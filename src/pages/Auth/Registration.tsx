@@ -12,7 +12,6 @@ export const Registration: React.FC = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -89,7 +88,6 @@ export const Registration: React.FC = () => {
         lastName: lastName.trim(),
         email: email.trim(),
         countryCode: '91',
-        phone: phone.trim() || undefined,
         password,
         confirmPassword,
         userType: accountType,
@@ -110,7 +108,6 @@ export const Registration: React.FC = () => {
         setFirstName('');
         setLastName('');
         setEmail('');
-        setPhone('');
         setPassword('');
         setConfirmPassword('');
         setAccountType('END_USER');
@@ -144,91 +141,6 @@ export const Registration: React.FC = () => {
             <h3 className="text-[20px] font-medium text-[#1F54B0] mb-4">
               Choose your account type
             </h3>
-            <div className="grid grid-cols-1 gap-4">
-              <label className="relative block">
-                <input
-                  type="radio"
-                  name="accountType"
-                  value="END_USER"
-                  checked={accountType === 'END_USER'}
-                  onChange={() => setAccountType('END_USER')}
-                  className="sr-only peer"
-                />
-                <div className="relative p-4 border-2 border-gray-200 rounded-xl cursor-pointer transition-all duration-200 hover:border-gray-300 hover:shadow-md peer-checked:border-blue-500 peer-checked:bg-gradient-to-br peer-checked:from-blue-50 peer-checked:to-cyan-50 peer-checked:shadow-lg group">
-                  <div className="absolute top-4 right-4">
-                    <CheckCircle2 className="w-6 h-6 text-blue-500 opacity-0 peer-checked:opacity-100 transition-all duration-200" />
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                      <Link2 className="w-7 h-7 text-blue-600" />
-                    </div>
-
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-900 mb-1">
-                        Personal Link Hub
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-3">
-                        Perfect for individuals who want one memorable link for all their social profiles
-                      </p>
-
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                          <Check className="w-3 h-3 text-blue-500" />
-                          <span>One link for all your social profiles</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                          <Check className="w-3 h-3 text-blue-500" />
-                          <span>Basic click tracking</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </label>
-
-              <label className="relative block">
-                <input
-                  type="radio"
-                  name="accountType"
-                  value="CREATOR"
-                  checked={accountType === 'CREATOR'}
-                  onChange={() => setAccountType('CREATOR')}
-                  className="sr-only peer"
-                />
-                <div className="relative p-4 border-2 border-gray-200 rounded-xl cursor-pointer transition-all duration-200 hover:border-gray-300 hover:shadow-md peer-checked:border-blue-500 peer-checked:bg-gradient-to-br peer-checked:from-purple-50 peer-checked:to-blue-50 peer-checked:shadow-lg group">
-                  <div className="absolute top-4 right-4">
-                    <CheckCircle2 className="w-6 h-6 text-blue-500 opacity-0 peer-checked:opacity-100 transition-all duration-200" />
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                      <TrendingUp className="w-7 h-7 text-purple-600" />
-                    </div>
-
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-900 mb-1">
-                        Creator & Business
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-3">
-                        For influencers, creators & businesses who monetize their audience
-                      </p>
-
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                          <Check className="w-3 h-3 text-purple-500" />
-                          <span>Advanced analytics & insights</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                          <Check className="w-3 h-3 text-purple-500" />
-                          <span>Priority support</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </label>
-            </div>
           </div>
 
           {/* Error Message */}
@@ -322,34 +234,6 @@ export const Registration: React.FC = () => {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
-              />
-            </div>
-          </div>
-
-          {/* Phone */}
-          <div>
-            <label
-              htmlFor="phone"
-              className="block text-[20px] font-medium mb-1"
-              style={{ color: '#1F54B0' }}
-            >
-              Phone Number <span className="text-gray-400 text-sm">(optional)</span>
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none z-10">
-                <Phone className="h-5 w-5 text-gray-600" />
-              </div>
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                className="appearance-none block w-full pl-10 pr-3 py-3 border placeholder-gray-500 text-gray-900 rounded-md 
-                 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
-                style={{ borderColor: '#1F54B0' }}
-                placeholder="+1 (555) 123-4567"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
                 disabled={isLoading}
               />
             </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import checkIcon from "../../assets/green-check.png";
 import arrowDownIcon from "../../assets/arrow-down.png";
 import keyboardLeftIcon from "../../assets/keyboard-left.png";
@@ -13,6 +14,7 @@ export const SelectPlans = () => {
   const [selectedNumber, setSelectedNumber] = useState(null);
   const [currentPrefixPage, setCurrentPrefixPage] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const planCards = [
     {
@@ -124,6 +126,12 @@ export const SelectPlans = () => {
       });
     }
   };
+
+  const handleViewCartOpen = () => {
+    setTimeout(() => {
+      navigate("/buyId/cart")
+    }, 500)
+  }
 
   return (
     <div className="mt-[26px] flex flex-col justify-center">
@@ -282,7 +290,8 @@ export const SelectPlans = () => {
       </div>
 
       <div className="text-center mt-[32px] mb-[32px] flex justify-center items-center">
-        <button className="flex items-center justify-center gap-2 bg-[#036937] text-white text-[24px] py-2 px-6 rounded-[10px]">
+        <button onClick={handleViewCartOpen}
+          className="flex items-center justify-center gap-2 bg-[#036937] text-white text-[24px] py-2 px-6 rounded-[10px]">
           <img src={shoppingCartIcon} alt="cart" className="w-10 h-10" />
           View cart
         </button>
