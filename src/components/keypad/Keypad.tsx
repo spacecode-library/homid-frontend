@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Delete } from 'lucide-react';
 import { searchService } from '../../services/search';
 import { idsService } from '../../services/ids';
-import { useAuth } from '../../hooks/useAuth';
-import { useErrorHandler } from '../../hooks/useErrorHandler';
-import { useNotifications } from '../../contexts/NotificationContext';
 import { ErrorAlert } from '../ErrorAlert';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Product } from '../product/Product';
 
 interface KeypadProps {
   onSubmit?: (searchResult: any) => void;
@@ -18,31 +15,8 @@ export const Keypad: React.FC<KeypadProps> = ({ onSubmit, showHistory = false, c
   const [value, setValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [searchResult, setSearchResult] = useState<any>(null);
-  searchResult; // Used for search history
-  const [history, setHistory] = useState<any[]>([]);
   const [isPressed, setIsPressed] = useState<string | null>(null);
   const [error, setError] = useState<{ title?: string; message: string; type?: 'error' | 'warning' | 'info' } | null>(null);
-  const { isAuthenticated } = useAuth();
-  const { handleError } = useErrorHandler();
-  const { showSuccess } = useNotifications();
-
-  useEffect(() => {
-    if (showHistory && isAuthenticated) {
-      loadSearchHistory();
-    }
-  }, [showHistory, isAuthenticated]);
-
-  const loadSearchHistory = async () => {
-    try {
-      const response = await searchService.getSearchHistory(5);
-      setHistory(response.data.history);
-    } catch (error) {
-      handleError(error, {
-        customTitle: 'Failed to Load History',
-        customMessage: 'Unable to retrieve your search history.',
-      });
-    }
-  };
 
   const formatDisplay = (val: string): string => {
     const digits = val.replace(/\D/g, '');
@@ -55,7 +29,7 @@ export const Keypad: React.FC<KeypadProps> = ({ onSubmit, showHistory = false, c
       setValue(prev => prev + key);
       setIsPressed(key);
       setTimeout(() => setIsPressed(null), 150);
-      
+
       // Vibrate on mobile if supported
       if ('vibrate' in navigator) {
         navigator.vibrate(10);
@@ -63,14 +37,11 @@ export const Keypad: React.FC<KeypadProps> = ({ onSubmit, showHistory = false, c
     }
   };
 
-  const handleDelete = () => {
-    setValue(prev => {
-      const digits = prev.replace(/\D/g, '');
-      return digits.slice(0, -1);
-    });
-    setIsPressed('delete');
+  const handleClear = () => {
+    setValue('');
+    setIsPressed('clear');
     setTimeout(() => setIsPressed(null), 150);
-    
+
     if ('vibrate' in navigator) {
       navigator.vibrate(10);
     }
@@ -92,15 +63,15 @@ export const Keypad: React.FC<KeypadProps> = ({ onSubmit, showHistory = false, c
     const formattedQuery = formatDisplay(value);
 
     try {
-      const timeoutPromise = new Promise((_, reject) => 
+      const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('timeout')), 10000)
       );
-      
+
       const response = await Promise.race([
         searchService.searchHomId(formattedQuery),
         timeoutPromise
       ]) as any;
-      
+
       if (response.data.found) {
         // Try to fetch website metadata using the public endpoint
         let enrichedData = { ...response.data };
@@ -121,20 +92,11 @@ export const Keypad: React.FC<KeypadProps> = ({ onSubmit, showHistory = false, c
             console.log('Failed to fetch metadata:', error);
           }
         }
-        
+
         setSearchResult(enrichedData);
-        
+
         if (onSubmit) {
           onSubmit(enrichedData);
-        } else if (response.data.targetUrl) {
-          showSuccess(
-            'ID Found!',
-            `Redirecting to ${(response.data as any).productName || 'destination'}...`,
-            { duration: 2000 }
-          );
-          setTimeout(() => {
-            window.location.href = response.data.targetUrl!;
-          }, 1000);
         } else {
           setError({
             title: 'ID Found - No Destination',
@@ -153,10 +115,6 @@ export const Keypad: React.FC<KeypadProps> = ({ onSubmit, showHistory = false, c
           });
         }
         setSearchResult(null);
-      }
-
-      if (isAuthenticated && showHistory) {
-        loadSearchHistory();
       }
     } catch (error: any) {
       if (error.message === 'timeout') {
@@ -182,7 +140,7 @@ export const Keypad: React.FC<KeypadProps> = ({ onSubmit, showHistory = false, c
       if (e.key >= '0' && e.key <= '9') {
         handleKeyPress(e.key);
       } else if (e.key === 'Backspace') {
-        handleDelete();
+        handleClear();
       } else if (e.key === 'Enter') {
         handleSearch();
       }
@@ -209,268 +167,171 @@ export const Keypad: React.FC<KeypadProps> = ({ onSubmit, showHistory = false, c
       { number: '9', letters: 'WXYZ' }
     ],
     [
-      { number: '', letters: '' },
+      { number: 'clear', letters: 'Clear' },
       { number: '0', letters: '' },
-      { number: 'delete', letters: '' }
+      { number: 'enter', letters: 'Enter' }
     ]
   ];
 
   return (
-    <div className={`w-full max-w-md mx-auto px-4 flex flex-col justify-center ${className}`}>
-      {/* Premium Display Section */}
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-6 md:mb-8"
+    <div className='px-10'>
+      {/* ID Display */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+        className="mb-8"
       >
-        <div className="text-center mb-6 md:mb-8">
-          {/* Logo and Title */}
-          <motion.div
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.3 }}
-            className="mb-3 md:mb-4"
-          >
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">
-              <span className="text-blue-900">Hom</span>
-              <span className="text-blue-400">.</span>
-              <span className="text-blue-900">ID</span>
-            </h1>
-            <p className="text-xs md:text-sm text-gray-500 mt-1">The Homepage Connector</p>
-          </motion.div>
-          
-          {/* ID Display */}
-          <div className="relative bg-gradient-to-b from-gray-50 to-white rounded-2xl p-6 sm:p-8 md:p-10 shadow-xl border border-gray-100">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-transparent to-cyan-50/20 rounded-2xl pointer-events-none" />
-            
-            <div className="relative">
-              <div className="flex items-center justify-center mb-2">
-                <span className="text-blue-600 font-bold text-base sm:text-lg md:text-xl mr-2 md:mr-3">.ID</span>
-                <div className="font-mono text-2xl sm:text-3xl md:text-5xl font-bold tracking-widest">
-                  {(() => {
-                    const digits = value.replace(/\D/g, '');
-                    const display = [];
-                    
-                    // First 4 digits
-                    for (let i = 0; i < 4; i++) {
-                      if (i < digits.length) {
-                        display.push(
-                          <span key={`d1-${i}`} className="text-gray-900">
-                            {digits[i]}
-                          </span>
-                        );
-                      } else {
-                        display.push(
-                          <span key={`p1-${i}`} className="text-gray-300">
-                            0
-                          </span>
-                        );
-                      }
+        <div className="flex justify-center items-center gap-x-[11px]">
+          <div className="flex justify-center items-center text-[#1F54B0] text-[40px] font-semibold"><span className='text-[#379AE6]'>.</span>ID</div>
+          <div className="flex justify-center items-center text-[40px] font-semibold">
+            {(() => {
+              const digits = value.replace(/\D/g, '');
+
+              if (digits.length === 0) {
+                return <span className="text-gray-400">0000-0000</span>;
+              }
+
+              let display = '';
+
+              // First 4 digits
+              for (let i = 0; i < 4; i++) {
+                display += i < digits.length ? digits[i] : '0';
+              }
+
+              display += '-';
+
+              // Last 4 digits
+              for (let i = 4; i < 8; i++) {
+                display += i < digits.length ? digits[i] : '0';
+              }
+
+              return (
+                <>
+                  {display.split('').map((char, index) => {
+                    let digitPosition = index > 4 ? index - 1 : index;
+
+                    if (char === '-') {
+                      return <span key={index} className="text-[#379AE6]">-</span>;
                     }
-                    
-                    // Hyphen
-                    display.push(
-                      <span key="hyphen" className="text-gray-300 mx-1">
-                        -
+
+                    const isFilled = digitPosition < digits.length;
+                    return (
+                      <span
+                        key={index}
+                        className={isFilled ? "text-[#379AE6]" : "text-gray-400"}
+                      >
+                        {char}
                       </span>
                     );
-                    
-                    // Last 4 digits
-                    for (let i = 4; i < 8; i++) {
-                      if (i < digits.length) {
-                        display.push(
-                          <span key={`d2-${i}`} className="text-gray-900">
-                            {digits[i]}
-                          </span>
-                        );
-                      } else {
-                        display.push(
-                          <span key={`p2-${i}`} className="text-gray-300">
-                            0
-                          </span>
-                        );
-                      }
-                    }
-                    
-                    return display;
-                  })()}
-                </div>
-              </div>
-              
-              {/* Progress Bar */}
-              <div className="w-full max-w-xs mx-auto mt-4 md:mt-6">
-                <div className="h-1.5 md:h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: value ? `${(value.replace(/\D/g, '').length / 8) * 100}%` : '0%' }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
-                  />
-                </div>
-                <p className="text-xs text-gray-500 mt-1.5">
-                  {value.replace(/\D/g, '').length} of 8 digits entered
-                </p>
-              </div>
-            </div>
+                  })}
+                </>
+              );
+            })()}
           </div>
         </div>
-
-        {/* Error Alert */}
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="mt-4"
-            >
-              <ErrorAlert
-                title={error.title}
-                message={error.message}
-                type={error.type}
-                onClose={() => setError(null)}
-                autoClose={error.type !== 'error'}
-                duration={error.type === 'error' ? 0 : 5000}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
       </motion.div>
+
+      {/* Error Alert */}
+      {/* <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="mb-6"
+          >
+            <ErrorAlert
+              title={error.title}
+              message={error.message}
+              type={error.type}
+              onClose={() => setError(null)}
+              autoClose={error.type !== 'error'}
+              duration={error.type === 'error' ? 0 : 5000}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence> */}
 
       {/* Keypad Grid */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4, delay: 0.2 }}
-        className="mb-6 md:mb-8"
+        className="mb-[53px]"
       >
-          
-          <div className="grid grid-cols-3 gap-3 md:gap-4 max-w-xs mx-auto w-full relative">
-        {keys.map((row, rowIndex) => (
-          row.map((key, colIndex) => (
-            <motion.button
-              key={`${rowIndex}-${colIndex}`}
-              whileHover={key.number && !loading ? { scale: 1.02 } : {}}
-              whileTap={key.number && !loading ? { scale: 0.98 } : {}}
-              onClick={() => {
-                if (key.number === 'delete') {
-                  handleDelete();
-                } else if (key.number) {
-                  handleKeyPress(key.number);
-                }
-              }}
-              className={`
-                relative h-14 sm:h-16 md:h-20 rounded-2xl font-medium transition-all duration-150
-                ${key.number === '' ? 'invisible' : ''}
-                ${key.number === 'delete' 
-                  ? 'bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 hover:border-red-300 active:bg-red-200 flex items-center justify-center shadow-sm hover:shadow-md' 
-                  : key.number ? 'bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 active:bg-gray-100 shadow-sm hover:shadow-md text-gray-800' : ''
-                }
-                ${isPressed === key.number ? 'transform scale-95 shadow-inner ring-4 ring-blue-500/60' : ''}
-                ${loading ? 'opacity-50 cursor-not-allowed' : ''}
-                group overflow-hidden
-              `}
-              disabled={key.number === '' || loading}
-              aria-label={key.number === 'delete' ? 'Delete' : key.number}
-              tabIndex={key.number ? 0 : -1}
-            >
-              {key.number === 'delete' ? (
-                <Delete className="w-5 md:w-6 h-5 md:h-6 relative z-10" />
-              ) : key.number ? (
-                <div className="flex flex-col items-center justify-center relative z-10">
-                  <span className="text-xl sm:text-2xl md:text-3xl font-bold leading-none">{key.number}</span>
-                  {key.letters && (
-                    <span className="text-[9px] sm:text-[10px] md:text-xs font-medium text-gray-500 mt-0.5 tracking-wider">{key.letters}</span>
-                  )}
-                </div>
-              ) : null}
-              
-              {/* Click Effect */}
-              {isPressed === key.number && key.number && (
-                <motion.div
-                  className="absolute inset-0 bg-blue-400/20 rounded-2xl"
-                  initial={{ scale: 0, opacity: 1 }}
-                  animate={{ scale: 1.2, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                />
-              )}
-            </motion.button>
-          ))
-        ))}
-          </div>
-      </motion.div>
-
-      {/* Premium Search Button */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.3 }}
-      >
-        <button
-          onClick={handleSearch}
-          disabled={value.replace(/\D/g, '').length !== 8 || loading}
-          className={`
-            w-full max-w-xs mx-auto flex items-center justify-center gap-2
-            px-6 md:px-8 py-3 md:py-4 rounded-full font-semibold text-sm md:text-base
-            transition-all duration-200 transform
-            ${value.replace(/\D/g, '').length === 8 && !loading
-              ? 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 shadow-lg hover:shadow-xl hover:-translate-y-0.5'
-              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            }
-          `}
-          aria-label="Search ID"
-        >
-          {loading ? (
-            <div className="w-4 md:w-5 h-4 md:h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          ) : (
-            <>
-              <Search className="w-3.5 md:w-4 h-3.5 md:h-4" />
-              <span>Search ID</span>
-            </>
-          )}
-        </button>
-      </motion.div>
-
-      {/* Search History (Premium Style) */}
-      {showHistory && isAuthenticated && history.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="mt-12"
-        >
-          <h3 className="text-sm font-semibold text-gray-600 mb-4">Recent Searches</h3>
-          <div className="space-y-3">
-            {history.slice(0, 3).map((item) => (
+        <div className="grid grid-cols-3 gap-x-[15px] gap-y-[16px] w-full">
+          {keys.map((row, rowIndex) => (
+            row.map((key, colIndex) => (
               <motion.button
-                key={item.id}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                key={`${rowIndex}-${colIndex}`}
+                whileHover={!loading ? { scale: 1.02 } : {}}
+                whileTap={!loading ? { scale: 0.98 } : {}}
                 onClick={() => {
-                  setValue(item.searchQuery.replace(/-/g, ''));
-                  handleSearch();
+                  if (key.number === 'clear') {
+                    handleClear();
+                  } else if (key.number === 'enter') {
+                    handleSearch();
+                  } else if (key.number && key.number !== 'clear' && key.number !== 'enter') {
+                    handleKeyPress(key.number);
+                  }
                 }}
-                className="w-full p-4 rounded-xl bg-white/80 backdrop-blur-sm border border-gray-100 hover:shadow-md transition-all duration-200 flex items-center justify-between group"
+                className={`
+                  relative h-[90px] rounded-[8px] font-medium transition-all duration-150 border border-[#1F54B0]
+                  ${isPressed === key.number ? 'transform scale-95 shadow-inner' : 'shadow-sm hover:shadow-md'}
+                  ${loading ? 'opacity-50 cursor-not-allowed' : ''}
+                  flex flex-col items-center justify-center
+                `}
+                disabled={loading}
+                aria-label={
+                  key.number === 'clear' ? 'Clear' :
+                    key.number === 'enter' ? 'Enter' :
+                      key.number
+                }
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500/10 to-purple-500/10 flex items-center justify-center">
-                    <span className="text-xs font-semibold text-blue-600">#</span>
+                {key.number === 'clear' ? (
+                  <span className="text-[24px] font-bold leading-none text-[#1F54B0]">Clear</span>
+                ) : key.number === 'enter' ? (
+                  loading ? (
+                    <div className="w-4 h-4 border border-[#1F54B0] border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <span className="text-[24px] font-bold leading-none text-[#1F54B0]">Enter</span>
+                  )
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <span className="text-[48px] font-bold leading-none text-[#1F54B0]">{key.number}</span>
+                    {key.letters && (
+                      <span className="text-[14px] text-[#1F54B0] mt-1">{key.letters}</span>
+                    )}
                   </div>
-                  <span className="font-mono text-lg text-gray-700">{formatDisplay(item.searchQuery)}</span>
-                </div>
-                <span className={`text-xs font-medium px-3 py-1 rounded-full ${
-                  item.found 
-                    ? 'bg-green-100 text-green-700' 
-                    : 'bg-gray-100 text-gray-500'
-                }`}>
-                  {item.found ? 'Found' : 'Not found'}
-                </span>
+                )}
               </motion.button>
-            ))}
-          </div>
-        </motion.div>
-      )}
+            ))
+          ))}
+        </div>
+      </motion.div>
+
+      {/* How to Buy .ID Link */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+        className="text-center mb-8"
+      >
+        <a
+          href="/how-to-buy"
+          className="text-[20px] text-[#1F54B0] font-semibold leading-none"
+        >
+          How to Buy .ID
+        </a>
+        <p className="text-[12px] text-[#666666] leading-none">© 2025 Hom.ID, All Rights Reserved</p>
+      </motion.div>
+      {
+        error &&
+        <div className='z-20 absolute top-[30%] left-0 right-0 px-4'>
+          <Product />
+        </div>
+      }
     </div>
   );
 };
