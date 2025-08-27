@@ -573,7 +573,7 @@ export const MyIDsTable: React.FC = () => {
                       {/* Left: Label + Textarea */}
                       <div className="flex items-start gap-2">
                         <Pencil className="w-5 h-5 text-[#374151FF] mt-1" />
-                        <label className="w-28 text-[16px] text-[#374151FF] font-normal mt-1">Memo here</label>
+                        <label className="w-[90px] text-[16px] text-[#374151FF] font-normal mt-1">Memo here</label>
                         <textarea
                           placeholder="Write your memo..."
                           className=" min-h-[80px] resize-y rounded-md border border-gray-300 p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
