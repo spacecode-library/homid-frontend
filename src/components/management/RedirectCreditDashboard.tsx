@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 type TimePeriod = '7 days' | '30 days' | '6 months' | '1 year';
 
@@ -32,9 +33,11 @@ export const RedirectCreditDashboard: React.FC = () => {
     <div className="flex bg-white justify-end">
       {/* Left Column - Labels */}
       <div className="flex flex-col items-start mr-24">
-        <p className="text-[14px] font-bold text-[#171A1FFF] underline mb-8">
-          Redirect Credit
-        </p>
+        <Link to="/buy-credit">
+          <p className="text-[14px] font-bold text-[#171A1FFF] underline mb-8">
+            Redirect Credit
+          </p>
+        </Link>
 
         <div className="flex flex-col gap-4 mt-5">
           <p className="text-[14px] font-normal text-[#6B7280FF] leading-tight">
@@ -83,12 +86,14 @@ export const RedirectCreditDashboard: React.FC = () => {
           </div>
 
           {/* Buy Credits Button */}
-          <button
-            onClick={handleBuyCredits}
-            className="h-[100px] w-[120px] rounded-[8px] shadow-sm bg-[#2563EBFF] text-white hover:bg-[#0F3FA6] text-[20px] font-bold transition-colors"
-          >
-            Buy <br />Credits
-          </button>
+          <Link to="/buy-credit">
+            <button
+              onClick={handleBuyCredits}
+              className="h-[100px] w-[120px] rounded-[8px] shadow-sm bg-[#2563EBFF] text-white hover:bg-[#0F3FA6] text-[20px] font-bold transition-colors"
+            >
+              Buy <br />Credits
+            </button>
+          </Link>
         </div>
       </div>
     </div>

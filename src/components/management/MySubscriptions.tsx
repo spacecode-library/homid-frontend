@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { CircleCrossIcon } from "../../assets/IconsComponent/CircleCrossIcon";
 import { CircleTickIcon } from "../../assets/IconsComponent/CircleTickIcon";
 
@@ -36,7 +37,9 @@ export const MySubscriptions = () => {
           </div>
         </div>
 
-        <button className="h-[96px] rounded-[8px] shadow-sm bg-[#2563EBFF] text-white px-5 ml-[45px] hover:bg-[#0F3FA6FF] text-[20px] font-bold">Upgrade</button>
+        <Link to="/upgrade-plans">
+          <button className="h-[96px] rounded-[8px] shadow-sm bg-[#2563EBFF] text-white px-5 ml-[45px] hover:bg-[#0F3FA6FF] text-[20px] font-bold">Upgrade</button>
+        </Link>
       </div>
     </div>
   )
