@@ -16,11 +16,11 @@ export const AccountManagement = () => {
       </div>
 
       <div className="flex justify-between bg-white rounded-[8px] shadow-sm py-[20px] px-[42px] mt-[30px] w-full">
-        <div className="w-[45%]">
+        <div className="w-[48%]">
           <MySubscriptions />
         </div>
 
-        <div className="w-[45%]">
+        <div className="w-[48%]">
           <RedirectCreditDashboard />
         </div>
       </div>
