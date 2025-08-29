@@ -4,7 +4,7 @@ import arrowDownIcon from "../../assets/arrow-down.png";
 import keyboardLeftIcon from "../../assets/keyboard-left.png";
 import keyboardRightIcon from "../../assets/keyboard-right.png";
 import selectionCartIcon from "../../assets/selection-cart.png";
-import shoppingCartIcon from "../../assets/shopping_cart.png";
+import closeIcon from "../../assets/close-small.png";
 
 export const UpgradePlans = () => {
   const [selectedPrefix, setSelectedPrefix] = useState(700);
@@ -299,37 +299,71 @@ export const UpgradePlans = () => {
           {/* Parent container for rows */}
           <div className="flex-1">
             {/* First Row - 4 cards */}
-            <div className="grid grid-cols-4 gap-4">
-              {generatePhoneNumbers(selectedSpecificNumber).slice(0, 4).map((phoneNumber, index) => (
-                <div key={index} className='border border-[#D1D5DBFF] rounded-[4px] flex items-center justify-between px-3 bg-white'>
-                  <p className='text-[24px] font-normal text-[#374151FF]'>{phoneNumber}</p>
-                  <div className='flex items-center'>
-                    {selectedPhoneNumbers.includes(phoneNumber) && (
-                      <span className='text-[12px] text-[#10B981] font-medium'>Added to Cart</span>
+            <div className="relative grid grid-cols-4 gap-4">
+              {generatePhoneNumbers(selectedSpecificNumber).slice(0, 4).map((phoneNumber, index) => {
+                const isSelected = selectedPhoneNumbers.includes(phoneNumber);
+
+                return (
+                  <div
+                    key={index}
+                    className={`relative border border-[#D1D5DBFF] rounded-[4px] flex flex-col items-center justify-between px-3 py-2 bg-white 
+        ${isSelected ? "border-[3px] border-[#E8618CFF]" : ""}`}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <p className="text-[24px] font-normal text-[#374151FF]">{phoneNumber}</p>
+                      <div className="flex items-center">
+                        <button onClick={() => handlePhoneNumberToggle(phoneNumber)}>
+                          <img src={selectionCartIcon} className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {isSelected && (
+                      <div className="absolute -top-7 left-1/2 transform -translate-x-1/2">
+                        <div className="bg-[#BBF7D0FF] rounded-[4px] px-2">
+                          <span className="text-[10px] font-normal text-[#15803DFF]">
+                            Added to Cart
+                          </span>
+                        </div>
+                      </div>
                     )}
-                    <button onClick={() => handlePhoneNumberToggle(phoneNumber)}>
-                      <img src={selectionCartIcon} className='w-5 h-5' />
-                    </button>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
+
             {/* Second Row - 2 cards + wider input field */}
-            <div className="grid grid-cols-4 gap-4 mt-[10px]">
-              {generatePhoneNumbers(selectedSpecificNumber).slice(4, 6).map((phoneNumber, index) => (
-                <div key={index + 4} className='border border-[#D1D5DBFF] rounded-[4px] flex items-center justify-between px-3 bg-white'>
-                  <p className='text-[24px] font-normal text-[#374151FF]'>{phoneNumber}</p>
-                  <div className='flex items-center gap-2'>
-                    {selectedPhoneNumbers.includes(phoneNumber) && (
-                      <span className='text-[12px] text-[#10B981] font-medium'>Added to Cart</span>
+            <div className="relative grid grid-cols-4 gap-4 mt-[10px]">
+              {generatePhoneNumbers(selectedSpecificNumber).slice(4, 6).map((phoneNumber, index) => {
+                const isSelected = selectedPhoneNumbers.includes(phoneNumber);
+
+                return (
+                  <div
+                    key={index + 4}
+                    className={`relative border border-[#D1D5DBFF] rounded-[4px] flex items-center justify-between px-3 py-2 bg-white  ${isSelected ? "border-[3px] border-[#E8618CFF]" : ""}`}
+                  >
+                    <p className="text-[24px] font-normal text-[#374151FF]">{phoneNumber}</p>
+
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => handlePhoneNumberToggle(phoneNumber)}>
+                        <img src={selectionCartIcon} className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    {isSelected && (
+                      <div className="absolute -top-7 left-1/2 transform -translate-x-1/2">
+                        <div className="bg-[#BBF7D0FF] rounded-[4px] px-2">
+                          <span className="text-[10px] font-normal text-[#15803DFF]">
+                            Added to Cart
+                          </span>
+                        </div>
+                      </div>
                     )}
-                    <button onClick={() => handlePhoneNumberToggle(phoneNumber)}>
-                      <img src={selectionCartIcon} className='w-5 h-5' />
-                    </button>
                   </div>
-                </div>
-              ))}
+                );
+              })}
+
 
               <div className='border border-[#D1D5DBFF] rounded-[4px] flex items-center justify-between px-3 bg-white col-span-2 placeholder-slate-200'>
                 <input
@@ -357,51 +391,88 @@ export const UpgradePlans = () => {
       <div className="mt-[100px] max-w-4xl mx-auto">
         <div className="flex items-center justify-center gap-5">
           <img src={blueCartIcon} alt="cart" className="w-9 h-9" />
-          <h3 className="text-[48px] font-normal text-[#242524FF]">My Cart</h3>
+          <h3 className="text-[48px] font-normal text-[#242524FF] mr-[250px]">My Cart</h3>
         </div>
 
-        <div className="flex gap-8">
+        <div className="flex mt-5 gap-x-11">
           {/* Selected Items */}
-          <div className="flex-1 border-2 border-[#EF4444] rounded-lg p-4">
-            <div className="grid grid-cols-3 gap-2 text-[12px]">
+          <div className="flex-1 border-4 border-[#E8618CFF] rounded-[4px] py-4">
+            <div className="flex flex-wrap gap-x-4 gap-y-2">
               {selectedPhoneNumbers.slice(0, 9).map((phoneNumber, index) => (
-                <div key={index} className="bg-[#10B981] text-white px-2 py-1 rounded text-center">
+                <div key={index} className="flex items-center gap-x-2 bg-[#DCFCE7FF] rounded-full text-[18px] font-normal text-[#166534FF] px-4">
                   {phoneNumber.split(' - ')[0]} - {phoneNumber.split(' - ')[1]}
+
+                  <img src={closeIcon} className='w-6 h-6 cursor-pointer' onClick={() => handlePhoneNumberToggle(phoneNumber)} />
                 </div>
               ))}
             </div>
-            <div className="text-center text-[12px] text-gray-500 mt-2 border-t pt-2">
-              Previously Purchased .ID
+
+            <div className="mt-[32px] flex items-center">
+              <div className="flex-grow border-t-[3px] border-[#9095A0FF]"></div>
+              <span className="px-3 text-[16px] font-normal text-[#242524FF]">
+                Previously Purchased .ID
+              </span>
+              <div className="flex-grow border-t-[3px] border-[#9095A0FF]"></div>
             </div>
-            <div className="grid grid-cols-4 gap-2 text-[10px] mt-2">
-              <span className="bg-gray-200 px-2 py-1 rounded text-center">733 - 1001</span>
-              <span className="bg-gray-200 px-2 py-1 rounded text-center">733 - 0011</span>
-              <span className="bg-gray-200 px-2 py-1 rounded text-center">710 - 1001</span>
-              <span className="bg-gray-200 px-2 py-1 rounded text-center">733 - 1001</span>
-              <span className="bg-gray-200 px-2 py-1 rounded text-center">733 - 1001</span>
-              <span className="bg-gray-200 px-2 py-1 rounded text-center">710 - 1001</span>
-              <span className="bg-gray-200 px-2 py-1 rounded text-center">733 - (Search availa...</span>
+
+            <div className="flex flex-wrap gap-2 text-[14px] text-[#166534FF] mt-2">
+              <span className="bg-[#DEE1E6FF] px-2 py-1 rounded-[6px] text-center">733 - 1001</span>
+              <span className="bg-[#DEE1E6FF] px-2 py-1 rounded-[6px] text-center">733 - 0011</span>
+              <span className="bg-[#DEE1E6FF] px-2 py-1 rounded-[6px] text-center">710 - 1001</span>
+              <span className="bg-[#DEE1E6FF] px-2 py-1 rounded-[6px] text-center">733 - 1001</span>
+              <span className="bg-[#DEE1E6FF] px-2 py-1 rounded-[6px] text-center">733 - 1001</span>
+              <span className="bg-[#DEE1E6FF] px-2 py-1 rounded-[6px] text-center">710 - 1001</span>
             </div>
           </div>
 
           {/* Order Summary */}
-          <div className="w-48">
-            <div className="bg-[#FFF87F] rounded-lg p-4">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-[16px] font-medium">Add 15 .IDs</span>
-              </div>
-              <div className="text-center">
-                <div className="text-[24px] font-bold text-[#4285F4]">GOLD</div>
-                <div className="text-[12px] text-gray-600">Plan Applied</div>
-                <div className="text-[12px] text-gray-600">No. of .ID Added: 3</div>
-                <div className="text-[12px] text-gray-600">Price per .ID: $1.5</div>
-                <div className="text-[12px] text-gray-600">Annual Payment: $149</div>
-              </div>
-              <button className="w-full bg-[#4285F4] text-white py-2 rounded-md mt-4 font-medium">
-                Checkout
-              </button>
+          <div className="relative rounded-[6px] border border-[#000000FF] w-fit">
+            <div className='absolute right-0 -top-[52px]'>
+              <p className='text-[20px] font-bold text-[#FF0000FF]'>Add <span className='text-[32px] text-[#379AE6FF]'>15</span> .IDs</p>
             </div>
+            <div className="p-[18px] leading-tight space-y-1">
+              <div className="flex justify-between w-full min-w-[236px]">
+                <p className="text-[14px] font-normal text-[#242524FF]">Plan Applied</p>
+                <p className="text-[24px] font-semibold text-[#4285F4FF]">GOLD</p>
+              </div>
+
+              <div className="flex justify-between w-full min-w-[236px]">
+                <p className="text-[14px] font-normal text-[#242524FF]">No. of .ID Added</p>
+                <p className="text-[24px] font-semibold text-[#4285F4FF]">3</p>
+              </div>
+
+              <div className="flex justify-between items-start w-full min-w-[236px]">
+                <p className="text-[14px] font-normal text-[#242524FF]">Price per .ID</p>
+                <p className="text-[14px] font-semibold text-[#242524FF] text-right">
+                  $1.24 <br />
+                  <span className="text-[10px] font-semibold text-[#6B7280FF]">/month per .ID</span>
+                </p>
+              </div>
+
+              <div className="flex justify-between items-start w-full min-w-[236px]">
+                <p className="text-[14px] font-normal text-[#242524FF]">Annual Payment</p>
+                <p className="text-[24px] font-semibold text-[#4285F4FF] text-right">
+                  $149 <br />
+                  <span className="text-[10px] font-semibold text-[#6B7280FF]">/year</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Checkout Button */}
+            <button className="absolute left-1/2 transform -translate-x-1/2 -bottom-4 rounded-[6px] text-white text-[14px] font-medium bg-[#4285F4FF] px-8 py-2">
+              Checkout
+            </button>
           </div>
+
+        </div>
+      </div>
+
+      <div className='border border-[#FFD700FF] rounded-[6px] bg-[#FFFACDFF] max-w-4xl mx-auto mt-6'>
+        <div className='flex gap-x-2 p-4'>
+          <div className="flex items-start mt-1">
+            <img src={blueCartIcon} alt="cart" className="w-6 h-6" />
+          </div>
+          <p className='text-[18px] font-normal text-[#374151FF]'>Add or Remove .ID - Subscription Plan will auto apply per Qty of .ID added to Cart <br /> .ID are auto generated and randomly added to the Car - Feel Free to Edit(Add or Remove)</p>
         </div>
       </div>
     </div>

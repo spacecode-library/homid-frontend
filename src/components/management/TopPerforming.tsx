@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from "react";
 import brand1Icon from "../../assets/brand1.png";
 import brand2Icon from "../../assets/brand2.png";
 import brand3Icon from "../../assets/brand3.png";
@@ -17,7 +17,31 @@ import bellIcon from "../../assets/bell.svg";
 import fileTextIcon from "../../assets/file-text.svg";
 import barChartIcon from "../../assets/chart.svg";
 
+
+type Status = "Active" | "Inactive";
+
+interface Row {
+  id: number;
+  status: Status;
+}
+
 export const TopPerforming = () => {
+  const [row, setRow] = useState<Row>({
+    id: 1,
+    status: "Inactive",
+  });
+
+  const handleStatusToggle = () => {
+    setRow((prevRow) => ({
+      ...prevRow,
+      status: prevRow.status === "Active" ? "Inactive" : "Active",
+    }));
+  };
+
+  const getStatusToggleColor = (): string => {
+    return row.status === "Active" ? "bg-green-500" : "bg-red-500";
+  };
+
   const topPerformingData = [
     {
       id: "070-1234",
@@ -87,7 +111,27 @@ export const TopPerforming = () => {
 
   return (
     <div>
-      <p className="mt-[42px] text-[24px] font-semibold text-[#111827]">Top Performing .ID</p>
+      <div className="flex justify-between items-center">
+        <p className="mt-[42px] text-[24px] font-semibold text-[#111827]">Top Performing .ID</p>
+
+        <div className="flex items-center gap-2 mt-[42px]">
+          <button
+            onClick={handleStatusToggle}
+            className={`w-12 h-6 ${getStatusToggleColor()} rounded-full relative transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 ${row.status === "Active" ? "focus:ring-green-500" : "focus:ring-red-500"
+              }`}
+          >
+            <div
+              className={`w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 transition-transform duration-200 ease-in-out ${row.status === "Active"
+                  ? "transform translate-x-6"
+                  : "transform translate-x-0.5"
+                }`}
+            ></div>
+          </button>
+
+          {/* Show label beside toggle */}
+          <span className="text-sm font-medium">{row.status}</span>
+        </div>
+      </div>
 
       <div className="grid grid-cols-3 gap-6 mt-5">
         {topPerformingData.map((card, index) => (
@@ -213,7 +257,7 @@ export const TopPerforming = () => {
               </div>
             </div>
 
-            <hr className='mt-[22px] mb-[16px]'/>
+            <hr className='mt-[22px] mb-[16px]' />
 
             {/* Action Buttons */}
             <div className="flex justify-between items-center px-5">
