@@ -122,8 +122,8 @@ export const TopPerforming = () => {
           >
             <div
               className={`w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 transition-transform duration-200 ease-in-out ${row.status === "Active"
-                  ? "transform translate-x-6"
-                  : "transform translate-x-0.5"
+                ? "transform translate-x-6"
+                : "transform translate-x-0.5"
                 }`}
             ></div>
           </button>
@@ -133,156 +133,163 @@ export const TopPerforming = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6 mt-5">
-        {topPerformingData.map((card, index) => (
-          <div key={card.id} className="bg-white rounded-[8px] shadow-sm border border-[ #E5E7EBFF] p-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-[40px] font-bold text-[#2563EBFF]">.<span className='text-[#374151FF]'>ID</span> {card.id}</h3>
-              <span className={`${getStatusStyle(card.status)} text-[14px] font-normal`}>
-                {card.status}
-              </span>
-            </div>
+      {
+        row.status === "Active" ? (
+          <div className="bg-white rounded-[8px] shadow-sm border border-[#E5E7EBFF] p-4 mt-5">
+            <p className="text-center">No Active Id's</p>
+          </div>) : (
+          <div className="grid grid-cols-3 gap-6 mt-5">
+            {topPerformingData.map((card, index) => (
+              <div key={card.id} className="bg-white rounded-[8px] shadow-sm border border-[#E5E7EBFF] p-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-[40px] font-bold text-[#2563EBFF]">.<span className='text-[#374151FF]'>ID</span> {card.id}</h3>
+                  <span className={`${getStatusStyle(card.status)} text-[14px] font-normal`}>
+                    {card.status}
+                  </span>
+                </div>
 
-            {/* Product Info */}
-            <div className="flex items-start mt-3">
-              <div className={`w-10 h-10  rounded-full flex items-center justify-center bg-white`}>
-                <img src={card.brandIcon} className='w-10 h-10' />
-              </div>
-              <div className="leading-tight ml-2">
-                <p className="text-[16px] font-semibold text-[#1F2937FF]">{card.brand}</p>
-                <p className="text-[16px] font-semibold text-[#1F2937FF] mt-[2px]">{card.product}</p>
-                <p className="text-[14px] font-normal text-[#3B82F6FF] cursor-pointer mt-[2px]">
-                  {card.url}
-                </p>
-                <p className="text-[14px] text-[#4B5563FF] font-normal mt-[2px]">{card.redirects} Redirects</p>
-              </div>
-            </div>
+                {/* Product Info */}
+                <div className="flex items-start mt-3">
+                  <div className={`w-10 h-10  rounded-full flex items-center justify-center bg-white`}>
+                    <img src={card.brandIcon} className='w-10 h-10' />
+                  </div>
+                  <div className="leading-tight ml-2">
+                    <p className="text-[16px] font-semibold text-[#1F2937FF]">{card.brand}</p>
+                    <p className="text-[16px] font-semibold text-[#1F2937FF] mt-[2px]">{card.product}</p>
+                    <p className="text-[14px] font-normal text-[#3B82F6FF] cursor-pointer mt-[2px]">
+                      {card.url}
+                    </p>
+                    <p className="text-[14px] text-[#4B5563FF] font-normal mt-[2px]">{card.redirects} Redirects</p>
+                  </div>
+                </div>
 
-            <div className="w-full bg-[#E5E7EBFF] rounded-full h-[10px] mt-6">
-              <div className="bg-[#3B82F6FF] h-[10px] rounded-full" style={{ width: card.progressWidth }}></div>
-            </div>
+                <div className="w-full bg-[#E5E7EBFF] rounded-full h-[10px] mt-6">
+                  <div className="bg-[#3B82F6FF] h-[10px] rounded-full" style={{ width: card.progressWidth }}></div>
+                </div>
 
-            <div className="mt-3 flex justify-between items-center">
-              <p className="text-[14px] text-[#4B5563FF] font-normal text-nowrap">Top Performing Countries:</p>
-              <div className="flex items-center gap-x-1">
-                {card.countries.map((country, idx) => (
-                  <div key={idx} className="flex items-center gap-x-1">
-                    <div className='flex items-center'>
-                      <img src={country.flag} className='w-[30px] h-[30px]' />
+                <div className="mt-3 flex justify-between items-center">
+                  <p className="text-[14px] text-[#4B5563FF] font-normal text-nowrap">Top Performing Countries:</p>
+                  <div className="flex items-center gap-x-1">
+                    {card.countries.map((country, idx) => (
+                      <div key={idx} className="flex items-center gap-x-1">
+                        <div className='flex items-center'>
+                          <img src={country.flag} className='w-[30px] h-[30px]' />
+                        </div>
+                        <span className="text-[14px] text-[#374151FF] font-normal">{country.percent}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Details Section */}
+                <div className="space-y-2 mt-[30px]">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-x-2">
+                      <div className='flex items-center'>
+                        <img src={calendarIcon} className='w-4 h-4' />
+                      </div>
+                      <span className="text-[14px] text-[#374151FF] font-normal">Start Date</span>
                     </div>
-                    <span className="text-[14px] text-[#374151FF] font-normal">{country.percent}</span>
+                    <div className='flex items-center gap-x-2'>
+                      <span className="text-[14px] text-[#374151FF] font-normal">{card.startDate}</span>
+                      <div className='flex items-center'>
+                        <img src={calendarIcon} className='w-4 h-4' />
+                      </div>
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
 
-            {/* Details Section */}
-            <div className="space-y-2 mt-[30px]">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-x-2">
-                  <div className='flex items-center'>
-                    <img src={calendarIcon} className='w-4 h-4' />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-x-2">
+                      <div className='flex items-center'>
+                        <img src={calendarIcon} className='w-4 h-4' />
+                      </div>
+                      <span className="text-[14px] text-[#374151FF] font-normal">Stop Date</span>
+                    </div>
+                    <div className='flex items-center gap-x-2'>
+                      <span className="text-[14px] text-[#374151FF] font-normal">{card.stopDate}</span>
+                      <div className='flex items-center'>
+                        <img src={calendarIcon} className='w-4 h-4' />
+                      </div>
+                    </div>
                   </div>
-                  <span className="text-[14px] text-[#374151FF] font-normal">Start Date</span>
-                </div>
-                <div className='flex items-center gap-x-2'>
-                  <span className="text-[14px] text-[#374151FF] font-normal">{card.startDate}</span>
-                  <div className='flex items-center'>
-                    <img src={calendarIcon} className='w-4 h-4' />
-                  </div>
-                </div>
-              </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-x-2">
-                  <div className='flex items-center'>
-                    <img src={calendarIcon} className='w-4 h-4' />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-x-2">
+                      <div className='flex items-center'>
+                        <img src={shoppingIcon} className='w-4 h-4' />
+                      </div>
+                      <span className="text-[14px] text-[#374151FF] font-normal">{card.demographics}</span>
+                    </div>
                   </div>
-                  <span className="text-[14px] text-[#374151FF] font-normal">Stop Date</span>
-                </div>
-                <div className='flex items-center gap-x-2'>
-                  <span className="text-[14px] text-[#374151FF] font-normal">{card.stopDate}</span>
-                  <div className='flex items-center'>
-                    <img src={calendarIcon} className='w-4 h-4' />
-                  </div>
-                </div>
-              </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-x-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-x-2">
+                      <div className='flex items-center'>
+                        <img src={refreshIcon} className='w-4 h-4' />
+                      </div>
+                      <span className="text-[14px] text-[#374151FF] font-normal">Renew Contract</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className='flex items-center'>
+                        <img src={shareIcon} className='w-4 h-4' />
+                      </div>
+                      <span className="text-[14px] text-[#374151FF] font-normal">Posted Social Medias</span>
+                    </div>
+                    <div className="flex gap-x-4">
+                      <div className="flex items-center">
+                        <img src={youtubeIcon} className='w-[22px] h-[22px]' />
+                      </div>
+                      <div className="flex items-center">
+                        <img src={instagramIcon} className='w-[22px] h-[22px]' />
+                      </div>
+                      <div className="flex items-center">
+                        <img src={tiktokIcon} className='w-[22px] h-[22px]' />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className='flex items-center'>
+                        <img src={dollarIcon} className='w-4 h-4' />
+                      </div>
+                      <span className="text-[14px] text-[#374151FF] font-normal">Total Earnings</span>
+                    </div>
+                    <span className="text-[14px] font-bold text-[#1F2937FF]">{card.totalEarnings}</span>
+                  </div>
+                </div>
+
+                <hr className='mt-[22px] mb-[16px]' />
+
+                {/* Action Buttons */}
+                <div className="flex justify-between items-center px-5">
                   <div className='flex items-center'>
-                    <img src={shoppingIcon} className='w-4 h-4' />
+                    <img src={bellIcon} className='w-5 h-5' />
                   </div>
-                  <span className="text-[14px] text-[#374151FF] font-normal">{card.demographics}</span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-x-2">
                   <div className='flex items-center'>
-                    <img src={refreshIcon} className='w-4 h-4' />
+                    <img src={fileTextIcon} className='w-5 h-5' />
                   </div>
-                  <span className="text-[14px] text-[#374151FF] font-normal">Renew Contract</span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
                   <div className='flex items-center'>
-                    <img src={shareIcon} className='w-4 h-4' />
+                    <img src={calendarIcon} className='w-5 h-5' />
                   </div>
-                  <span className="text-[14px] text-[#374151FF] font-normal">Posted Social Medias</span>
-                </div>
-                <div className="flex gap-x-4">
-                  <div className="flex items-center">
-                    <img src={youtubeIcon} className='w-[22px] h-[22px]' />
-                  </div>
-                  <div className="flex items-center">
-                    <img src={instagramIcon} className='w-[22px] h-[22px]' />
-                  </div>
-                  <div className="flex items-center">
-                    <img src={tiktokIcon} className='w-[22px] h-[22px]' />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
                   <div className='flex items-center'>
-                    <img src={dollarIcon} className='w-4 h-4' />
+                    <img src={shareIcon} className='w-5 h-5' />
                   </div>
-                  <span className="text-[14px] text-[#374151FF] font-normal">Total Earnings</span>
+                  <div className='flex items-center'>
+                    <img src={dollarIcon} className='w-5 h-5' />
+                  </div>
+                  <div className='flex items-center'>
+                    <img src={barChartIcon} className='w-5 h-5' />
+                  </div>
                 </div>
-                <span className="text-[14px] font-bold text-[#1F2937FF]">{card.totalEarnings}</span>
               </div>
-            </div>
-
-            <hr className='mt-[22px] mb-[16px]' />
-
-            {/* Action Buttons */}
-            <div className="flex justify-between items-center px-5">
-              <div className='flex items-center'>
-                <img src={bellIcon} className='w-5 h-5' />
-              </div>
-              <div className='flex items-center'>
-                <img src={fileTextIcon} className='w-5 h-5' />
-              </div>
-              <div className='flex items-center'>
-                <img src={calendarIcon} className='w-5 h-5' />
-              </div>
-              <div className='flex items-center'>
-                <img src={shareIcon} className='w-5 h-5' />
-              </div>
-              <div className='flex items-center'>
-                <img src={dollarIcon} className='w-5 h-5' />
-              </div>
-              <div className='flex items-center'>
-                <img src={barChartIcon} className='w-5 h-5' />
-              </div>
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
+        )
+      }
     </div>
   );
 };
