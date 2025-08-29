@@ -5,7 +5,6 @@ import { Registration } from './pages/Auth/Registration';
 import { MyAccount } from './pages/Account/MyAccount';
 import { FooterMenus } from './components/footerMenus/FooterMenus';
 import { SelectPlans } from './pages/BuyId/SelectPlans';
-import { Cart } from './pages/BuyId/Cart';
 import { IdManagement } from './pages/IdManagement/IdManagement';
 import { RedirectCredit } from './pages/buyCredit/RedirectCredit';
 import { UpgradePlans } from './pages/upgradePlans/UpgradePlans';
@@ -26,7 +25,6 @@ function App() {
         <Route path='/registration' element={<Registration />} />
         <Route path='/my-account' element={<MyAccount />} />
         <Route path="/buyId" element={<SelectPlans />} />
-        <Route path="/buyId/cart" element={<Cart />} />
         <Route path="/id-management" element={<IdManagement />} />
         <Route path="/buy-credit" element={<RedirectCredit />} />
         <Route path="/upgrade-plans" element={<UpgradePlans />} />

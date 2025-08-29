@@ -18,7 +18,7 @@ import fileTextIcon from "../../assets/file-text.svg";
 import barChartIcon from "../../assets/chart.svg";
 
 
-type Status = "Active" | "Inactive";
+type Status = "Live" | "Demo";
 
 interface Row {
   id: number;
@@ -28,18 +28,18 @@ interface Row {
 export const TopPerforming = () => {
   const [row, setRow] = useState<Row>({
     id: 1,
-    status: "Inactive",
+    status: "Demo",
   });
 
   const handleStatusToggle = () => {
     setRow((prevRow) => ({
       ...prevRow,
-      status: prevRow.status === "Active" ? "Inactive" : "Active",
+      status: prevRow.status === "Live" ? "Demo" : "Live",
     }));
   };
 
   const getStatusToggleColor = (): string => {
-    return row.status === "Active" ? "bg-green-500" : "bg-red-500";
+    return row.status === "Live" ? "bg-green-500" : "bg-red-500";
   };
 
   const topPerformingData = [
@@ -104,7 +104,7 @@ export const TopPerforming = () => {
 
 
   const getStatusStyle = (status: any) => {
-    return status === "Active"
+    return status === "Live"
       ? "text-[#22C55EFF]"
       : "text-yellow-700";
   };
@@ -117,11 +117,11 @@ export const TopPerforming = () => {
         <div className="flex items-center gap-2 mt-[42px]">
           <button
             onClick={handleStatusToggle}
-            className={`w-12 h-6 ${getStatusToggleColor()} rounded-full relative transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 ${row.status === "Active" ? "focus:ring-green-500" : "focus:ring-red-500"
+            className={`w-12 h-6 ${getStatusToggleColor()} rounded-full relative transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 ${row.status === "Live" ? "focus:ring-green-500" : "focus:ring-red-500"
               }`}
           >
             <div
-              className={`w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 transition-transform duration-200 ease-in-out ${row.status === "Active"
+              className={`w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 transition-transform duration-200 ease-in-out ${row.status === "Live"
                 ? "transform translate-x-6"
                 : "transform translate-x-0.5"
                 }`}
@@ -134,7 +134,7 @@ export const TopPerforming = () => {
       </div>
 
       {
-        row.status === "Active" ? (
+        row.status === "Live" ? (
           <div className="bg-white rounded-[8px] shadow-sm border border-[#E5E7EBFF] p-4 mt-5">
             <p className="text-center">No Active Id's</p>
           </div>) : (
