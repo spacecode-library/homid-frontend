@@ -93,8 +93,6 @@ export const Registration: React.FC = () => {
         userType: accountType,
       };
 
-      console.log('Registration attempt:', formData);
-
       // Call the auth service
       const response = await authService.register(formData);
 
@@ -102,7 +100,7 @@ export const Registration: React.FC = () => {
         console.log('Registration successful:', response);
         // Handle successful registration
         setTimeout(() => {
-          navigate("/login");
+          navigate("/");
         }, 500)
 
         setFirstName('');

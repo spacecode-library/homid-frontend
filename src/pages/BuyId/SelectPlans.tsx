@@ -16,6 +16,7 @@ export const SelectPlans = () => {
   const [currentPrefixPage, setCurrentPrefixPage] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showCart, setShowCart] = useState(false);
+  const [selectedPhoneNumbers, setSelectedPhoneNumbers] = useState<string[]>([]);
 
   const planCards = [
     {
@@ -51,6 +52,10 @@ export const SelectPlans = () => {
       priceSubtext: '$299/year',
     }
   ];
+
+  useEffect(() => {
+    setSelectedPhoneNumbers([]);
+  }, [selectedCard])
 
   // Scroll to show PRO card by default with 10% of adjacent cards visible
   useEffect(() => {
@@ -126,6 +131,14 @@ export const SelectPlans = () => {
         behavior: 'smooth'
       });
     }
+  };
+
+  const handlePhoneNumberToggle = (phoneNumber: string) => {
+    setSelectedPhoneNumbers(prev =>
+      prev.includes(phoneNumber)
+        ? prev.filter(num => num !== phoneNumber) // Remove if already selected
+        : [...prev, phoneNumber] // Add if not selected
+    );
   };
 
   const handleViewCartOpen = () => {
@@ -255,10 +268,16 @@ export const SelectPlans = () => {
             <div className='flex justify-center'>
               <img src={arrowDownIcon} className='w-12 h-12' />
             </div>
-            <div className="space-y-3 grid grid-cols-2 gap-x-8 px-4">
-              {generatePhoneNumbers(selectedNumber).map((phoneNumber, index) => (
-                <div className='grid grid-cols-1'>
-                  <div className='border border-[#D1D5DB] rounded-[5px] flex items-center justify-between px-2 py-1'>
+            <div className="grid grid-cols-2 gap-3 px-4">
+              {generatePhoneNumbers(selectedNumber).map((phoneNumber: string) => (
+                <div key={phoneNumber}>
+                  <div
+                    onClick={() => handlePhoneNumberToggle(phoneNumber)}
+                    className={`border rounded-[5px] flex items-center justify-between px-2 py-1 cursor-pointer transition-all ${selectedPhoneNumbers.includes(phoneNumber)
+                      ? 'border-[#E8618C] border-2'
+                      : 'border-[#D1D5DB]'
+                      }`}
+                  >
                     <p className='text-[24px] font-medium text-[#374151]'>{phoneNumber}</p>
                     <div className='flex items-center'>
                       <img src={selectionCartIcon} className='w-6 h-6' />
@@ -301,7 +320,14 @@ export const SelectPlans = () => {
 
       <div className="absolute top-[18px] right-0">
         <AnimatePresence>
-          {showCart && <Cart setShowCart={setShowCart} />}
+          {showCart && (
+            <Cart
+              setShowCart={setShowCart}
+              selectedPhoneNumbers={selectedPhoneNumbers}
+              onRemovePhoneNumber={handlePhoneNumberToggle}
+              selectedPlan={planCards[selectedCard]}
+            />
+          )}
         </AnimatePresence>
       </div>
     </div>

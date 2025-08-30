@@ -16,10 +16,14 @@ import {
   Music2,
   Pencil,
 } from "lucide-react";
-
+import gobalIcon from "../../assets/globalIcon.png";
+import flag1Icon from "../../assets/flag1.png";
+import flag2Icon from "../../assets/flag2.png";
+import flag3Icon from "../../assets/flag3.png";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { TargetedAudience } from "./TargetedAudience";
+import { Global } from "./Global";
 
 // Types
 interface AccordionData {
@@ -45,6 +49,7 @@ interface TableRow {
 
 export const MyIDsTable: React.FC = () => {
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
+  const [globalExpandedRow, setGlobalExpandedRow] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [tableData, setTableData] = useState<TableRow[]>([
     {
@@ -178,6 +183,10 @@ export const MyIDsTable: React.FC = () => {
     setExpandedRow(expandedRow === index ? null : index);
   };
 
+  const toggleGlobal = (index: number) => {
+    setGlobalExpandedRow(globalExpandedRow === index ? null : index)
+  }
+
   const handleStatusToggle = (index: number) => {
     setTableData(prevData =>
       prevData.map((row, i) =>
@@ -226,7 +235,7 @@ export const MyIDsTable: React.FC = () => {
       {/* Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {/* Table Header */}
-        <div className="grid grid-cols-[1fr_1.5fr_1.5fr_1fr_1fr_1fr] gap-4 p-4 bg-white border-b font-semibold text-[#374151FF] text-[16px]">
+        <div className="grid grid-cols-[.7fr_1.5fr_1.5fr_1fr_1fr_.7fr_.6fr] gap-4 p-4 bg-white border-b font-semibold text-[#374151FF] text-[16px]">
           <div className="flex items-center gap-2">
             ID <ChevronDown className="w-4 h-4" />
           </div>
@@ -239,13 +248,14 @@ export const MyIDsTable: React.FC = () => {
             Status <ChevronDown className="w-4 h-4" />
           </div>
           <div>Manage</div>
+          <div>Global</div>
         </div>
 
         {/* Table Body */}
         {filteredData.map((row, index) => (
           <React.Fragment key={row.id}>
             {/* Main Row */}
-            <div className="grid grid-cols-[1fr_1.5fr_1.5fr_1fr_1fr_1fr] gap-4 p-4 border-b hover:bg-gray-50 items-center">
+            <div className="grid grid-cols-[.7fr_1.5fr_1.5fr_1fr_1fr_.7fr_.6fr] gap-4 p-4 border-b hover:bg-gray-50 items-center">
               {/* ID */}
               <div className="text-[16px] font-medium text-[#2563EBFF]">{row.id}</div>
 
@@ -292,6 +302,10 @@ export const MyIDsTable: React.FC = () => {
                       }`}
                   />
                 </button>
+              </div>
+
+              <div onClick={() => toggleGlobal(index)} className="cursor-pointer">
+                <img src={gobalIcon} className="w-6 h-6" />
               </div>
             </div>
 
@@ -717,6 +731,11 @@ export const MyIDsTable: React.FC = () => {
                   <button className="rounded-[6px] bg-[#2563EBFF] text-white font-semibold px-6 py-2">Save</button>
                 </div>
               </div>
+            )}
+
+            {/* Global Id Content*/}
+            {globalExpandedRow === index && (
+              <Global />
             )}
           </React.Fragment>
         ))}
