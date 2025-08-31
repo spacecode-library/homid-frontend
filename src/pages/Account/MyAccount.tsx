@@ -22,8 +22,8 @@ export const MyAccount = () => {
 
   const accountMenues = [
     { icon: MyAccountIcon, menuName: "Edit profile", link: "" },
-    { icon: FavouritesIcon, menuName: "Favourites", link: "" },
-    { icon: HistoryIcon, menuName: "History", link: "" },
+    { icon: FavouritesIcon, menuName: "Favourites", link: "/favourites" },
+    { icon: HistoryIcon, menuName: "History", link: "/history" },
     { icon: ShoppingBagIcon, menuName: "Buy an .ID", link: "/buyId" },
     { icon: ShoppingBagIcon, menuName: "ID Management", link: "/id-management" },
     { icon: SignOutIcon, menuName: "Sign out", action: handleLogout },

@@ -10,6 +10,8 @@ import { RedirectCredit } from "./pages/buyCredit/RedirectCredit";
 import { UpgradePlans } from "./pages/upgradePlans/UpgradePlans";
 import PrivateRoute from "./components/PrivateRoute"; // ⬅️ import
 import { Favourites } from "./pages/Favourites/Favourites";
+import { FavouritesDetails } from "./pages/Favourites/FavouritesDetails";
+import { History } from "./pages/History/History";
 
 function App() {
   const location = useLocation();
@@ -22,7 +24,8 @@ function App() {
     location.pathname === "/buyId/cart" ||
     location.pathname === "/id-management" ||
     location.pathname === "/buy-credit" ||
-    location.pathname === "/upgrade-plans";
+    location.pathname === "/upgrade-plans" ||
+    location.pathname.startsWith("/favourites/");
 
   return (
     <>
@@ -78,6 +81,22 @@ function App() {
           element={
             <PrivateRoute>
               <Favourites />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/favourites/:id"
+          element={
+            <PrivateRoute>
+              <FavouritesDetails />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/history"
+          element={
+            <PrivateRoute>
+              <History />
             </PrivateRoute>
           }
         />

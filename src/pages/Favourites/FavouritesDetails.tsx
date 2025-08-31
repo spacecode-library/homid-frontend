@@ -1,10 +1,11 @@
+import { Header } from "../../components/common/Header"
 import KMartImg from "../../assets/kmart.png";
 import BurgerKingImg from "../../assets/burgerKing.png";
-import addIcon from "../../assets/add.png";
-import { Header } from "../../components/common/Header"
-import { Link } from "react-router-dom";
+import NavigateIcon from "../../assets/navigate.png";
+import CloseIcon from "../../assets/close.png";
+import { useParams } from "react-router-dom";
 
-export const Favourites = () => {
+export const FavouritesDetails = () => {
   const favouritesList = [
     {
       id: "1",
@@ -43,40 +44,55 @@ export const Favourites = () => {
       ]
     },
   ]
+
+  const { id } = useParams();
+
+  const currentFavouritesData = favouritesList.find(
+    (favourite) => favourite.id === id
+  );
+  console.log("currentFavouritesData", currentFavouritesData)
   return (
     <div className="mt-[26px] flex flex-col justify-center">
       <Header />
 
-      <div className="grid grid-cols-3 gap-[10px] px-6 py-[10px]">
-        {favouritesList.map((favouritesItem) => (
-          <Link to={favouritesItem.id}>
-            <div className="flex flex-col">
-              <div className="rounded-[20px] border-2 border-[#00E5FFFF] p-4 flex justify-center items-center">
-                <div className="flex flex-wrap gap-[16px] justify-between">
-                  {favouritesItem.products.map((product, index) => (
-                    <img
-                      key={index}
-                      src={product.img}
-                      className="w-[30px] h-[30px] object-contain"
-                    />
-                  ))}
-                </div>
+      <div className="mt-[10px] flex flex-col space-y-5 px-5">
+        {currentFavouritesData?.products.map((favourite, index) => (
+          <div key={index} className="flex border-b border-[#DDDDDDFF] pb-[10px]">
+            {/* Image */}
+            <img src={favourite.img} className="w-[64px] h-[64px]" />
+
+            {/* Right side */}
+            <div className="flex flex-col flex-1 ml-4 leading-none">
+              {/* Name + Count */}
+              <div className="flex justify-between items-start leading-none">
+                <p className="text-[18px] font-medium text-[#000000FF]">
+                  {favourite.name}
+                </p>
+                <p className="text-[36px] font-bold text-[#1464C8FF]">
+                  {favourite.count}
+                </p>
               </div>
-              <p className="text-[14px] font-normal text-[#1A73E8FF] text-center">
-                {favouritesItem.favouritesListName}
+
+              {/* URL */}
+              <p className="text-[14px] font-normal text-[#888888FF] -mt-2">
+                {favourite.url}
               </p>
+
+              {/* ID + Actions */}
+              <div className="flex justify-between items-center mt-2">
+                <div className="flex items-center">
+                  <p className="w-[160px] text-[24px] font-bold text-[#00AEFFFF]">
+                    .<span className="text-[#1F54B0FF]">ID</span>{" "}
+                    <span>{favourite.id}</span>
+                  </p>
+                  <img src={NavigateIcon} className="w-6 h-6 ml-[18px]" />
+                </div>
+                <img src={CloseIcon} className="w-6 h-6" />
+              </div>
             </div>
-          </Link>
+          </div>
         ))}
-
-        {/* Add button as a grid item card */}
-        <div className="flex items-center -mt-[16px] ml-[40px]">
-          <button className="bg-[#1A73E8FF] rounded-full flex justify-center items-center p-4">
-            <img src={addIcon} className="w-[40px] h-[40px]" />
-          </button>
-        </div>
       </div>
-
     </div>
   )
 }
