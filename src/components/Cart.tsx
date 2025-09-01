@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import shopCartIcon from "../assets/shop-cart.png";
 import closeIcon from "../assets/close-small.png";
 import exitIcon from "../assets/exit-icon.png";
+import { subscriptionService } from "../services/Subscriptions";
 
 type CartProps = {
   setShowCart: React.Dispatch<React.SetStateAction<boolean>>;
@@ -24,6 +25,26 @@ export const Cart: React.FC<CartProps> = ({
   onRemovePhoneNumber,
   selectedPlan
 }) => {
+  const planId = selectedPlan.name.toLowerCase();
+  const [loading, setLoading] = useState(false);
+
+  const handleCheckoutPlan = async () => {
+    setLoading(true);
+    try {
+      const res = await subscriptionService.createSubscription(planId);
+      if (res.success) {
+        const billingRes = await subscriptionService.createBillingPortalSession();
+        if (billingRes.success) {
+          window.open(billingRes.data.url, "_blank");
+          setLoading(false)
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+
   return (
     <motion.div
       initial={{ x: "100%" }}
@@ -89,8 +110,16 @@ export const Cart: React.FC<CartProps> = ({
             </div>
 
             <div className="text-center pb-2">
-              <button className="bg-[#4285F4] text-white text-[20px] font-medium py-3 px-14 rounded-[10px] mt-[34px]">
-                Checkout
+              <button
+                disabled={loading}
+                onClick={handleCheckoutPlan}
+                className={`bg-[#4285F4] text-white text-[20px] font-medium py-3 px-14 rounded-[10px] mt-[34px] ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}>
+                {
+                  loading ? <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Checkout...
+                  </div> : 'Checkout'
+                }
               </button>
             </div>
           </div>
