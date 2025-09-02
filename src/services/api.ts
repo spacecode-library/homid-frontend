@@ -29,7 +29,7 @@ api.interceptors.response.use(
     // Skip refresh for auth endpoints and public endpoints
     const publicEndpoints = ['/auth/', '/search'];
     const isPublicEndpoint = publicEndpoints.some(endpoint => originalRequest.url?.includes(endpoint));
-    
+
     if (isPublicEndpoint) {
       return Promise.reject(error);
     }
@@ -42,33 +42,27 @@ api.interceptors.response.use(
         if (!refreshToken) {
           throw new Error('No refresh token available');
         }
-        
-        const response = await api.post('/auth/refresh', { refreshToken });
-        const { tokens } = response.data.data;
-        
-        localStorage.setItem('accessToken', tokens.accessToken);
-        if (tokens.refreshToken) {
-          localStorage.setItem('refreshToken', tokens.refreshToken);
+
+        const response = await api.post('/auth/refresh-token', { refreshToken });
+
+        // ✅ Use the correct structure from your backend
+        const { accessToken, refreshToken: newRefreshToken } = response.data.data;
+
+        localStorage.setItem('accessToken', accessToken);
+        if (newRefreshToken) {
+          localStorage.setItem('refreshToken', newRefreshToken);
         }
-        
+
         // Retry original request with new token
-        originalRequest.headers.Authorization = `Bearer ${tokens.accessToken}`;
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
-        // Refresh failed, clear tokens
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        
-        // Only redirect to login if not a public endpoint
-        const publicEndpoints = ['/auth/', '/search'];
-        const isPublicEndpoint = publicEndpoints.some(endpoint => originalRequest.url?.includes(endpoint));
-        
-        if (!isPublicEndpoint) {
-          window.location.href = '/login';
-        }
-        
+        window.location.href = '/login';  // you can keep this if you want logout on refresh fail
         return Promise.reject(refreshError);
       }
+
     }
 
     return Promise.reject(error);
@@ -79,7 +73,7 @@ api.interceptors.response.use(
 export const handleApiError = (error: any): string => {
   if (error.response) {
     const { status, data } = error.response;
-    
+
     switch (status) {
       case 400:
         return data.message || 'Invalid request';
@@ -97,10 +91,10 @@ export const handleApiError = (error: any): string => {
         return data.message || 'An unexpected error occurred';
     }
   }
-  
+
   if (error.request) {
     return 'Network error. Please check your connection';
   }
-  
+
   return error.message || 'An unexpected error occurred';
 };

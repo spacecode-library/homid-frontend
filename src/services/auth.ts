@@ -110,7 +110,7 @@ export const authService = {
   
   refreshToken: async (): Promise<string> => {
     const refreshToken = localStorage.getItem('refreshToken');
-    const response = await api.post('/auth/refresh', { refreshToken });
+    const response = await api.post('/auth/refresh-token', { refreshToken });
     const { tokens } = response.data.data;
     
     localStorage.setItem('accessToken', tokens.accessToken);
