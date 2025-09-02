@@ -8,6 +8,7 @@ import selectionCartIcon from "../../assets/selection-cart.png";
 import shoppingCartIcon from "../../assets/shopping_cart.png";
 import { Header } from "../../components/common/Header"
 import { Cart } from '../../components/Cart';
+import { subscriptionService } from '../../services/Subscriptions';
 
 export const SelectPlans = () => {
   const [selectedCard, setSelectedCard] = useState(1); // Pro is at index 1
@@ -17,6 +18,8 @@ export const SelectPlans = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showCart, setShowCart] = useState(false);
   const [selectedPhoneNumbers, setSelectedPhoneNumbers] = useState<string[]>([]);
+  const [randonIds, setrandomIds] = useState<[]>([]);
+  const [isRegenerate, setIsRegenerate] = useState(false);
 
   const planCards = [
     {
@@ -54,8 +57,20 @@ export const SelectPlans = () => {
   ];
 
   useEffect(() => {
-    setSelectedPhoneNumbers([]);
-  }, [selectedCard])
+    const len = selectedPhoneNumbers.length;
+
+    if (len > 25) {
+      setSelectedCard(3); // Elite
+    } else if (len > 10) {
+      setSelectedCard(2); // Gold
+    } else if (len > 1) {
+      setSelectedCard(1); // Pro
+    } else if (len === 1) {
+      setSelectedCard(0); // Single
+    } else {
+      setSelectedCard(1); // default fallback (Pro)
+    }
+  }, [selectedPhoneNumbers]);
 
   // Scroll to show PRO card by default with 10% of adjacent cards visible
   useEffect(() => {
@@ -79,6 +94,25 @@ export const SelectPlans = () => {
   const prefixesPerPage = 6;
   const maxPages = Math.ceil(prefixNumbers.length / prefixesPerPage);
 
+  useEffect(() => {
+    if (selectedNumber == null) return;
+    async function generateIDS() {
+      setrandomIds([]);
+      try {
+        const obj = {
+          "prefix": selectedNumber,
+          "countryCode": "US"
+        }
+        const res = await subscriptionService.generateHomeId(obj);
+        setrandomIds(res.data)
+        setIsRegenerate(false);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    generateIDS()
+  }, [selectedNumber, isRegenerate])
+
   const getCurrentPrefixes = () => {
     const startIndex = currentPrefixPage * prefixesPerPage;
     return prefixNumbers.slice(startIndex, startIndex + prefixesPerPage);
@@ -90,15 +124,6 @@ export const SelectPlans = () => {
       numbers.push(prefix + i);
     }
     return numbers;
-  };
-
-  const generatePhoneNumbers = (baseNumber: number) => {
-    return [
-      `${baseNumber}-0001`,
-      `${baseNumber}-0011`,
-      `${baseNumber}-9901`,
-      `${baseNumber}-1009`
-    ];
   };
 
   const handlePrefixPrev = () => {
@@ -269,28 +294,42 @@ export const SelectPlans = () => {
               <img src={arrowDownIcon} className='w-12 h-12' />
             </div>
             <div className="grid grid-cols-2 gap-3 px-4">
-              {generatePhoneNumbers(selectedNumber).map((phoneNumber: string) => (
-                <div key={phoneNumber}>
-                  <div
-                    onClick={() => handlePhoneNumberToggle(phoneNumber)}
-                    className={`border rounded-[5px] flex items-center justify-between px-2 py-1 cursor-pointer transition-all ${selectedPhoneNumbers.includes(phoneNumber)
-                      ? 'border-[#E8618C] border-2'
-                      : 'border-[#D1D5DB]'
-                      }`}
-                  >
-                    <p className='text-[24px] font-medium text-[#374151]'>{phoneNumber}</p>
-                    <div className='flex items-center'>
-                      <img src={selectionCartIcon} className='w-6 h-6' />
-                    </div>
+              {
+                randonIds.length > 0 ? (
+
+                  randonIds.map((phoneNumber: string) => {
+                    // Insert dash after first 3 digits
+                    const formattedNumber = `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}`;
+
+                    return (
+                      <div key={phoneNumber}>
+                        <div
+                          onClick={() => handlePhoneNumberToggle(formattedNumber)}
+                          className={`border rounded-[5px] flex items-center justify-between px-2 py-1 cursor-pointer transition-all ${selectedPhoneNumbers.includes(formattedNumber)
+                            ? 'border-[#E8618C] border-2'
+                            : 'border-[#D1D5DB]'
+                            }`}
+                        >
+                          <p className='text-[24px] font-medium text-[#374151]'>{formattedNumber}</p>
+                          <div className='flex items-center'>
+                            <img src={selectionCartIcon} className='w-6 h-6' />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })) : (
+                  <div className='col-span-2 flex justify-center items-center'>
+                    <span className='w-10 h-10 border-2 border-blue-400 border-t-transparent rounded-full animate-spin'></span>
                   </div>
-                </div>
-              ))}
+                )}
             </div>
           </>
         )}
 
         <div className="text-center">
-          <button className='inline-block bg-[#4285F4] text-white text-[20px] rounded-[10px] px-4 py-2 mt-6'>
+          <button
+            onClick={() => setIsRegenerate(true)}
+            className='inline-block bg-[#4285F4] text-white text-[20px] rounded-[10px] px-4 py-2 mt-6'>
             Regenerate
           </button>
         </div>

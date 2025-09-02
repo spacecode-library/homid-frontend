@@ -28,19 +28,35 @@ export const Cart: React.FC<CartProps> = ({
   const planId = selectedPlan.name.toLowerCase();
   const [loading, setLoading] = useState(false);
 
-  const handleCheckoutPlan = async () => {
-    setLoading(true);
+  // const handleCheckoutPlan = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const res = await subscriptionService.createSubscription(planId);
+  //     if (res.success) {
+  //       const billingRes = await subscriptionService.createBillingPortalSession();
+  //       if (billingRes.success) {
+  //         window.open(billingRes.data.url, "_blank");
+  //         setLoading(false)
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
+
+  const handleInsertId = async () => {
+    console.log("selectedPhoneNumbers", selectedPhoneNumbers)
     try {
-      const res = await subscriptionService.createSubscription(planId);
-      if (res.success) {
-        const billingRes = await subscriptionService.createBillingPortalSession();
-        if (billingRes.success) {
-          window.open(billingRes.data.url, "_blank");
-          setLoading(false)
-        }
+      const cleanedNumbers = selectedPhoneNumbers.map(num => num.replace(/-/g, ""));
+      console.log("cleanedNumbers", cleanedNumbers)
+      const obj = {
+        "ids": cleanedNumbers,
+        "countryCode": "US"
       }
-    } catch (error) {
-      console.log(error);
+      const res = await subscriptionService.insertCartId(obj);
+      console.log("res", res);
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -112,7 +128,8 @@ export const Cart: React.FC<CartProps> = ({
             <div className="text-center pb-2">
               <button
                 disabled={loading}
-                onClick={handleCheckoutPlan}
+                // onClick={handleCheckoutPlan}
+                onClick={handleInsertId}
                 className={`bg-[#4285F4] text-white text-[20px] font-medium py-3 px-14 rounded-[10px] mt-[34px] ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}>
                 {
                   loading ? <div className="flex items-center gap-2">
