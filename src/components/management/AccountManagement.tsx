@@ -1,8 +1,20 @@
+import { useEffect, useState } from "react";
 import circleUserIcon from "../../assets/CircleUserRound.svg";
 import { MySubscriptions } from "./MySubscriptions";
 import RedirectCreditDashboard from "./RedirectCreditDashboard";
+import { subscriptionService } from "../../services/Subscriptions";
 
 export const AccountManagement = () => {
+  const [accountInfo, setAccountInfo] = useState(null);
+
+  useEffect(() => {
+    const getAccountsdata = async () => {
+      const res = await subscriptionService.usersInfo();
+      setAccountInfo(res?.data)
+    }
+    getAccountsdata()
+  }, [])
+
   return (
     <div>
       <div className="flex justify-between items-center">
@@ -17,7 +29,7 @@ export const AccountManagement = () => {
 
       <div className="flex justify-between bg-white rounded-[8px] shadow-sm py-[20px] px-[42px] mt-[30px] w-full">
         <div className="w-[48%]">
-          <MySubscriptions />
+          <MySubscriptions accountInfo={accountInfo} />
         </div>
 
         <div className="w-[48%]">

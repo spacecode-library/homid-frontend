@@ -225,11 +225,25 @@ export const SelectPlans = () => {
         </div>
 
         {/* Choose Prefix Number */}
-        <div className="">
+        <div className="relative">
           <div className='flex justify-center -mt-6'>
             <img src={arrowDownIcon} className='w-12 h-12' />
           </div>
+
           <h2 className="text-[38px] text-[#1F54B0] font-semibold text-center px-4">Choose Prefix Number</h2>
+
+          <div className="absolute top-5 right-0">
+            <div className="relative" onClick={handleViewCartOpen}>
+              <img
+                src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/header_cart-eed150.svg"
+                className="w-8 h-8"
+                alt="Cart"
+              />
+              <span className="absolute -top-2 right-3 flex items-center justify-center rounded-full w-[28px] h-[28px] bg-[#ff6161] border border-white text-white text-[14px]">
+                {selectedPhoneNumbers.length}
+              </span>
+            </div>
+          </div>
 
           {/* Prefix Grid with Navigation */}
           <div className="flex items-center justify-center mt-[44px]">
@@ -299,7 +313,7 @@ export const SelectPlans = () => {
 
                   randonIds.map((phoneNumber: string) => {
                     // Insert dash after first 3 digits
-                    const formattedNumber = `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}`;
+                    const formattedNumber = `${phoneNumber.slice(0, 4)}-${phoneNumber.slice(4)}`;
 
                     return (
                       <div key={phoneNumber}>
@@ -351,7 +365,7 @@ export const SelectPlans = () => {
           <button onClick={handleViewCartOpen}
             className="flex items-center justify-center gap-2 bg-[#036937] text-white text-[24px] py-2 px-6 rounded-[10px]">
             <img src={shoppingCartIcon} alt="cart" className="w-10 h-10" />
-            View cart
+            Add to cart
           </button>
         </div>
 

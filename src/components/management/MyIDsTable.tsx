@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Search,
   ChevronDown,
@@ -24,6 +24,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { TargetedAudience } from "./TargetedAudience";
 import { Global } from "./Global";
+import { subscriptionService } from "../../services/Subscriptions";
 
 // Types
 interface AccordionData {
@@ -44,6 +45,8 @@ interface TableRow {
   productName: string;
   totalRedirects: string;
   status: "Active" | "Inactive";
+  numericId: string;
+  redirectCreditsUsed: number;
   accordionData: AccordionData;
 }
 
@@ -51,86 +54,7 @@ export const MyIDsTable: React.FC = () => {
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
   const [globalExpandedRow, setGlobalExpandedRow] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [tableData, setTableData] = useState<TableRow[]>([
-    {
-      id: "070-1234",
-      targetUrl: "www.amazon.com",
-      productName: "Ralph Rauern - Women's",
-      totalRedirects: "180,631",
-      status: "Active",
-      accordionData: {
-        redirectUrl: "Act now.app.b2t",
-        artImage: "ART Image URL 1",
-        websiteTitle: "What does the website offer or sell?",
-        websiteDescription: "Information about the website...",
-        brandOwner: "Advertiser/Brand Owner: United Paid Promotion",
-        websiteInfo:
-          "Website URL: Information about your relationship with the website owner",
-        websiteOffer: "What does this website offer?",
-        categories: ["Electronics", "Gadgets"],
-        demographics:
-          "Age Group: Generation_x, Gender: Dropdown_v, Marriage Status: Dropdown_v, Income Level: Dropdown_v",
-      },
-    },
-    {
-      id: "561-1234",
-      targetUrl: "www.amazon.com",
-      productName: "Strong-Fit Capsule",
-      totalRedirects: "180,631",
-      status: "Active",
-      accordionData: {
-        redirectUrl: "Act now.app.b2t",
-        artImage: "ART Image URL 2",
-        websiteTitle: "Health & Fitness Supplements",
-        websiteDescription:
-          "Premium fitness capsules for enhanced performance...",
-        brandOwner: "Advertiser/Brand Owner: Fitness Solutions Inc",
-        websiteInfo: "Website URL: Partnership with fitness retailers",
-        websiteOffer: "What does this website offer?",
-        categories: ["Health", "Fitness"],
-        demographics:
-          "Age Group: Millennial, Gender: All, Marriage Status: Any, Income Level: Medium+",
-      },
-    },
-    {
-      id: "783-1234",
-      targetUrl: "www.amazon.com",
-      productName: "Ralph Rauern - Women's",
-      totalRedirects: "100,531",
-      status: "Inactive",
-      accordionData: {
-        redirectUrl: "Act now.app.b2t",
-        artImage: "ART Image URL 3",
-        websiteTitle: "Fashion & Lifestyle",
-        websiteDescription: "Premium women's fashion collection...",
-        brandOwner: "Advertiser/Brand Owner: Fashion Forward LLC",
-        websiteInfo: "Website URL: Exclusive fashion partnerships",
-        websiteOffer: "What does this website offer?",
-        categories: ["Fashion", "Lifestyle"],
-        demographics:
-          "Age Group: Generation_y, Gender: Female, Marriage Status: Any, Income Level: High",
-      },
-    },
-    {
-      id: "430-1234",
-      targetUrl: "company.com",
-      productName: "Product Name ABC",
-      totalRedirects: "23,436",
-      status: "Active",
-      accordionData: {
-        redirectUrl: "Act now.app.b2t",
-        artImage: "ART Image URL 4",
-        websiteTitle: "Corporate Solutions",
-        websiteDescription: "Business solutions and services...",
-        brandOwner: "Advertiser/Brand Owner: Corporate Services Ltd",
-        websiteInfo: "Website URL: B2B service provider",
-        websiteOffer: "What does this website offer?",
-        categories: ["Business", "Services"],
-        demographics:
-          "Age Group: Professional, Gender: All, Marriage Status: Any, Income Level: Corporate",
-      },
-    },
-  ]);
+  const [tableData, setTableData] = useState<TableRow[]>([]);
   const [selected, setSelected] = useState([
     "North Korea",
     "Nigeria",
@@ -144,6 +68,16 @@ export const MyIDsTable: React.FC = () => {
   ]);
 
   const [showAddTags, setShowAddTags] = useState(false);
+
+
+  useEffect(() => {
+    const getListHomeIds = async () => {
+      const res = await subscriptionService.homeIdsList();
+      console.log("allIds", res?.data?.homIds);
+      setTableData(res?.data?.homIds)
+    }
+    getListHomeIds();
+  }, [])
 
   const memos = [
     { id: 1, text: "Created Memo #1", date: "01/JAN/2026" },
@@ -212,7 +146,6 @@ export const MyIDsTable: React.FC = () => {
       item.targetUrl.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-
   return (
     <div className="mt-[52px]">
       {/* Header */}
@@ -257,19 +190,18 @@ export const MyIDsTable: React.FC = () => {
             {/* Main Row */}
             <div className="grid grid-cols-[.7fr_1.5fr_1.5fr_1fr_1fr_.7fr_.6fr] gap-4 p-4 border-b hover:bg-gray-50 items-center">
               {/* ID */}
-              <div className="text-[16px] font-medium text-[#2563EBFF]">{row.id}</div>
-
+              <div className="text-[16px] font-medium text-[#2563EBFF]">{row?.numericId?.slice(0, 4)}-{row?.numericId?.slice(4)}</div>
               {/* Target URL */}
               <div className="flex items-center gap-2">
-                <span className="text-[16px] font-normal text-[#242524FF]">{row.targetUrl}</span>
-                <ExternalLink className="w-4 h-4 text-gray-400" />
+                <span className="text-[16px] font-normal text-[#242524FF]">-</span>
+                {/* <ExternalLink className="w-4 h-4 text-gray-400" /> */}
               </div>
 
               {/* Product Name */}
-              <div className="text-[16px] font-normal text-[#242524FF]">{row.productName}</div>
+              <div className="text-[16px] font-normal text-[#242524FF]">-</div>
 
               {/* Total Redirects */}
-              <div className="text-[16px] font-normal text-[#242524FF]">{row.totalRedirects}</div>
+              <div className="text-[16px] font-normal text-[#242524FF]">{row?.redirectCreditsUsed}</div>
 
               {/* Status - Interactive Switch */}
               <div className="flex items-center gap-2">

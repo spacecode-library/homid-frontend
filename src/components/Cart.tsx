@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import shopCartIcon from "../assets/shop-cart.png";
 import closeIcon from "../assets/close-small.png";
 import exitIcon from "../assets/exit-icon.png";
+import enterIcon from "../assets/enter.png";
 import { subscriptionService } from "../services/Subscriptions";
 
 type CartProps = {
@@ -25,6 +26,7 @@ export const Cart: React.FC<CartProps> = ({
   onRemovePhoneNumber,
   selectedPlan
 }) => {
+  console.log("selectedPlan", selectedPlan)
   const planId = selectedPlan.name.toLowerCase();
   const [loading, setLoading] = useState(false);
 
@@ -45,16 +47,17 @@ export const Cart: React.FC<CartProps> = ({
   // }
 
   const handleInsertId = async () => {
-    console.log("selectedPhoneNumbers", selectedPhoneNumbers)
+    setLoading(true)
     try {
       const cleanedNumbers = selectedPhoneNumbers.map(num => num.replace(/-/g, ""));
-      console.log("cleanedNumbers", cleanedNumbers)
       const obj = {
         "ids": cleanedNumbers,
-        "countryCode": "US"
+        "countryCode": "US",
+        "planId": planId,
+        "totalId": selectedPlan.included
       }
       const res = await subscriptionService.insertCartId(obj);
-      console.log("res", res);
+      setLoading(false);
     } catch (err) {
       console.error(err);
     }
@@ -67,7 +70,7 @@ export const Cart: React.FC<CartProps> = ({
       animate={{ x: 0 }}
       exit={{ x: "100%" }}
       transition={{ type: "tween", duration: 0.4 }}
-      className="fixed top-0 right-0 h-full w-[400px] z-50"
+      className="fixed top-0 right-0 h-full w-[400px] z-50 overflow-y-auto"
     >
       <div className="relative">
         <div className="border-4 border-[#BAF3EB] rounded-[10px] bg-[#FFF87F] p-3">
@@ -79,7 +82,10 @@ export const Cart: React.FC<CartProps> = ({
               <p className="text-[24px] text-[#171A1F] font-medium">Cart</p>
             </div>
 
-            <p className="text-[24px] text-[#FF0000] font-medium">Side Widget</p>
+            {/* <p className="text-[24px] text-[#FF0000] font-medium">Side Widget</p> */}
+            <div className="flex items-center" onClick={() => setShowCart(false)}>
+              <img src={closeIcon} className="w-10 h-10" />
+            </div>
           </div>
 
           <div className="mt-3">
@@ -130,13 +136,16 @@ export const Cart: React.FC<CartProps> = ({
                 disabled={loading}
                 // onClick={handleCheckoutPlan}
                 onClick={handleInsertId}
-                className={`bg-[#4285F4] text-white text-[20px] font-medium py-3 px-14 rounded-[10px] mt-[34px] ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}>
+                className={`mx-auto flex items-center justify-center gap-x-4 bg-[#4285F4] text-white text-[20px] font-medium py-3 px-10 rounded-[10px] mt-[34px] transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
+                  }`}>
                 {
                   loading ? <div className="flex items-center gap-2">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     Checkout...
                   </div> : 'Checkout'
                 }
+
+                <img src={enterIcon} className="w-6 h-6" />
               </button>
             </div>
           </div>

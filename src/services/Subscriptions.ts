@@ -23,5 +23,15 @@ export const subscriptionService = {
   insertCartId: async (obj: any) => {
     const response = await api.post('/homid/insert', obj);
     return response.data;
+  },
+
+  usersInfo: async () => {
+    const response = await api.get('/users/info');
+    return response.data;
+  },
+
+  homeIdsList: async () => {
+    const response = await api.get('/homid/list');
+    return response.data;
   }
 }
