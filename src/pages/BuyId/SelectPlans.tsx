@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 import { AnimatePresence } from "framer-motion";
 import checkIcon from "../../assets/green-check.png";
 import arrowDownIcon from "../../assets/arrow-down.png";
+import arrowGif from "../../assets/arrow.gif";
 import keyboardLeftIcon from "../../assets/keyboard-left.png";
 import keyboardRightIcon from "../../assets/keyboard-right.png";
 import selectionCartIcon from "../../assets/selection-cart.png";
 import shoppingCartIcon from "../../assets/shopping_cart.png";
 import { Header } from "../../components/common/Header"
 import { Cart } from '../../components/Cart';
+import whiteCart from "../../assets/white-cart.png";
 import { subscriptionService } from '../../services/Subscriptions';
 
 export const SelectPlans = () => {
+  const [prevSelectedCard, setPrevSelectedCard] = useState(1);
   const [selectedCard, setSelectedCard] = useState(1); // Pro is at index 1
   const [selectedPrefix, setSelectedPrefix] = useState(700);
   const [selectedNumber, setSelectedNumber] = useState(null);
@@ -20,6 +24,7 @@ export const SelectPlans = () => {
   const [selectedPhoneNumbers, setSelectedPhoneNumbers] = useState<string[]>([]);
   const [randonIds, setrandomIds] = useState<[]>([]);
   const [isRegenerate, setIsRegenerate] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const planCards = [
     {
@@ -56,6 +61,18 @@ export const SelectPlans = () => {
     }
   ];
 
+  // Show toast when plan changes
+  useEffect(() => {
+    if (prevSelectedCard !== selectedCard && !isInitialLoad) {
+      const planName = planCards[selectedCard].name;
+      toast.success(`Plan changed to ${planName}`, {
+        position: 'top-right',
+        duration: 3000,
+      });
+    }
+    setPrevSelectedCard(selectedCard);
+  }, [selectedCard, prevSelectedCard, isInitialLoad]);
+
   useEffect(() => {
     const len = selectedPhoneNumbers.length;
 
@@ -72,12 +89,30 @@ export const SelectPlans = () => {
     }
   }, [selectedPhoneNumbers]);
 
+  // Auto-scroll when selectedCard changes (except on initial load)
+  useEffect(() => {
+    if (!isInitialLoad && scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const containerWidth = container.clientWidth;
+      const cardWidth = containerWidth * 0.8; // Keep same as initial load (0.8)
+      const gap = 16; // 1rem = 16px gap
+
+      // Use the EXACT same calculation as initial load
+      const targetScrollPosition = selectedCard * (cardWidth + gap) - (containerWidth * 0.1);
+
+      container.scrollTo({
+        left: Math.max(0, targetScrollPosition),
+        behavior: 'smooth'
+      });
+    }
+  }, [selectedCard, isInitialLoad]);
+
   // Scroll to show PRO card by default with 10% of adjacent cards visible
   useEffect(() => {
     if (scrollContainerRef.current) {
       const container = scrollContainerRef.current;
       const containerWidth = container.clientWidth;
-      const cardWidth = containerWidth * 0.8; // 80% width cards
+      const cardWidth = containerWidth * 0.85; // Match actual card width (85%)
       const gap = 16; // 1rem = 16px gap
 
       // Calculate scroll position to center the PRO card with 10% of adjacent cards visible
@@ -87,6 +122,9 @@ export const SelectPlans = () => {
         left: Math.max(0, targetScrollPosition),
         behavior: 'smooth'
       });
+
+      // Mark initial load as complete
+      setIsInitialLoad(false);
     }
   }, []); // Run only on mount
 
@@ -145,10 +183,10 @@ export const SelectPlans = () => {
     if (scrollContainerRef.current) {
       const container = scrollContainerRef.current;
       const containerWidth = container.clientWidth;
-      const cardWidth = containerWidth * 0.8; // 80% width cards
+      const cardWidth = containerWidth * 0.8; // Keep consistent with initial load
       const gap = 16; // 1rem = 16px gap
 
-      // Calculate scroll position to center the selected card with 10% of adjacent cards visible
+      // Use the EXACT same calculation as initial load
       const targetScrollPosition = index * (cardWidth + gap) - (containerWidth * 0.1);
 
       container.scrollTo({
@@ -172,7 +210,7 @@ export const SelectPlans = () => {
 
   return (
     <div className='relative'>
-      <div className="mt-[26px] flex flex-col justify-center">
+      <div className="relative mt-[26px] flex flex-col justify-center">
         <Header />
 
         <div className="mb-8">
@@ -227,7 +265,8 @@ export const SelectPlans = () => {
         {/* Choose Prefix Number */}
         <div className="relative">
           <div className='flex justify-center -mt-6'>
-            <img src={arrowDownIcon} className='w-12 h-12' />
+            {/* <img src={arrowDownIcon} className='w-12 h-12' /> */}
+            <img src={arrowGif} className='w-14 h-14' />
           </div>
 
           <h2 className="text-[38px] text-[#1F54B0] font-semibold text-center px-4">Choose Prefix Number</h2>
@@ -244,27 +283,6 @@ export const SelectPlans = () => {
               </span>
             </div>
           </div> */}
-
-          <div className="absolute top-5 right-0">
-            <div
-              className="relative bg-gradient-to-r from-[#2563eb] to-[#1e40af] p-3 rounded-lg shadow-md cursor-pointer flex items-center justify-center"
-              onClick={handleViewCartOpen}
-            >
-              {/* Count badge (left side) */}
-              <span className="absolute -top-2 -left-2 flex items-center justify-center rounded-full w-[28px] h-[28px] bg-[#ff4d4f] border border-white text-white text-[14px] font-semibold">
-                {selectedPhoneNumbers.length}
-              </span>
-
-              {/* Cart Icon */}
-              <img
-                src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/header_cart-eed150.svg"
-                className="w-8 h-8"
-                alt="Cart"
-              />
-            </div>
-          </div>
-
-
 
           {/* Prefix Grid with Navigation */}
           <div className="flex items-center justify-center mt-[44px]">
@@ -304,7 +322,8 @@ export const SelectPlans = () => {
         {/* Available Numbers */}
         <div className="">
           <div className='flex justify-center mt-3'>
-            <img src={arrowDownIcon} className='w-12 h-12' />
+            {/* <img src={arrowDownIcon} className='w-12 h-12' /> */}
+            <img src={arrowGif} className='w-14 h-14' />
           </div>
           <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide">
             {getAvailableNumbers(selectedPrefix).map((number) => (
@@ -326,7 +345,8 @@ export const SelectPlans = () => {
         {selectedNumber && (
           <>
             <div className='flex justify-center'>
-              <img src={arrowDownIcon} className='w-12 h-12' />
+              {/* <img src={arrowDownIcon} className='w-12 h-12' /> */}
+              <img src={arrowGif} className='w-14 h-14' />
             </div>
             <div className="grid grid-cols-2 gap-3 px-4">
               {
@@ -382,6 +402,25 @@ export const SelectPlans = () => {
           </div>
         </div>
 
+        <div className="fixed top-[60%] right-0">
+          <div
+            className="flex flex-col items-center relative bg-[#379AE6FF] py-4 px-2 rounded-tl-[10px] rounded-bl-[10px] shadow-md cursor-pointer gap-y-2"
+            onClick={handleViewCartOpen}
+          >
+            <div className='flex justify-center items-center w-[20px] h-[20px] rounded-full border-2 border-[#F2FF00FF] bg-[#379AE6FF]'>
+              <p className='text-[#F2FF00FF] text-xs font-semibold'>{selectedPhoneNumbers.length}</p>
+            </div>
+            <div className=''>
+              {/* Cart Icon */}
+              <img
+                src={whiteCart}
+                className="w-6 h-6"
+                alt="Cart"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* <div className="text-center mt-[32px] mb-[32px] flex justify-center items-center">
           <button onClick={handleViewCartOpen}
             className="flex items-center justify-center gap-2 bg-[#036937] text-white text-[24px] py-2 px-6 rounded-[10px]">
@@ -400,7 +439,7 @@ export const SelectPlans = () => {
           </button>
         </div>
 
-
+        <Toaster />
       </div>
 
       <div className="absolute top-[18px] right-0">

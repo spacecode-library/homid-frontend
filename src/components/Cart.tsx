@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import toast, { Toaster } from 'react-hot-toast';
 import { motion } from "framer-motion";
 import shopCartIcon from "../assets/shop-cart.png";
 import closeIcon from "../assets/close-small.png";
@@ -24,7 +25,7 @@ export const Cart: React.FC<CartProps> = ({
   setShowCart,
   selectedPhoneNumbers,
   onRemovePhoneNumber,
-  selectedPlan
+  selectedPlan,
 }) => {
   console.log("selectedPlan", selectedPlan)
   const planId = selectedPlan.name.toLowerCase();
@@ -47,6 +48,15 @@ export const Cart: React.FC<CartProps> = ({
   // }
 
   const handleInsertId = async () => {
+    // Check if user has selected required number of IDs
+    if (selectedPhoneNumbers.length < selectedPlan.included) {
+      toast.error(`Please choose ${selectedPlan.included} ID${selectedPlan.included > 1 ? 's' : ''}`, {
+        position: 'top-right',
+        duration: 4000,
+      });
+      return;
+    }
+
     setLoading(true)
     try {
       const cleanedNumbers = selectedPhoneNumbers.map(num => num.replace(/-/g, ""));
@@ -72,6 +82,9 @@ export const Cart: React.FC<CartProps> = ({
       transition={{ type: "tween", duration: 0.4 }}
       className="fixed top-0 right-0 h-full w-[400px] z-50 overflow-y-auto"
     >
+      {/* Toast Message for Cart */}
+
+
       <div className="relative">
         <div className="border-4 border-[#BAF3EB] rounded-[10px] bg-[#FFF87F] p-3">
           <div className="flex justify-between items-center border-b-2 border-[#DEE1E6] py-3">
@@ -112,7 +125,7 @@ export const Cart: React.FC<CartProps> = ({
 
               {/* Exit Icon */}
               <div
-                className="absolute left-0 top-1/2 -translate-y-1/2 cursor-pointer"
+                className="absolute right-0 top-1/2 -translate-y-1/2 cursor-pointer pb-[14px]"
                 onClick={() => setShowCart(false)}
               >
                 <img src={exitIcon} className="w-11 h-11" />
