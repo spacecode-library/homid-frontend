@@ -17,14 +17,20 @@ import {
   Pencil,
 } from "lucide-react";
 import gobalIcon from "../../assets/globalIcon.png";
-import flag1Icon from "../../assets/flag1.png";
-import flag2Icon from "../../assets/flag2.png";
-import flag3Icon from "../../assets/flag3.png";
+import social1 from "../../assets/social1.png";
+import social2 from "../../assets/social2.png";
+import social3 from "../../assets/social3.png";
+import social4 from "../../assets/social4.png";
+import social5 from "../../assets/social5.png";
+import social6 from "../../assets/social6.png";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { TargetedAudience } from "./TargetedAudience";
 import { Global } from "./Global";
 import { subscriptionService } from "../../services/Subscriptions";
+import { CountrySelectorRow } from "../CountrySelectorRow";
+import { CountryMultiSelector } from "../CountryMultiSelector";
+import { SocialMediaSelector } from "../SocialMediaSelector";
 
 // Types
 interface AccordionData {
@@ -39,6 +45,13 @@ interface AccordionData {
   demographics: string;
 }
 
+interface Selections {
+  ageGroup: string;
+  gender: string;
+  religiousGroup: string;
+  incomeLevel: string;
+}
+
 interface TableRow {
   id: string;
   targetUrl: string;
@@ -50,30 +63,124 @@ interface TableRow {
   accordionData: AccordionData;
 }
 
+interface SocialMediaItem {
+  id: string;
+  name: string;
+  icon: string;
+  checked: boolean;
+  customValue?: string;
+}
+
 export const MyIDsTable: React.FC = () => {
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
   const [globalExpandedRow, setGlobalExpandedRow] = useState<number | null>(null);
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [tableData, setTableData] = useState<TableRow[]>([]);
-  const [selected, setSelected] = useState([
-    "North Korea",
-    "Nigeria",
-    "Kenya",
+  const [currentId, setCurrentId] = useState<string>("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [websiteInfo, setWebsiteInfo] = useState("");
+  const [isAdultWebsite, setIsAdultWebsite] = useState<null | boolean>(null);
+  const [isPromotingOwnServices, setIsPromotingOwnServices] = useState<null | boolean>(null);
+  const [isOwnerOrAdmin, setIsOwnerOrAdmin] = useState<null | boolean>(null);
+  // States for Row #2
+  const [value2, setValue2] = useState<string>("");
+  const [selectedCountry2, setSelectedCountry2] = useState<string>("");
+  const [isOpen2, setIsOpen2] = useState<boolean>(false);
+  // States for Row #3
+  const [value3, setValue3] = useState<string>("");
+  const [selectedCountry3, setSelectedCountry3] = useState<string>("");
+  const [isOpen3, setIsOpen3] = useState<boolean>(false);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [startDate, setStartDate] = useState<Date | null>(new Date());
+  const [stopDate, setStopDate] = useState<Date | null>(new Date());
+  const [socialMediaData, setSocialMediaData] = useState<SocialMediaItem[]>([
+    { id: 'youtube', name: 'YouTube', icon: social1, checked: false },
+    { id: 'instagram', name: 'Instagram', icon: social2, checked: false },
+    { id: 'tiktok', name: 'TikTok', icon: social3, checked: false },
+    { id: 'facebook', name: 'Facebook', icon: social4, checked: false },
+    { id: 'linkedin', name: 'LinkedIn', icon: social5, checked: false },
+    { id: 'twitter', name: 'Twitter/X', icon: social6, checked: false },
+    { id: 'other', name: 'Other', icon: '', checked: false, customValue: '' }
   ]);
-  const [startDate, setStartDate] = useState<Date | null>(new Date("2025-01-01"));
-  const [stopDate, setStopDate] = useState<Date | null>(new Date("2026-12-31"));
+  const [postLink, setPostLink] = useState<string>("");
+  const [totalEarning, setTotalEarning] = useState<string>("");
+  const [memo, setMemo] = useState<string>("");
+  const [affiliateUrl, setAffiliateUrl] = useState<null | boolean>(null);
+  const [isPaidPromotion, setIsPaidPromotion] = useState<null | boolean>(null);
+  const [websiteOffer, setWebsiteOffer] = useState<string>("");
+  const [brandOwnerUrl, setBrandOwnerUrl] = useState<string>("");
+  const [brandPromotion, setBrandPromotion] = useState<string>("");
   const [selectedFilters, setSelectedFilters] = useState([
     { id: 1, label: 'Womens Clothing', type: 'category' },
     { id: 2, label: 'Ages 20-30', type: 'age' }
   ]);
 
+  const [selections, setSelections] = useState<Selections>({
+    ageGroup: "Dropdown",
+    gender: "Dropdown",
+    religiousGroup: "Dropdown",
+    incomeLevel: "Dropdown",
+  });
+
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [tableData, setTableData] = useState<TableRow[]>([]);
+
   const [showAddTags, setShowAddTags] = useState(false);
+
+  useEffect(() => {
+    // reset all form states when currentId changes
+    setWebsiteUrl("");
+    setWebsiteInfo("");
+    setIsAdultWebsite(null);
+    setIsPromotingOwnServices(null);
+    setIsOwnerOrAdmin(null);
+
+    setValue2("");
+    setSelectedCountry2("");
+    setIsOpen2(false);
+
+    setValue3("");
+    setSelectedCountry3("");
+    setIsOpen3(false);
+
+    setSelected([]);
+
+    setStartDate(new Date());
+    setStopDate(new Date());
+
+    setSocialMediaData([
+      { id: 'youtube', name: 'YouTube', icon: social1, checked: false },
+      { id: 'instagram', name: 'Instagram', icon: social2, checked: false },
+      { id: 'tiktok', name: 'TikTok', icon: social3, checked: false },
+      { id: 'facebook', name: 'Facebook', icon: social4, checked: false },
+      { id: 'linkedin', name: 'LinkedIn', icon: social5, checked: false },
+      { id: 'twitter', name: 'Twitter/X', icon: social6, checked: false },
+      { id: 'other', name: 'Other', icon: '', checked: false, customValue: '' }
+    ]);
+
+    setPostLink("");
+    setTotalEarning("");
+    setMemo("");
+    setAffiliateUrl(null);
+    setIsPaidPromotion(null);
+    setWebsiteOffer("");
+    setBrandOwnerUrl("");
+    setBrandPromotion("");
+
+    setSelectedFilters([]); // reset applied filters
+
+    setSelections({
+      ageGroup: "Dropdown",
+      gender: "Dropdown",
+      religiousGroup: "Dropdown",
+      incomeLevel: "Dropdown",
+    });
+    
+    setShowAddTags(false);
+  }, [currentId]);
 
 
   useEffect(() => {
     const getListHomeIds = async () => {
       const res = await subscriptionService.homeIdsList();
-      console.log("allIds", res?.data?.homIds);
       setTableData(res?.data?.homIds)
     }
     getListHomeIds();
@@ -145,6 +252,51 @@ export const MyIDsTable: React.FC = () => {
       item.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.targetUrl.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleSave = async () => {
+    try {
+      const socialMediaSelection = socialMediaData.reduce((acc, item) => {
+        if (item.id === "other") {
+          acc[item.id] = item.checked ? item.customValue || "" : "";
+        } else {
+          acc[item.id] = item.checked ? true : ""; // or replace `true` with any string you want
+        }
+        return acc;
+      }, {} as Record<string, string | boolean>);
+
+      const obj = {
+        "homIdId": currentId,
+        "websiteUrl": websiteUrl,
+        "websiteInfo": websiteInfo,
+        "adultGambling": isAdultWebsite,
+        "promotion": isPromotingOwnServices,
+        "ownerOrAdministrator": isOwnerOrAdmin,
+        "targetRegion1": "US",
+        "targetRegion2": value2,
+        "targetRegion3": value3,
+        "startDate": startDate,
+        "endDate": stopDate,
+        ...socialMediaSelection,
+        "earning": totalEarning,
+        "memo": memo,
+        "affiliate": affiliateUrl,
+        "paidPromotion": isPaidPromotion,
+        "websiteOfferSell": websiteOffer,
+        "paidPromotionLink": brandOwnerUrl,
+        "paidPromotionInfo": brandPromotion,
+        "ageGroup": selections.ageGroup,
+        "gender": selections.gender,
+        "religious": selections.religiousGroup,
+        "income": selections.incomeLevel,
+        "termCondition": true,
+        "blockedCountry": ["US"]
+      }
+      const res = await subscriptionService.homeIdsDetailsPost(obj);
+      console.log("data", res.data)
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   return (
     <div className="mt-[52px]">
@@ -225,7 +377,7 @@ export const MyIDsTable: React.FC = () => {
               {/* Manage Button */}
               <div>
                 <button
-                  onClick={() => toggleAccordion(index)}
+                  onClick={() => { toggleAccordion(index); setCurrentId(row?.numericId) }}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2"
                 >
                   Manage
@@ -256,6 +408,8 @@ export const MyIDsTable: React.FC = () => {
                         <input
                           type="text"
                           placeholder="Add Website and click 'Read URL' →"
+                          value={websiteUrl}
+                          onChange={(e) => setWebsiteUrl(e.target.value)}
                           className="text-[14px] flex-1 border border-[#D1D5DBFF] rounded-[6px] p-2 outline-none"
                         />
 
@@ -268,13 +422,15 @@ export const MyIDsTable: React.FC = () => {
 
                     <div className="flex w-full items-center justify-between">
                       <p className="text-[16px] font-normal text-[#374151FF] mr-4">
-                        Website URL:
+                        Website Info:
                       </p>
 
                       <div className="flex items-center gap-3 w-full max-w-[450px]">
                         <textarea
                           rows={2}
                           placeholder="Fill-in website information"
+                          value={websiteInfo}
+                          onChange={(e) => setWebsiteInfo(e.target.value)}
                           className="text-[14px] flex-1 border border-[#D1D5DBFF] rounded-[6px] p-2 outline-none"
                         />
                       </div>
@@ -284,11 +440,21 @@ export const MyIDsTable: React.FC = () => {
                       <p className="text-[16px] text-[#374151FF] font-normal">Is this an adult or gambling website?</p>
                       <div className="space-x-4">
                         <label className="inline-flex items-center space-x-1">
-                          <input type="checkbox" className="w-4 h-4" />
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4"
+                            checked={isAdultWebsite === true}
+                            onChange={() => setIsAdultWebsite(true)}
+                          />
                           <span className="text-[16px] text-[#374151FF] font-normal">Yes</span>
                         </label>
                         <label className="inline-flex items-center space-x-1">
-                          <input type="checkbox" className="w-4 h-4" />
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4"
+                            checked={isAdultWebsite === false}
+                            onChange={() => setIsAdultWebsite(false)}
+                          />
                           <span className="text-[16px] text-[#374151FF] font-normal">No</span>
                         </label>
                       </div>
@@ -300,11 +466,21 @@ export const MyIDsTable: React.FC = () => {
                       </p>
                       <div className="space-x-4 text-nowrap">
                         <label className="inline-flex items-center space-x-1">
-                          <input type="checkbox" className="w-4 h-4" />
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4"
+                            checked={isPromotingOwnServices === true}
+                            onChange={() => setIsPromotingOwnServices(true)}
+                          />
                           <span className="text-[16px] text-[#374151FF] font-normal">Yes</span>
                         </label>
                         <label className="inline-flex items-center space-x-1">
-                          <input type="checkbox" className="w-4 h-4" />
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4"
+                            checked={isPromotingOwnServices === false}
+                            onChange={() => setIsPromotingOwnServices(false)}
+                          />
                           <span className="text-[16px] text-[#374151FF] font-normal">No</span>
                         </label>
                       </div>
@@ -314,11 +490,21 @@ export const MyIDsTable: React.FC = () => {
                       <p className="text-[16px] text-[#374151FF] font-normal">Are you the owner or an administrator?</p>
                       <div className="space-x-4">
                         <label className="inline-flex items-center space-x-1">
-                          <input type="checkbox" className="w-4 h-4" />
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4"
+                            checked={isOwnerOrAdmin === true}
+                            onChange={() => setIsOwnerOrAdmin(true)}
+                          />
                           <span className="text-[16px] text-[#374151FF] font-normal">Yes</span>
                         </label>
                         <label className="inline-flex items-center space-x-1">
-                          <input type="checkbox" className="w-4 h-4" />
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4"
+                            checked={isOwnerOrAdmin === false}
+                            onChange={() => setIsOwnerOrAdmin(false)}
+                          />
                           <span className="text-[16px] text-[#374151FF] font-normal">No</span>
                         </label>
                       </div>
@@ -345,74 +531,34 @@ export const MyIDsTable: React.FC = () => {
                         </label>
 
                         {/* Row #2 */}
-                        <label className="flex items-center space-x-2 w-full">
-                          <input type="checkbox" className="w-4 h-4" />
-                          <span className="text-[16px] text-[ #374151FF]">#2:</span>
-                          <div className="relative flex-1">
-                            <input
-                              type="text"
-                              placeholder="Search"
-                              className="w-full text-sm px-2 py-1 pr-8 border border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                            <Search className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                          </div>
-                        </label>
+                        <CountrySelectorRow
+                          label="#2:"
+                          value={value2}
+                          selectedCountry={selectedCountry2}
+                          isOpen={isOpen2}
+                          onValueChange={setValue2}
+                          onSelectedCountryChange={setSelectedCountry2}
+                          onOpenChange={setIsOpen2}
+                        />
 
                         {/* Row #3 */}
-                        <label className="flex items-center space-x-2 w-full">
-                          <input type="checkbox" className="w-4 h-4" />
-                          <span className="text-[16px] text-[ #374151FF]">#3:</span>
-                          <div className="relative flex-1">
-                            <input
-                              type="text"
-                              placeholder="Search"
-                              className="w-full text-sm px-2 py-1 pr-8 border border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                            <Search className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                          </div>
-                        </label>
+                        <CountrySelectorRow
+                          label="#3:"
+                          value={value3}
+                          selectedCountry={selectedCountry3}
+                          isOpen={isOpen3}
+                          onValueChange={setValue3}
+                          onSelectedCountryChange={setSelectedCountry3}
+                          onOpenChange={setIsOpen3}
+                        />
                       </div>
                     </div>
 
-                    <div className="w-full">
-                      <p className="text-[14px] font-normal text-[#374151] mb-2">
-                        Block Visitors by Country (or City, State, Province)
-                      </p>
-
-                      {/* Top controls (search + dropdown) */}
-                      <div className="flex items-center space-x-2 mb-2">
-                        {/* Search box with icon */}
-                        <div className="relative flex-1">
-                          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                          <input
-                            type="text"
-                            placeholder="Select Max 20"
-                            className="w-full border border-gray-300 rounded-md text-sm pl-8 pr-2 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                        </div>
-
-                        {/* Dropdown button */}
-                        <button className="flex items-center border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-700 bg-white hover:bg-gray-50">
-                          Dropdown
-                          <ChevronDown className="w-4 h-4 ml-1" />
-                        </button>
-                      </div>
-
-                      {/* Selected tags */}
-                      <div className="flex flex-wrap gap-2 border border-gray-300 rounded-md p-2 min-h-[44px]">
-                        {selected.map((tag) => (
-                          <span
-                            key={tag}
-                            className="flex items-center space-x-1 bg-blue-50 text-blue-700 text-sm px-2 py-1 rounded-md border border-blue-200"
-                          >
-                            <span>{tag}</span>
-                            <button onClick={() => removeTag(tag)} className="focus:outline-none">
-                              <X className="w-3 h-3 text-blue-500" />
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    </div>
+                    <CountryMultiSelector
+                      selected={selected}
+                      onSelectionChange={setSelected}
+                      maxSelections={20}
+                    />
 
                     <div className="flex items-center gap-3">
                       <label className="w-28 text-[16px] text-[#374151FF] font-normal">Start Date</label>
@@ -442,54 +588,10 @@ export const MyIDsTable: React.FC = () => {
                       <label className="w-[116px] text-[16px] text-[#374151FF] font-normal">
                         Posted Social Medias
                       </label>
-                      <div className="flex flex-wrap items-center gap-4">
-                        {/* YouTube */}
-                        <label className="flex items-center gap-1 cursor-pointer">
-                          <input type="checkbox" className="w-4 h-4" />
-                          <Youtube className="w-4 h-4 text-red-500" />
-                        </label>
-
-                        {/* Instagram */}
-                        <label className="flex items-center gap-1 cursor-pointer">
-                          <input type="checkbox" className="w-4 h-4" />
-                          <Instagram className="w-4 h-4 text-pink-500" />
-                        </label>
-
-                        {/* TikTok */}
-                        <label className="flex items-center gap-1 cursor-pointer">
-                          <input type="checkbox" className="w-4 h-4" />
-                          <Music2 className="w-4 h-4 text-black" />
-                        </label>
-
-                        {/* Facebook */}
-                        <label className="flex items-center gap-1 cursor-pointer">
-                          <input type="checkbox" className="w-4 h-4" />
-                          <Facebook className="w-4 h-4 text-blue-600" />
-                        </label>
-
-                        {/* LinkedIn */}
-                        <label className="flex items-center gap-1 cursor-pointer">
-                          <input type="checkbox" className="w-4 h-4" />
-                          <Linkedin className="w-4 h-4 text-blue-700" />
-                        </label>
-
-                        {/* Twitter / X */}
-                        <label className="flex items-center gap-1 cursor-pointer">
-                          <input type="checkbox" className="w-4 h-4" />
-                          <Twitter className="w-4 h-4 text-black" />
-                        </label>
-
-                        {/* Other + text input */}
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" className="w-4 h-4" />
-                          <span className="text-sm text-gray-700">Other</span>
-                          <input
-                            type="text"
-                            placeholder="Enter"
-                            className="w-24 rounded-md border border-gray-300 p-1 text-sm outline-none"
-                          />
-                        </label>
-                      </div>
+                      <SocialMediaSelector
+                        value={socialMediaData}
+                        onChange={setSocialMediaData}
+                      />
                     </div>
 
                     {/* Post Link */}
@@ -498,6 +600,8 @@ export const MyIDsTable: React.FC = () => {
                       <input
                         type="text"
                         placeholder="https://www.example.com/postid"
+                        value={postLink}
+                        onChange={(e) => setPostLink(e.target.value)}
                         className="flex-1 rounded-md border border-gray-300 p-2 text-sm outline-none"
                       />
                     </div>
@@ -510,6 +614,8 @@ export const MyIDsTable: React.FC = () => {
                         <input
                           type="number"
                           defaultValue={0.0}
+                          value={totalEarning}
+                          onChange={(e) => setTotalEarning(e.target.value)}
                           className="w-24 rounded-md border border-gray-300 px-2 py-1 text-sm outline-none"
                         />
                       </div>
@@ -522,6 +628,8 @@ export const MyIDsTable: React.FC = () => {
                         <label className="w-[90px] text-[16px] text-[#374151FF] font-normal mt-1">Memo here</label>
                         <textarea
                           placeholder="Write your memo..."
+                          value={memo}
+                          onChange={(e) => setMemo(e.target.value)}
                           className=" min-h-[80px] resize-y rounded-md border border-gray-300 p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
@@ -543,11 +651,21 @@ export const MyIDsTable: React.FC = () => {
                       <p className="text-[16px] text-[#374151FF] font-normal">Affiliate URL?</p>
                       <div className="space-x-4">
                         <label className="inline-flex items-center space-x-1">
-                          <input type="checkbox" className="w-4 h-4" />
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4"
+                            checked={affiliateUrl === true}
+                            onChange={() => setAffiliateUrl(true)}
+                          />
                           <span className="text-[16px] text-[#374151FF] font-normal">Yes</span>
                         </label>
                         <label className="inline-flex items-center space-x-1">
-                          <input type="checkbox" className="w-4 h-4" />
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4"
+                            checked={affiliateUrl === false}
+                            onChange={() => setAffiliateUrl(false)}
+                          />
                           <span className="text-[16px] text-[#374151FF] font-normal">No</span>
                         </label>
                       </div>
@@ -557,11 +675,21 @@ export const MyIDsTable: React.FC = () => {
                       <p className="text-[16px] text-[#374151FF] font-normal">Paid Promotion</p>
                       <div className="space-x-4">
                         <label className="inline-flex items-center space-x-1">
-                          <input type="checkbox" className="w-4 h-4" />
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4"
+                            checked={isPaidPromotion === true}
+                            onChange={() => setIsPaidPromotion(true)}
+                          />
                           <span className="text-[16px] text-[#374151FF] font-normal">Yes</span>
                         </label>
                         <label className="inline-flex items-center space-x-1">
-                          <input type="checkbox" className="w-4 h-4" />
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4"
+                            checked={isPaidPromotion === false}
+                            onChange={() => setIsPaidPromotion(false)}
+                          />
                           <span className="text-[16px] text-[#374151FF] font-normal">No</span>
                         </label>
                       </div>
@@ -572,6 +700,8 @@ export const MyIDsTable: React.FC = () => {
                       <textarea
                         rows={3}
                         placeholder="Information about the website"
+                        value={websiteOffer}
+                        onChange={(e) => setWebsiteOffer(e.target.value)}
                         className="text-[14px] flex-1 border border-[#D1D5DBFF] rounded-[6px] p-2 outline-none w-full"
                       />
                     </div>
@@ -581,11 +711,15 @@ export const MyIDsTable: React.FC = () => {
                       <input
                         type="text"
                         placeholder="Website URL:"
+                        value={brandOwnerUrl}
+                        onChange={(e) => setBrandOwnerUrl(e.target.value)}
                         className="mt-2 text-[14px] flex-1 border border-[#D1D5DBFF] rounded-[6px] p-2 outline-none w-full"
                       />
                       <textarea
                         rows={3}
                         placeholder="Promotion Type: Information about your relationship with the ReDirected To URL Website."
+                        value={brandPromotion}
+                        onChange={(e) => setBrandPromotion(e.target.value)}
                         className="mt-2 text-[14px] flex-1 border border-[#D1D5DBFF] rounded-[6px] p-2 outline-none w-full"
                       />
                     </div>
@@ -648,7 +782,7 @@ export const MyIDsTable: React.FC = () => {
                       </div>
                     </div>
 
-                    <TargetedAudience />
+                    <TargetedAudience selections={selections} setSelections={setSelections} />
                   </div>
                 </div>
 
@@ -660,7 +794,7 @@ export const MyIDsTable: React.FC = () => {
                     />
                     <p className="text-[14px] font-normal text-[#374151FF]">I agree to Terms & Conditions</p>
                   </div>
-                  <button className="rounded-[6px] bg-[#2563EBFF] text-white font-semibold px-6 py-2">Save</button>
+                  <button className="rounded-[6px] bg-[#2563EBFF] text-white font-semibold px-6 py-2" onClick={handleSave}>Save</button>
                 </div>
               </div>
             )}

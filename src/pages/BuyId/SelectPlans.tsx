@@ -404,7 +404,7 @@ export const SelectPlans = () => {
 
         <div className="fixed top-[60%] right-0">
           <div
-            className="flex flex-col items-center relative bg-[#379AE6FF] py-4 px-2 rounded-tl-[10px] rounded-bl-[10px] shadow-md cursor-pointer gap-y-2"
+            className="flex flex-col items-center relative bg-[#379AE6FF] py-4 px-1 rounded-tl-[10px] rounded-bl-[10px] shadow-md cursor-pointer gap-y-2"
             onClick={handleViewCartOpen}
           >
             <div className='flex justify-center items-center w-[20px] h-[20px] rounded-full border-2 border-[#F2FF00FF] bg-[#379AE6FF]'>

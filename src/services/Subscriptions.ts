@@ -33,5 +33,10 @@ export const subscriptionService = {
   homeIdsList: async () => {
     const response = await api.get('/homid/list');
     return response.data;
+  },
+
+  homeIdsDetailsPost: async (obj:any) => {
+    const response = await api.post('/homid', obj);
+    return response.data;
   }
 }
