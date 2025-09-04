@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-type DropdownField = "ageGroup" | "gender" | "religiousGroup" | "incomeLevel";
+type DropdownField = "ageGroup" | "gender" | "incomeLevel";
 
 interface Selections {
   ageGroup: string;
   gender: string;
-  religiousGroup: string;
   incomeLevel: string;
 }
 
@@ -18,7 +17,6 @@ interface TargetedAudienceProps {
 interface DropdownOptions {
   ageGroup: string[];
   gender: string[];
-  religiousGroup: string[];
   incomeLevel: string[];
 }
 
@@ -38,16 +36,6 @@ export const TargetedAudience: React.FC<TargetedAudienceProps> = ({
   const dropdownOptions: DropdownOptions = {
     ageGroup: ["18-24", "25-34", "35-44", "45-54", "55-64", "65+", "All Ages"],
     gender: ["Male", "Female", "Non-binary", "All Genders"],
-    religiousGroup: [
-      "Christian",
-      "Muslim",
-      "Jewish",
-      "Hindu",
-      "Buddhist",
-      "Other",
-      "Non-religious",
-      "All Religious Groups",
-    ],
     incomeLevel: [
       "Under $25k",
       "$25k-$50k",
@@ -78,7 +66,7 @@ export const TargetedAudience: React.FC<TargetedAudienceProps> = ({
     onSelect,
   }) => (
     <div className="flex items-center gap-x-4 mb-2">
-      <label className="text-[16px] text-[#374151FF] font-normal w-full max-w-28 whitespace-nowrap">
+      <label className="text-[16px] text-[#374151FF] font-normal w-full max-w-28 min-w-28 whitespace-nowrap">
         {label}
       </label>
       <div className="relative">
@@ -141,14 +129,6 @@ export const TargetedAudience: React.FC<TargetedAudienceProps> = ({
           </div>
 
           <div className="flex flex-col sm:flex-row sm:gap-8">
-            <div className="flex-1">
-              <DropdownField
-                label="Religious Group:"
-                field="religiousGroup"
-                value={selections.religiousGroup}
-                onSelect={handleSelection}
-              />
-            </div>
             <div className="flex-1">
               <DropdownField
                 label="Income Level:"

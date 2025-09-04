@@ -40,7 +40,6 @@ interface AccordionData {
   websiteDescription: string;
   brandOwner: string;
   websiteInfo: string;
-  websiteOffer: string;
   categories: string[];
   demographics: string;
 }
@@ -48,7 +47,6 @@ interface AccordionData {
 interface Selections {
   ageGroup: string;
   gender: string;
-  religiousGroup: string;
   incomeLevel: string;
 }
 
@@ -68,6 +66,7 @@ interface SocialMediaItem {
   name: string;
   icon: string;
   checked: boolean;
+  socialLink?: string,
   customValue?: string;
 }
 
@@ -92,90 +91,98 @@ export const MyIDsTable: React.FC = () => {
   const [startDate, setStartDate] = useState<Date | null>(new Date());
   const [stopDate, setStopDate] = useState<Date | null>(new Date());
   const [socialMediaData, setSocialMediaData] = useState<SocialMediaItem[]>([
-    { id: 'youtube', name: 'YouTube', icon: social1, checked: false },
-    { id: 'instagram', name: 'Instagram', icon: social2, checked: false },
-    { id: 'tiktok', name: 'TikTok', icon: social3, checked: false },
-    { id: 'facebook', name: 'Facebook', icon: social4, checked: false },
-    { id: 'linkedin', name: 'LinkedIn', icon: social5, checked: false },
-    { id: 'twitter', name: 'Twitter/X', icon: social6, checked: false },
-    { id: 'other', name: 'Other', icon: '', checked: false, customValue: '' }
+    { id: 'youtube', name: 'YouTube', icon: social1, checked: false, socialLink: '' },
+    { id: 'instagram', name: 'Instagram', icon: social2, checked: false, socialLink: '' },
+    { id: 'tiktok', name: 'TikTok', icon: social3, checked: false, socialLink: '' },
+    { id: 'facebook', name: 'Facebook', icon: social4, checked: false, socialLink: '' },
+    { id: 'linkedin', name: 'LinkedIn', icon: social5, checked: false, socialLink: '' },
+    { id: 'twitter', name: 'Twitter/X', icon: social6, checked: false, socialLink: '' },
+    { id: 'other', name: 'Other', icon: '', checked: false, customValue: '', socialLink: '' }
   ]);
   const [postLink, setPostLink] = useState<string>("");
   const [totalEarning, setTotalEarning] = useState<string>("");
   const [memo, setMemo] = useState<string>("");
   const [affiliateUrl, setAffiliateUrl] = useState<null | boolean>(null);
   const [isPaidPromotion, setIsPaidPromotion] = useState<null | boolean>(null);
-  const [websiteOffer, setWebsiteOffer] = useState<string>("");
   const [brandOwnerUrl, setBrandOwnerUrl] = useState<string>("");
   const [brandPromotion, setBrandPromotion] = useState<string>("");
   const [selectedFilters, setSelectedFilters] = useState([
     { id: 1, label: 'Womens Clothing', type: 'category' },
     { id: 2, label: 'Ages 20-30', type: 'age' }
   ]);
-
   const [selections, setSelections] = useState<Selections>({
     ageGroup: "Dropdown",
     gender: "Dropdown",
-    religiousGroup: "Dropdown",
     incomeLevel: "Dropdown",
   });
+  const [termsAccepted, setTermsAccepted] = useState<boolean>(false);
+
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [tableData, setTableData] = useState<TableRow[]>([]);
 
   const [showAddTags, setShowAddTags] = useState(false);
 
+  // useEffect(() => {
+  //   // reset all form states when currentId changes
+  //   setWebsiteUrl("");
+  //   setWebsiteInfo("");
+  //   setIsAdultWebsite(null);
+  //   setIsPromotingOwnServices(null);
+  //   setIsOwnerOrAdmin(null);
+
+  //   setValue2("");
+  //   setSelectedCountry2("");
+  //   setIsOpen2(false);
+
+  //   setValue3("");
+  //   setSelectedCountry3("");
+  //   setIsOpen3(false);
+
+  //   setSelected([]);
+
+  //   setStartDate(new Date());
+  //   setStopDate(new Date());
+
+  //   setSocialMediaData([
+  //     { id: 'youtube', name: 'YouTube', icon: social1, checked: false },
+  //     { id: 'instagram', name: 'Instagram', icon: social2, checked: false },
+  //     { id: 'tiktok', name: 'TikTok', icon: social3, checked: false },
+  //     { id: 'facebook', name: 'Facebook', icon: social4, checked: false },
+  //     { id: 'linkedin', name: 'LinkedIn', icon: social5, checked: false },
+  //     { id: 'twitter', name: 'Twitter/X', icon: social6, checked: false },
+  //     { id: 'other', name: 'Other', icon: '', checked: false, customValue: '' }
+  //   ]);
+
+  //   setPostLink("");
+  //   setTotalEarning("");
+  //   setMemo("");
+  //   setAffiliateUrl(null);
+  //   setIsPaidPromotion(null);
+  //   setBrandOwnerUrl("");
+  //   setBrandPromotion("");
+
+  //   setSelectedFilters([]); // reset applied filters
+
+  //   setSelections({
+  //     ageGroup: "Dropdown",
+  //     gender: "Dropdown",
+  //     incomeLevel: "Dropdown",
+  //   });
+
+  //   setTermsAccepted(false);
+
+  //   setShowAddTags(false);
+  // }, [currentId]);
+
   useEffect(() => {
-    // reset all form states when currentId changes
-    setWebsiteUrl("");
-    setWebsiteInfo("");
-    setIsAdultWebsite(null);
-    setIsPromotingOwnServices(null);
-    setIsOwnerOrAdmin(null);
-
-    setValue2("");
-    setSelectedCountry2("");
-    setIsOpen2(false);
-
-    setValue3("");
-    setSelectedCountry3("");
-    setIsOpen3(false);
-
-    setSelected([]);
-
-    setStartDate(new Date());
-    setStopDate(new Date());
-
-    setSocialMediaData([
-      { id: 'youtube', name: 'YouTube', icon: social1, checked: false },
-      { id: 'instagram', name: 'Instagram', icon: social2, checked: false },
-      { id: 'tiktok', name: 'TikTok', icon: social3, checked: false },
-      { id: 'facebook', name: 'Facebook', icon: social4, checked: false },
-      { id: 'linkedin', name: 'LinkedIn', icon: social5, checked: false },
-      { id: 'twitter', name: 'Twitter/X', icon: social6, checked: false },
-      { id: 'other', name: 'Other', icon: '', checked: false, customValue: '' }
-    ]);
-
-    setPostLink("");
-    setTotalEarning("");
-    setMemo("");
-    setAffiliateUrl(null);
-    setIsPaidPromotion(null);
-    setWebsiteOffer("");
-    setBrandOwnerUrl("");
-    setBrandPromotion("");
-
-    setSelectedFilters([]); // reset applied filters
-
-    setSelections({
-      ageGroup: "Dropdown",
-      gender: "Dropdown",
-      religiousGroup: "Dropdown",
-      incomeLevel: "Dropdown",
-    });
-    
-    setShowAddTags(false);
-  }, [currentId]);
+    if (!currentId) return;
+    const getIdsPrefilledDetails = async () => {
+      const res = await subscriptionService.getHomeIdsDetails(currentId);
+      console.log("accordianData", res?.data);
+    }
+    getIdsPrefilledDetails();
+  }, [currentId])
 
 
   useEffect(() => {
@@ -185,12 +192,6 @@ export const MyIDsTable: React.FC = () => {
     }
     getListHomeIds();
   }, [])
-
-  const memos = [
-    { id: 1, text: "Created Memo #1", date: "01/JAN/2026" },
-    { id: 2, text: "Created Memo #2", date: "01/JAN/2026" },
-    { id: 3, text: "Created Memo #3", date: "01/JAN/2026" },
-  ];
 
   const availableCategories = [
     'Shopping', 'Consulting', 'Professional Services', 'Information',
@@ -214,10 +215,6 @@ export const MyIDsTable: React.FC = () => {
     };
     setSelectedFilters(prev => [...prev, newFilter]);
     setShowAddTags(false);
-  };
-
-  const removeTag = (tag: any) => {
-    setSelected(selected.filter((item) => item !== tag));
   };
 
   const toggleAccordion = (index: number) => {
@@ -259,7 +256,9 @@ export const MyIDsTable: React.FC = () => {
         if (item.id === "other") {
           acc[item.id] = item.checked ? item.customValue || "" : "";
         } else {
-          acc[item.id] = item.checked ? true : ""; // or replace `true` with any string you want
+          // Include both checked status and social link
+          acc[item.id] = item.checked ? true : "";
+          acc[`${item.id}Link`] = item.socialLink || ""; // Store the social media link
         }
         return acc;
       }, {} as Record<string, string | boolean>);
@@ -281,15 +280,13 @@ export const MyIDsTable: React.FC = () => {
         "memo": memo,
         "affiliate": affiliateUrl,
         "paidPromotion": isPaidPromotion,
-        "websiteOfferSell": websiteOffer,
         "paidPromotionLink": brandOwnerUrl,
         "paidPromotionInfo": brandPromotion,
         "ageGroup": selections.ageGroup,
         "gender": selections.gender,
-        "religious": selections.religiousGroup,
         "income": selections.incomeLevel,
-        "termCondition": true,
-        "blockedCountry": ["US"]
+        "termCondition": termsAccepted,
+        "blockedCountry": selected,
       }
       const res = await subscriptionService.homeIdsDetailsPost(obj);
       console.log("data", res.data)
@@ -413,7 +410,23 @@ export const MyIDsTable: React.FC = () => {
                           className="text-[14px] flex-1 border border-[#D1D5DBFF] rounded-[6px] p-2 outline-none"
                         />
 
-                        <button className="flex items-center text-[14px] gap-x-2 text-[#3B82F6FF] font-medium whitespace-nowrap border border-[#3B82F6FF] rounded-[6px] px-4 py-2">
+                        <button
+                          disabled={!websiteUrl.trim()}
+                          onClick={() => {
+                            if (websiteUrl.trim()) {
+                              const url =
+                                websiteUrl.startsWith("http://") || websiteUrl.startsWith("https://")
+                                  ? websiteUrl
+                                  : `https://${websiteUrl}`;
+                              window.open(url, "_blank");
+                            }
+                          }}
+                          className={`flex items-center text-[14px] gap-x-2 font-medium whitespace-nowrap border rounded-[6px] px-4 py-2
+      ${websiteUrl.trim()
+                              ? "text-[#3B82F6FF] border-[#3B82F6FF] cursor-pointer"
+                              : "text-gray-400 border-gray-300 cursor-not-allowed bg-gray-100"
+                            }`}
+                        >
                           Read URL
                           <ExternalLink className="w-4 h-4" />
                         </button>
@@ -621,27 +634,16 @@ export const MyIDsTable: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-4">
-                      {/* Left: Label + Textarea */}
-                      <div className="flex items-start gap-2">
-                        <Pencil className="w-5 h-5 text-[#374151FF] mt-1" />
-                        <label className="w-[90px] text-[16px] text-[#374151FF] font-normal mt-1">Memo here</label>
-                        <textarea
-                          placeholder="Write your memo..."
-                          value={memo}
-                          onChange={(e) => setMemo(e.target.value)}
-                          className=" min-h-[80px] resize-y rounded-md border border-gray-300 p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-
-                      {/* Right: Created memos list */}
-                      <div className="w-60 space-y-1">
-                        {memos.map((memo) => (
-                          <p key={memo.id} className="text-[14px] font-normal text-[ #4B5563FF]">
-                            {memo.text} <span>{memo.date}</span>
-                          </p>
-                        ))}
-                      </div>
+                    {/* Left: Label + Textarea */}
+                    <div className="flex items-start gap-2">
+                      <Pencil className="w-5 h-5 text-[#374151FF] mt-1" />
+                      <label className="w-[90px] text-[16px] text-[#374151FF] font-normal mt-1">Memo here</label>
+                      <textarea
+                        placeholder="Write your memo..."
+                        value={memo}
+                        onChange={(e) => setMemo(e.target.value)}
+                        className="flex-1 min-h-[80px] resize-y rounded-md border border-gray-300 p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                      />
                     </div>
                   </div>
 
@@ -693,17 +695,6 @@ export const MyIDsTable: React.FC = () => {
                           <span className="text-[16px] text-[#374151FF] font-normal">No</span>
                         </label>
                       </div>
-                    </div>
-
-                    <div>
-                      <p className="text-[16px] font-normal text-[#374151FF]">What does the website offer or sell?</p>
-                      <textarea
-                        rows={3}
-                        placeholder="Information about the website"
-                        value={websiteOffer}
-                        onChange={(e) => setWebsiteOffer(e.target.value)}
-                        className="text-[14px] flex-1 border border-[#D1D5DBFF] rounded-[6px] p-2 outline-none w-full"
-                      />
                     </div>
 
                     <div>
@@ -791,10 +782,17 @@ export const MyIDsTable: React.FC = () => {
                     <input
                       type="checkbox"
                       className="w-4 h-4"
+                      checked={termsAccepted}
+                      onChange={(e) => setTermsAccepted(e.target.checked)}
                     />
                     <p className="text-[14px] font-normal text-[#374151FF]">I agree to Terms & Conditions</p>
                   </div>
-                  <button className="rounded-[6px] bg-[#2563EBFF] text-white font-semibold px-6 py-2" onClick={handleSave}>Save</button>
+                  <button className={`rounded-[6px] bg-[#2563EBFF] text-white font-semibold px-6 py-2 ${!termsAccepted && "cursor-not-allowed opacity-50"}`}
+                    onClick={handleSave}
+                    disabled={!termsAccepted}
+                  >
+                    Save
+                  </button>
                 </div>
               </div>
             )}
