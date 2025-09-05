@@ -101,7 +101,6 @@ export const MyIDsTable: React.FC = () => {
     { id: 'twitter', name: 'Twitter/X', icon: social6, checked: false, socialLink: '' },
     { id: 'other', name: 'Other', icon: '', checked: false, customValue: '', socialLink: '' }
   ]);
-  const [postLink, setPostLink] = useState<string>("");
   const [totalEarning, setTotalEarning] = useState<string>("");
   const [memo, setMemo] = useState<string>("");
   const [affiliateUrl, setAffiliateUrl] = useState<null | boolean>(null);
@@ -146,16 +145,15 @@ export const MyIDsTable: React.FC = () => {
     setStopDate(new Date());
 
     setSocialMediaData([
-      { id: 'youtube', name: 'YouTube', icon: social1, checked: false },
-      { id: 'instagram', name: 'Instagram', icon: social2, checked: false },
-      { id: 'tiktok', name: 'TikTok', icon: social3, checked: false },
-      { id: 'facebook', name: 'Facebook', icon: social4, checked: false },
-      { id: 'linkedin', name: 'LinkedIn', icon: social5, checked: false },
-      { id: 'twitter', name: 'Twitter/X', icon: social6, checked: false },
-      { id: 'other', name: 'Other', icon: '', checked: false, customValue: '' }
+      { id: 'youtube', name: 'YouTube', icon: social1, checked: false, socialLink: '' },
+      { id: 'instagram', name: 'Instagram', icon: social2, checked: false, socialLink: '' },
+      { id: 'tiktok', name: 'TikTok', icon: social3, checked: false, socialLink: '' },
+      { id: 'facebook', name: 'Facebook', icon: social4, checked: false, socialLink: '' },
+      { id: 'linkedin', name: 'LinkedIn', icon: social5, checked: false, socialLink: '' },
+      { id: 'twitter', name: 'Twitter/X', icon: social6, checked: false, socialLink: '' },
+      { id: 'other', name: 'Other', icon: '', checked: false, customValue: '', socialLink: '' }
     ]);
 
-    setPostLink("");
     setTotalEarning("");
     setMemo("");
     setAffiliateUrl(null);
@@ -201,17 +199,25 @@ export const MyIDsTable: React.FC = () => {
           setStartDate(data?.startDate);
           setStopDate(data?.endDate);
 
-          // setSocialMediaData([
-          //   { id: 'youtube', name: 'YouTube', icon: social1, checked: false },
-          //   { id: 'instagram', name: 'Instagram', icon: social2, checked: false },
-          //   { id: 'tiktok', name: 'TikTok', icon: social3, checked: false },
-          //   { id: 'facebook', name: 'Facebook', icon: social4, checked: false },
-          //   { id: 'linkedin', name: 'LinkedIn', icon: social5, checked: false },
-          //   { id: 'twitter', name: 'Twitter/X', icon: social6, checked: false },
-          //   { id: 'other', name: 'Other', icon: '', checked: false, customValue: '' }
-          // ]);
+          setSocialMediaData(prevData =>
+            prevData.map(item => {
+              if (item.id === 'other') {
+                return {
+                  ...item,
+                  checked: Boolean(data?.other),
+                  customValue: data?.other || '',
+                  socialLink: data?.otherLink || ''
+                };
+              } else {
+                return {
+                  ...item,
+                  checked: Boolean(data?.[item.id]),
+                  socialLink: data?.[`${item.id}Link`] || ''
+                };
+              }
+            })
+          );
 
-          // setPostLink("");
           setTotalEarning(data?.earning);
           setMemo(data?.memo);
           setAffiliateUrl(data?.affiliate);
@@ -309,11 +315,13 @@ export const MyIDsTable: React.FC = () => {
     try {
       const socialMediaSelection = socialMediaData.reduce((acc, item) => {
         if (item.id === "other") {
-          acc[item.id] = item.checked ? item.customValue || "" : "";
+          // For 'other', store the custom value and link
+          acc[item.id] = item.checked ? (item.customValue || "") : "";
+          acc[`${item.id}Link`] = item.checked ? (item.socialLink || "") : "";
         } else {
-          // Include both checked status and social link
-          acc[item.id] = item.checked ? true : "";
-          acc[`${item.id}Link`] = item.socialLink || ""; // Store the social media link
+          // For regular social media platforms
+          acc[item.id] = item.checked;
+          acc[`${item.id}Link`] = item.checked ? (item.socialLink || "") : "";
         }
         return acc;
       }, {} as Record<string, string | boolean>);
@@ -342,6 +350,7 @@ export const MyIDsTable: React.FC = () => {
         "income": selections.incomeLevel,
         "termCondition": termsAccepted,
         "blockedCountry": selected,
+        // "blockedCountry": ["US"],
       }
       const res = await subscriptionService.homeIdsDetailsPost(obj);
       toast.dismiss(toastId);
@@ -675,18 +684,6 @@ export const MyIDsTable: React.FC = () => {
                       <SocialMediaSelector
                         value={socialMediaData}
                         onChange={setSocialMediaData}
-                      />
-                    </div>
-
-                    {/* Post Link */}
-                    <div className="flex items-center gap-3">
-                      <label className="w-28 text-[16px] font-normal text-[ #374151FF]">Post Link:</label>
-                      <input
-                        type="text"
-                        placeholder="https://www.example.com/postid"
-                        value={postLink}
-                        onChange={(e) => setPostLink(e.target.value)}
-                        className="flex-1 rounded-md border border-gray-300 p-2 text-sm outline-none"
                       />
                     </div>
 

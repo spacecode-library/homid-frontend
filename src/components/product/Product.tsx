@@ -8,7 +8,26 @@ import KMartImg from "../../assets/kmart.png";
 import BurgerKingImg from "../../assets/burgerKing.png";
 import NavigateLogo from "../../assets/navigate.png";
 
-export const Product = () => {
+interface SearchResult {
+  productImage: string;
+  productName: string;
+  productUrl?: string;
+  description?: string;
+  price?: number;
+}
+
+interface ProductItem {
+  name: string;
+  url: string;
+  logo: string;
+  brand: string;
+}
+
+interface ProductProps {
+  searchResult: SearchResult;
+}
+
+export const Product: React.FC<ProductProps> = ({ searchResult }) => {
   const products = [
     {
       name: "Summer Outdoor Patio w/ Sunshade Sail Canopy",
@@ -47,13 +66,17 @@ export const Product = () => {
         {/* Main Product */}
         <div className="flex flex-col justify-center items-center">
 
-          <div className='bg-[#1F54B0] rounded-full p-3 -mt-8'>
-            <img src={AsteriskIcon} className='w-12 h-12' />
+          <div className='rounded-full -mt-8 w-[48px] h-[48px] overflow-hidden bg-[#1F54B0]'>
+            <img
+              src={searchResult?.productImage}
+              className='w-full h-full object-cover'
+              alt="Product"
+            />
           </div>
 
           <div className='mt-[10px] flex flex-col justify-center items-center'>
             <p className='text-[20px] text-center font-medium text-[#1F2937] leading-tight'>
-              Mosquito Zapper - Zap Bugs & Mosquitoes
+              {searchResult?.productName}
             </p>
             <div className='flex justify-between items-center w-full'>
               <p className='text-[14px] text-[#6B7280] text-center w-full'>https://www.walmart.com</p>
@@ -97,7 +120,7 @@ export const Product = () => {
                 </p>
               </div>
               <button className="flex-shrink-0 ml-2">
-                <img src={NavigateLogo} className='w-10 h-10'/>
+                <img src={NavigateLogo} className='w-10 h-10' />
               </button>
             </div>
           ))}

@@ -43,5 +43,10 @@ export const subscriptionService = {
   getHomeIdsDetails: async (homIdId: string) => {
     const response = await api.get(`/homid/${homIdId}`);
     return response.data;
+  },
+
+  extractDataBasedOnIUrl: async (obj: any) => {
+    const resposne = await api.post('/homid/extract', obj);
+    return resposne.data;
   }
 }

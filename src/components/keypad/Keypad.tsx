@@ -4,6 +4,7 @@ import { idsService } from '../../services/ids';
 import { ErrorAlert } from '../ErrorAlert';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Product } from '../product/Product';
+import { subscriptionService } from '../../services/Subscriptions';
 
 interface KeypadProps {
   onSubmit?: (searchResult: any) => void;
@@ -11,18 +12,22 @@ interface KeypadProps {
   className?: string;
 }
 
-export const Keypad: React.FC<KeypadProps> = ({ onSubmit, showHistory = false, className = '' }) => {
+interface SearchResult {
+  productImage: string;
+  productName: string;
+  productUrl?: string;
+  description?: string;
+  price?: number;
+  // Add other properties that your API returns
+}
+
+export const Keypad: React.FC<KeypadProps> = ({ onSubmit }) => {
   const [value, setValue] = useState('');
   const [loading, setLoading] = useState(false);
-  const [searchResult, setSearchResult] = useState<any>(null);
+  const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const [isPressed, setIsPressed] = useState<string | null>(null);
   const [error, setError] = useState<{ title?: string; message: string; type?: 'error' | 'warning' | 'info' } | null>(null);
 
-  const formatDisplay = (val: string): string => {
-    const digits = val.replace(/\D/g, '');
-    if (digits.length <= 4) return digits;
-    return `${digits.slice(0, 4)}-${digits.slice(4, 8)}`;
-  };
 
   const handleKeyPress = (key: string) => {
     if (value.replace(/\D/g, '').length < 8) {
@@ -60,76 +65,22 @@ export const Keypad: React.FC<KeypadProps> = ({ onSubmit, showHistory = false, c
 
     setLoading(true);
     setError(null);
-    const formattedQuery = formatDisplay(value);
 
     try {
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('timeout')), 10000)
-      );
-
-      const response = await Promise.race([
-        searchService.searchHomId(formattedQuery),
-        timeoutPromise
-      ]) as any;
-
-      if (response.data.found) {
-        // Try to fetch website metadata using the public endpoint
-        let enrichedData = { ...response.data };
-        if (response.data.id) {
-          try {
-            const metadataResponse = await idsService.getPublicMetadata(response.data.id);
-            if (metadataResponse.data.metadata) {
-              enrichedData = {
-                ...response.data,
-                websiteIcon: metadataResponse.data.metadata.favicon,
-                previewImage: metadataResponse.data.metadata.image || metadataResponse.data.metadata.screenshot,
-                description: metadataResponse.data.metadata.description,
-                productName: metadataResponse.data.metadata.title || response.data.productName
-              };
-            }
-          } catch (error) {
-            // If metadata fetch fails, continue with basic data
-            console.log('Failed to fetch metadata:', error);
-          }
-        }
-
-        setSearchResult(enrichedData);
-
-        if (onSubmit) {
-          onSubmit(enrichedData);
-        } else {
-          setError({
-            title: 'ID Found - No Destination',
-            message: 'This ID exists but has no destination URL set.',
-            type: 'info'
-          });
-        }
-      } else {
-        if (onSubmit) {
-          onSubmit(response.data);
-        } else {
-          setError({
-            title: 'ID Not Found',
-            message: `The ID "${formattedQuery}" hasn't been registered yet.`,
-            type: 'info'
-          });
-        }
-        setSearchResult(null);
+      const res = await subscriptionService.getHomeIdsDetails(digits);
+      console.log(res);
+      const obj = {
+        "url": res?.data?.websiteUrl
       }
+      const newRes = await subscriptionService.extractDataBasedOnIUrl(obj);
+      if (newRes.success) {
+        console.log("newRes", newRes?.data)
+        setSearchResult(newRes?.data)
+      }
+
     } catch (error: any) {
-      if (error.message === 'timeout') {
-        setError({
-          title: 'Search Timeout',
-          message: 'The search is taking longer than expected. Please try again.',
-          type: 'warning'
-        });
-      } else {
-        setError({
-          title: 'Search Failed',
-          message: 'Unable to search for the ID. Please check your connection and try again.',
-          type: 'error'
-        });
-      }
+      console.error(error);
+
     } finally {
       setLoading(false);
     }
@@ -327,9 +278,9 @@ export const Keypad: React.FC<KeypadProps> = ({ onSubmit, showHistory = false, c
         <p className="text-[12px] text-[#666666] leading-none">© 2025 Hom.ID, All Rights Reserved</p>
       </motion.div>
       {
-        error &&
+        searchResult !== null &&
         <div className='z-20 absolute top-[30%] left-0 right-0 px-4'>
-          <Product />
+          <Product searchResult={searchResult} />
         </div>
       }
     </div>
