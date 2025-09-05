@@ -271,19 +271,6 @@ export const SelectPlans = () => {
 
           <h2 className="text-[38px] text-[#1F54B0] font-semibold text-center px-4">Choose Prefix Number</h2>
 
-          {/* <div className="absolute top-5 right-0">
-            <div className="relative" onClick={handleViewCartOpen}>
-              <img
-                src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/header_cart-eed150.svg"
-                className="w-8 h-8"
-                alt="Cart"
-              />
-              <span className="absolute -top-2 right-3 flex items-center justify-center rounded-full w-[28px] h-[28px] bg-[#ff6161] border border-white text-white text-[14px]">
-                {selectedPhoneNumbers.length}
-              </span>
-            </div>
-          </div> */}
-
           {/* Prefix Grid with Navigation */}
           <div className="flex items-center justify-center mt-[44px]">
             <button
@@ -420,14 +407,6 @@ export const SelectPlans = () => {
             </div>
           </div>
         </div>
-
-        {/* <div className="text-center mt-[32px] mb-[32px] flex justify-center items-center">
-          <button onClick={handleViewCartOpen}
-            className="flex items-center justify-center gap-2 bg-[#036937] text-white text-[24px] py-2 px-6 rounded-[10px]">
-            <img src={shoppingCartIcon} alt="cart" className="w-10 h-10" />
-            View cart
-          </button>
-        </div> */}
 
         <div className="sticky bottom-0 bg-white py-2 flex justify-center items-center shadow-md">
           <button

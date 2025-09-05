@@ -1,4 +1,5 @@
 import { Routes, Route, useLocation } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import { HomePage } from "./pages/HomePage";
 import { Login } from "./pages/Auth/Login";
 import { Registration } from "./pages/Auth/Registration";
@@ -101,6 +102,16 @@ function App() {
           }
         />
       </Routes>
+
+      <Toaster
+        position="top-right"  // 👈 default position
+        toastOptions={{
+          duration: 3000,
+          style: {
+            zIndex: 999999, // avoids modal overlap issues
+          },
+        }}
+      />
 
       {!hideFooter && <FooterMenus />}
     </>

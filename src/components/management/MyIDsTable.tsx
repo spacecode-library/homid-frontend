@@ -31,6 +31,7 @@ import { subscriptionService } from "../../services/Subscriptions";
 import { CountrySelectorRow } from "../CountrySelectorRow";
 import { CountryMultiSelector } from "../CountryMultiSelector";
 import { SocialMediaSelector } from "../SocialMediaSelector";
+import toast from "react-hot-toast";
 
 // Types
 interface AccordionData {
@@ -71,6 +72,7 @@ interface SocialMediaItem {
 }
 
 export const MyIDsTable: React.FC = () => {
+  const [loading, setLoading] = useState(false);
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
   const [globalExpandedRow, setGlobalExpandedRow] = useState<number | null>(null);
   const [currentId, setCurrentId] = useState<string>("");
@@ -123,63 +125,114 @@ export const MyIDsTable: React.FC = () => {
 
   const [showAddTags, setShowAddTags] = useState(false);
 
-  // useEffect(() => {
-  //   // reset all form states when currentId changes
-  //   setWebsiteUrl("");
-  //   setWebsiteInfo("");
-  //   setIsAdultWebsite(null);
-  //   setIsPromotingOwnServices(null);
-  //   setIsOwnerOrAdmin(null);
+  const resetForm = () => {
+    setWebsiteUrl("");
+    setWebsiteInfo("");
+    setIsAdultWebsite(null);
+    setIsPromotingOwnServices(null);
+    setIsOwnerOrAdmin(null);
 
-  //   setValue2("");
-  //   setSelectedCountry2("");
-  //   setIsOpen2(false);
+    setValue2("");
+    setSelectedCountry2("");
+    setIsOpen2(false);
 
-  //   setValue3("");
-  //   setSelectedCountry3("");
-  //   setIsOpen3(false);
+    setValue3("");
+    setSelectedCountry3("");
+    setIsOpen3(false);
 
-  //   setSelected([]);
+    setSelected([]);
 
-  //   setStartDate(new Date());
-  //   setStopDate(new Date());
+    setStartDate(new Date());
+    setStopDate(new Date());
 
-  //   setSocialMediaData([
-  //     { id: 'youtube', name: 'YouTube', icon: social1, checked: false },
-  //     { id: 'instagram', name: 'Instagram', icon: social2, checked: false },
-  //     { id: 'tiktok', name: 'TikTok', icon: social3, checked: false },
-  //     { id: 'facebook', name: 'Facebook', icon: social4, checked: false },
-  //     { id: 'linkedin', name: 'LinkedIn', icon: social5, checked: false },
-  //     { id: 'twitter', name: 'Twitter/X', icon: social6, checked: false },
-  //     { id: 'other', name: 'Other', icon: '', checked: false, customValue: '' }
-  //   ]);
+    setSocialMediaData([
+      { id: 'youtube', name: 'YouTube', icon: social1, checked: false },
+      { id: 'instagram', name: 'Instagram', icon: social2, checked: false },
+      { id: 'tiktok', name: 'TikTok', icon: social3, checked: false },
+      { id: 'facebook', name: 'Facebook', icon: social4, checked: false },
+      { id: 'linkedin', name: 'LinkedIn', icon: social5, checked: false },
+      { id: 'twitter', name: 'Twitter/X', icon: social6, checked: false },
+      { id: 'other', name: 'Other', icon: '', checked: false, customValue: '' }
+    ]);
 
-  //   setPostLink("");
-  //   setTotalEarning("");
-  //   setMemo("");
-  //   setAffiliateUrl(null);
-  //   setIsPaidPromotion(null);
-  //   setBrandOwnerUrl("");
-  //   setBrandPromotion("");
+    setPostLink("");
+    setTotalEarning("");
+    setMemo("");
+    setAffiliateUrl(null);
+    setIsPaidPromotion(null);
+    setBrandOwnerUrl("");
+    setBrandPromotion("");
 
-  //   setSelectedFilters([]); // reset applied filters
+    setSelectedFilters([]); // reset applied filters
 
-  //   setSelections({
-  //     ageGroup: "Dropdown",
-  //     gender: "Dropdown",
-  //     incomeLevel: "Dropdown",
-  //   });
+    setSelections({
+      ageGroup: "Dropdown",
+      gender: "Dropdown",
+      incomeLevel: "Dropdown",
+    });
 
-  //   setTermsAccepted(false);
+    setTermsAccepted(false);
 
-  //   setShowAddTags(false);
-  // }, [currentId]);
+    setShowAddTags(false);
+  }
 
   useEffect(() => {
     if (!currentId) return;
+    resetForm();
     const getIdsPrefilledDetails = async () => {
-      const res = await subscriptionService.getHomeIdsDetails(currentId);
-      console.log("accordianData", res?.data);
+      try {
+        const res = await subscriptionService.getHomeIdsDetails(currentId);
+        if (res.success) {
+          const data = res.data;
+          setWebsiteUrl(data?.websiteUrl);
+          setWebsiteInfo(data?.websiteInfo);
+          setIsAdultWebsite(data?.adultGambling);
+          setIsPromotingOwnServices(data?.promotion);
+          setIsOwnerOrAdmin(data?.ownerOrAdministrator);
+
+          setValue2(data?.targetRegion2);
+          setSelectedCountry2((data?.targetRegion2));
+
+          setValue3(data?.targetRegion3);
+          setSelectedCountry3(data?.targetRegion3);
+
+          // setSelected([]);
+
+          setStartDate(data?.startDate);
+          setStopDate(data?.endDate);
+
+          // setSocialMediaData([
+          //   { id: 'youtube', name: 'YouTube', icon: social1, checked: false },
+          //   { id: 'instagram', name: 'Instagram', icon: social2, checked: false },
+          //   { id: 'tiktok', name: 'TikTok', icon: social3, checked: false },
+          //   { id: 'facebook', name: 'Facebook', icon: social4, checked: false },
+          //   { id: 'linkedin', name: 'LinkedIn', icon: social5, checked: false },
+          //   { id: 'twitter', name: 'Twitter/X', icon: social6, checked: false },
+          //   { id: 'other', name: 'Other', icon: '', checked: false, customValue: '' }
+          // ]);
+
+          // setPostLink("");
+          setTotalEarning(data?.earning);
+          setMemo(data?.memo);
+          setAffiliateUrl(data?.affiliate);
+          setIsPaidPromotion(data?.paidPromotion);
+          setBrandOwnerUrl(data?.paidPromotionLink);
+          setBrandPromotion(data?.paidPromotionInfo);
+
+          // setSelectedFilters([]); 
+
+          setSelections({
+            ageGroup: data?.ageGroup || "Dropdown",
+            gender: data?.gender || "Dropdown",
+            incomeLevel: data?.income || "Dropdown",
+          });
+
+          setTermsAccepted(data?.termCondition);
+        }
+      }
+      catch (err) {
+        console.error("Error fetching prefilled data:", err);
+      }
     }
     getIdsPrefilledDetails();
   }, [currentId])
@@ -251,6 +304,8 @@ export const MyIDsTable: React.FC = () => {
   );
 
   const handleSave = async () => {
+    setLoading(true);
+    const toastId = toast.loading("Saving details...");
     try {
       const socialMediaSelection = socialMediaData.reduce((acc, item) => {
         if (item.id === "other") {
@@ -289,9 +344,25 @@ export const MyIDsTable: React.FC = () => {
         "blockedCountry": selected,
       }
       const res = await subscriptionService.homeIdsDetailsPost(obj);
-      console.log("data", res.data)
-    } catch (err) {
+      toast.dismiss(toastId);
+      if (res?.success) {
+        setLoading(false);
+        toast.success(res?.message, {
+          position: "top-right",
+        })
+      } else {
+        setLoading(false);
+        toast.error(res?.message, {
+          position: "top-right"
+        });
+      }
+    } catch (err: any) {
+      setLoading(false);
       console.error(err);
+      toast.dismiss(toastId);
+      toast.error(err?.response?.data?.message || "Something went wrong!", {
+        position: "top-right"
+      });
     }
   }
 
@@ -787,11 +858,18 @@ export const MyIDsTable: React.FC = () => {
                     />
                     <p className="text-[14px] font-normal text-[#374151FF]">I agree to Terms & Conditions</p>
                   </div>
-                  <button className={`rounded-[6px] bg-[#2563EBFF] text-white font-semibold px-6 py-2 ${!termsAccepted && "cursor-not-allowed opacity-50"}`}
+                  <button className={`rounded-[6px] bg-[#2563EBFF] text-white font-semibold px-6 py-2 ${!termsAccepted || loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
                     onClick={handleSave}
-                    disabled={!termsAccepted}
+                    disabled={!termsAccepted || loading}
                   >
-                    Save
+                    {loading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Saving...
+                      </div>
+                    ) : (
+                      'Save'
+                    )}
                   </button>
                 </div>
               </div>
