@@ -13,7 +13,7 @@ interface KeypadProps {
 }
 
 interface SearchResult {
-  productImage: string;
+  imageUrl: string;
   productName: string;
   productUrl?: string;
   description?: string;
@@ -65,17 +65,13 @@ export const Keypad: React.FC<KeypadProps> = ({ onSubmit }) => {
 
     setLoading(true);
     setError(null);
-
     try {
-      const res = await subscriptionService.getHomeIdsDetails(digits);
-      console.log(res);
       const obj = {
-        "url": res?.data?.websiteUrl
+        "homId": digits
       }
-      const newRes = await subscriptionService.extractDataBasedOnIUrl(obj);
-      if (newRes.success) {
-        console.log("newRes", newRes?.data)
-        setSearchResult(newRes?.data)
+      const res = await subscriptionService.postHomIdInfo(obj)
+      if (res.success) {
+        setSearchResult(res?.data)
       }
 
     } catch (error: any) {

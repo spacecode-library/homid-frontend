@@ -53,5 +53,10 @@ export const subscriptionService = {
   postChat: async (obj: any) => {
     const response = await api.post('/homid/chat', obj);
     return response.data;
+  },
+
+  postHomIdInfo: async (obj: any) => {
+    const response = await api.post(`homid/info`, obj);
+    return response.data;
   }
 }

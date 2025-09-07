@@ -59,6 +59,7 @@ interface TableRow {
   totalRedirects: string;
   status: "Active" | "Inactive";
   numericId: string;
+  websiteUrl: string,
   redirectCreditsUsed: number;
   accordionData: AccordionData;
 }
@@ -112,7 +113,6 @@ export const MyIDsTable: React.FC = () => {
   const [brandOwnerUrl, setBrandOwnerUrl] = useState<string>("");
   const [brandPromotion, setBrandPromotion] = useState<string>("");
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-  console.log("selectedFilters", selectedFilters)
   const [selections, setSelections] = useState<Selections>({
     ageGroup: "Dropdown",
     gender: "Dropdown",
@@ -122,7 +122,10 @@ export const MyIDsTable: React.FC = () => {
 
 
   const [searchTerm, setSearchTerm] = useState<string>("");
+  console.log("searchTerm", searchTerm)
   const [tableData, setTableData] = useState<TableRow[]>([]);
+  const [productName, setProductName] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
 
   const [showAddTags, setShowAddTags] = useState(false);
 
@@ -303,11 +306,13 @@ export const MyIDsTable: React.FC = () => {
     return status === "Active" ? "bg-green-500" : "bg-red-500";
   };
 
-  const filteredData = tableData.filter(
+  const filteredData = tableData?.filter(
     (item) =>
-      item.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.targetUrl.toLowerCase().includes(searchTerm.toLowerCase())
+      // item.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      // item.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      // item.targetUrl.toLowerCase().includes(searchTerm.toLowerCase())
+
+      item?.numericId?.includes(searchTerm)
   );
 
   const cleanUrl = (url: string) => {
@@ -342,6 +347,8 @@ export const MyIDsTable: React.FC = () => {
       const res = await subscriptionService.extractDataBasedOnIUrl(obj);
       if (res?.success) {
         setWebsiteInfo(res?.data?.productDescription);
+        setProductName(res?.data?.productName);
+        setImageUrl(res?.data?.productImage);
         setEditWebsiteInfo("");
       }
     } catch (err) {
@@ -428,6 +435,8 @@ export const MyIDsTable: React.FC = () => {
         "income": selections.incomeLevel,
         "termCondition": termsAccepted,
         "blockedCountry": selectedCodes,
+        "productName": productName,
+        "imageUrl": imageUrl
 
       }
       const res = await subscriptionService.homeIdsDetailsPost(obj);
@@ -500,13 +509,45 @@ export const MyIDsTable: React.FC = () => {
               <div className="text-[16px] font-medium text-[#2563EBFF]">{row?.numericId?.slice(0, 4)}-{row?.numericId?.slice(4)}</div>
               {/* Target URL */}
               <div className="flex items-center gap-2">
-                <span className="text-[16px] font-normal text-[#242524FF]">-</span>
-                {/* <ExternalLink className="w-4 h-4 text-gray-400" /> */}
+                <span
+                  className="text-[16px] font-normal text-[#242524FF]"
+                  title={row.websiteUrl || ''} // Shows full URL on hover
+                >
+                  {row.websiteUrl
+                    ? (row.websiteUrl.length > 20
+                      ? `${row.websiteUrl.substring(0, 20)}...`
+                      : row.websiteUrl
+                    )
+                    : '-'
+                  }
+                </span>
+
+                {row.websiteUrl && (
+                  <a
+                    href={row.websiteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-blue-500 transition-colors cursor-pointer"
+                    title="Open in new tab"
+                  >
+                    <ExternalLink className="w-4 h-4 text-gray-400 hover:text-blue-500" />
+                  </a>
+                )}
               </div>
 
               {/* Product Name */}
-              <div className="text-[16px] font-normal text-[#242524FF]">-</div>
-
+              <div
+                className="text-[16px] font-normal text-[#242524FF]"
+                title={row.productName || ''} // Shows full product name on hover
+              >
+                {row.productName
+                  ? (row.productName.length > 20
+                    ? `${row.productName.substring(0, 20)}...`
+                    : row.productName
+                  )
+                  : '-'
+                }
+              </div>
               {/* Total Redirects */}
               <div className="text-[16px] font-normal text-[#242524FF]">{row?.redirectCreditsUsed}</div>
 
@@ -995,6 +1036,6 @@ export const MyIDsTable: React.FC = () => {
           </React.Fragment>
         ))}
       </div>
-    </div>
+    </div >
   );
 };

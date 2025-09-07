@@ -9,11 +9,13 @@ import BurgerKingImg from "../../assets/burgerKing.png";
 import NavigateLogo from "../../assets/navigate.png";
 
 interface SearchResult {
-  productImage: string;
+  imageUrl: string;
   productName: string;
   productUrl?: string;
   description?: string;
   price?: number;
+  websiteInfo?: string;
+  websiteUrl?: string;
 }
 
 interface ProductItem {
@@ -68,18 +70,32 @@ export const Product: React.FC<ProductProps> = ({ searchResult }) => {
 
           <div className='rounded-full -mt-8 w-[48px] h-[48px] overflow-hidden bg-[#1F54B0]'>
             <img
-              src={searchResult?.productImage}
+              src={searchResult?.imageUrl}
               className='w-full h-full object-cover'
               alt="Product"
             />
           </div>
 
-          <div className='mt-[10px] flex flex-col justify-center items-center'>
+          <div className='mt-[10px] flex flex-col justify-center items-center px-4'>
             <p className='text-[20px] text-center font-medium text-[#1F2937] leading-tight'>
-              {searchResult?.productName}
+              {searchResult?.productName
+                ? (searchResult.productName.length > 40
+                  ? `${searchResult.productName.substring(0, 40)}...`
+                  : searchResult.productName
+                )
+                : ''
+              }
             </p>
             <div className='flex justify-between items-center w-full'>
-              <p className='text-[14px] text-[#6B7280] text-center w-full'>https://www.walmart.com</p>
+              <p className='text-[14px] text-[#6B7280] text-center w-full'>
+                {searchResult?.websiteUrl
+                  ? (searchResult.websiteUrl.length > 30
+                    ? `${searchResult.websiteUrl.substring(0, 30)}...`
+                    : searchResult.websiteUrl
+                  )
+                  : ''
+                }
+              </p>
               <div>
                 <img src={BookmarkIcon} className='w-6 h-6' />
               </div>
@@ -87,9 +103,18 @@ export const Product: React.FC<ProductProps> = ({ searchResult }) => {
           </div>
 
           <div className='mt-5 flex flex-col justify-center items-center'>
-            <p className='text-[14px] text-[#6B7280] px-4'>Bug zappers work by emitting a UV light that attracts bugs to the center of the device, where they're electrocuted, usually between two metal </p>
-
-            <button className='mt-[14px] text-white text-[20px] bg-[#3AB9F4] rounded-[20px] px-10'>Connect</button>
+            <p className='text-[14px] text-[#6B7280] px-4'>
+              {searchResult?.websiteInfo
+                ? (searchResult.websiteInfo.length > 140
+                  ? `${searchResult.websiteInfo.substring(0, 140)}...`
+                  : searchResult.websiteInfo
+                )
+                : ''
+              }
+            </p>
+            <a href={searchResult?.websiteUrl} target='_blank'>
+              <button className='mt-[14px] text-white text-[20px] bg-[#3AB9F4] rounded-[20px] px-10'>Connect</button>
+            </a>
           </div>
         </div>
 
