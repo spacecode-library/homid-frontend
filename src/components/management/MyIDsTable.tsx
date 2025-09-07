@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { CountryCode, CountryCodeReverse } from "../../utils/CountryCode";
 import {
   Search,
   ChevronDown,
@@ -78,6 +79,9 @@ export const MyIDsTable: React.FC = () => {
   const [currentId, setCurrentId] = useState<string>("");
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [websiteInfo, setWebsiteInfo] = useState("");
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editWebsiteInfo, setEditWebsiteInfo] = useState("");
+  const [aiWebSiteInfo, setAIWebsiteInfo] = useState("");
   const [isAdultWebsite, setIsAdultWebsite] = useState<null | boolean>(null);
   const [isPromotingOwnServices, setIsPromotingOwnServices] = useState<null | boolean>(null);
   const [isOwnerOrAdmin, setIsOwnerOrAdmin] = useState<null | boolean>(null);
@@ -101,16 +105,14 @@ export const MyIDsTable: React.FC = () => {
     { id: 'twitter', name: 'Twitter/X', icon: social6, checked: false, socialLink: '' },
     { id: 'other', name: 'Other', icon: '', checked: false, customValue: '', socialLink: '' }
   ]);
-  const [totalEarning, setTotalEarning] = useState<string>("");
+  const [totalEarning, setTotalEarning] = useState<number>(0);
   const [memo, setMemo] = useState<string>("");
   const [affiliateUrl, setAffiliateUrl] = useState<null | boolean>(null);
   const [isPaidPromotion, setIsPaidPromotion] = useState<null | boolean>(null);
   const [brandOwnerUrl, setBrandOwnerUrl] = useState<string>("");
   const [brandPromotion, setBrandPromotion] = useState<string>("");
-  const [selectedFilters, setSelectedFilters] = useState([
-    { id: 1, label: 'Womens Clothing', type: 'category' },
-    { id: 2, label: 'Ages 20-30', type: 'age' }
-  ]);
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  console.log("selectedFilters", selectedFilters)
   const [selections, setSelections] = useState<Selections>({
     ageGroup: "Dropdown",
     gender: "Dropdown",
@@ -154,14 +156,14 @@ export const MyIDsTable: React.FC = () => {
       { id: 'other', name: 'Other', icon: '', checked: false, customValue: '', socialLink: '' }
     ]);
 
-    setTotalEarning("");
+    setTotalEarning(0);
     setMemo("");
     setAffiliateUrl(null);
     setIsPaidPromotion(null);
     setBrandOwnerUrl("");
     setBrandPromotion("");
 
-    setSelectedFilters([]); // reset applied filters
+    setSelectedFilters([]);
 
     setSelections({
       ageGroup: "Dropdown",
@@ -183,7 +185,7 @@ export const MyIDsTable: React.FC = () => {
         if (res.success) {
           const data = res.data;
           setWebsiteUrl(data?.websiteUrl);
-          setWebsiteInfo(data?.websiteInfo);
+          setWebsiteInfo(data.editInfo ? data.editInfo : data.websiteInfo);
           setIsAdultWebsite(data?.adultGambling);
           setIsPromotingOwnServices(data?.promotion);
           setIsOwnerOrAdmin(data?.ownerOrAdministrator);
@@ -194,7 +196,10 @@ export const MyIDsTable: React.FC = () => {
           setValue3(data?.targetRegion3);
           setSelectedCountry3(data?.targetRegion3);
 
-          // setSelected([]);
+          const filterCountry = data?.blockedCountries?.map((country: any) => (
+            CountryCodeReverse[country?.countryCode]
+          ))
+          setSelected(filterCountry);
 
           setStartDate(data?.startDate);
           setStopDate(data?.endDate);
@@ -225,7 +230,8 @@ export const MyIDsTable: React.FC = () => {
           setBrandOwnerUrl(data?.paidPromotionLink);
           setBrandPromotion(data?.paidPromotionInfo);
 
-          // setSelectedFilters([]); 
+          const extractTagName = data?.tag?.map((obj: any) => obj.tag);
+          setSelectedFilters(extractTagName || []);
 
           setSelections({
             ageGroup: data?.ageGroup || "Dropdown",
@@ -262,17 +268,12 @@ export const MyIDsTable: React.FC = () => {
   ];
 
 
-  const removeFilter = (filterId: any) => {
-    setSelectedFilters(prev => prev.filter(filter => filter.id !== filterId));
+  const removeFilter = (tagName: string) => {
+    setSelectedFilters(prev => (prev || []).filter(tag => tag !== tagName));
   };
 
-  const addFilter = (category: any) => {
-    const newFilter = {
-      id: Date.now(),
-      label: category,
-      type: 'category'
-    };
-    setSelectedFilters(prev => [...prev, newFilter]);
+  const addFilter = (category: string) => {
+    setSelectedFilters(prev => [...(prev || []), category]);
     setShowAddTags(false);
   };
 
@@ -309,6 +310,78 @@ export const MyIDsTable: React.FC = () => {
       item.targetUrl.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const cleanUrl = (url: string) => {
+    try {
+      const parsed = new URL(url); // fallback for relative
+
+      if (parsed.hostname.includes("amazon.")) {
+        const match = url.match(/(https:\/\/www\.amazon\.[^/]+\/[^/]+\/dp\/[A-Z0-9]+)/);
+        return match ? match[1] : parsed.origin + parsed.pathname;
+      }
+
+      if (parsed.hostname.includes("flipkart.com")) {
+        return parsed.origin + parsed.pathname;
+      }
+
+      return parsed.origin + parsed.pathname;
+    } catch (err) {
+      return url;
+    }
+  };
+
+  const handleChange = (e: any) => {
+    const inputVal = e.target.value.trim();
+    setWebsiteUrl(cleanUrl(inputVal));
+  };
+
+  const handleExtractDataFromUrl = async () => {
+    try {
+      const obj = {
+        "url": websiteUrl
+      }
+      const res = await subscriptionService.extractDataBasedOnIUrl(obj);
+      if (res?.success) {
+        setWebsiteInfo(res?.data?.productDescription);
+        setEditWebsiteInfo("");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const handleEdit = () => {
+    // Initialize edit state with current displayed value
+    setEditWebsiteInfo(websiteInfo);
+    setIsEditMode(true);
+  };
+
+  const handleCancel = () => {
+    // Reset edit state and exit edit mode
+    setEditWebsiteInfo("");
+    setIsEditMode(false);
+  };
+
+  const handleInfoSave = async () => {
+    // Save the edited content to the main state
+    // setWebsiteInfo(editWebsiteInfo);
+    const obj = {
+      "message": websiteInfo + " " + editWebsiteInfo
+    }
+    const res = await subscriptionService.postChat(obj);
+    if (res?.success) {
+      setAIWebsiteInfo(res?.data?.response);
+    }
+
+    if (isContentEdited()) {
+      setWebsiteInfo(editWebsiteInfo);
+    }
+    setIsEditMode(false);
+  };
+
+  const isContentEdited = () => {
+    return editWebsiteInfo !== "" && editWebsiteInfo !== websiteInfo;
+  };
+
   const handleSave = async () => {
     setLoading(true);
     const toastId = toast.loading("Saving details...");
@@ -326,10 +399,14 @@ export const MyIDsTable: React.FC = () => {
         return acc;
       }, {} as Record<string, string | boolean>);
 
+      const selectedCodes = selected.map((country) => CountryCode[country]);
+
       const obj = {
         "homIdId": currentId,
         "websiteUrl": websiteUrl,
         "websiteInfo": websiteInfo,
+        "editInfo": editWebsiteInfo,
+        "aiInfo": aiWebSiteInfo,
         "adultGambling": isAdultWebsite,
         "promotion": isPromotingOwnServices,
         "ownerOrAdministrator": isOwnerOrAdmin,
@@ -345,12 +422,13 @@ export const MyIDsTable: React.FC = () => {
         "paidPromotion": isPaidPromotion,
         "paidPromotionLink": brandOwnerUrl,
         "paidPromotionInfo": brandPromotion,
+        "tag": selectedFilters,
         "ageGroup": selections.ageGroup,
         "gender": selections.gender,
         "income": selections.incomeLevel,
         "termCondition": termsAccepted,
-        "blockedCountry": selected,
-        // "blockedCountry": ["US"],
+        "blockedCountry": selectedCodes,
+
       }
       const res = await subscriptionService.homeIdsDetailsPost(obj);
       toast.dismiss(toastId);
@@ -486,23 +564,15 @@ export const MyIDsTable: React.FC = () => {
                           type="text"
                           placeholder="Add Website and click 'Read URL' →"
                           value={websiteUrl}
-                          onChange={(e) => setWebsiteUrl(e.target.value)}
+                          onChange={handleChange}
                           className="text-[14px] flex-1 border border-[#D1D5DBFF] rounded-[6px] p-2 outline-none"
                         />
 
                         <button
-                          disabled={!websiteUrl.trim()}
-                          onClick={() => {
-                            if (websiteUrl.trim()) {
-                              const url =
-                                websiteUrl.startsWith("http://") || websiteUrl.startsWith("https://")
-                                  ? websiteUrl
-                                  : `https://${websiteUrl}`;
-                              window.open(url, "_blank");
-                            }
-                          }}
+                          disabled={!websiteUrl?.trim()}
+                          onClick={handleExtractDataFromUrl}
                           className={`flex items-center text-[14px] gap-x-2 font-medium whitespace-nowrap border rounded-[6px] px-4 py-2
-      ${websiteUrl.trim()
+      ${websiteUrl?.trim()
                               ? "text-[#3B82F6FF] border-[#3B82F6FF] cursor-pointer"
                               : "text-gray-400 border-gray-300 cursor-not-allowed bg-gray-100"
                             }`}
@@ -513,19 +583,65 @@ export const MyIDsTable: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="flex w-full items-center justify-between">
-                      <p className="text-[16px] font-normal text-[#374151FF] mr-4">
-                        Website Info:
-                      </p>
+                    <div className="">
+                      {/* Main row with label and textarea */}
+                      <div className="flex w-full items-start justify-between gap-4">
+                        <p className="text-[16px] font-normal text-[#374151] flex-shrink-0">
+                          Website Info:
+                        </p>
 
-                      <div className="flex items-center gap-3 w-full max-w-[450px]">
-                        <textarea
-                          rows={2}
-                          placeholder="Fill-in website information"
-                          value={websiteInfo}
-                          onChange={(e) => setWebsiteInfo(e.target.value)}
-                          className="text-[14px] flex-1 border border-[#D1D5DBFF] rounded-[6px] p-2 outline-none"
-                        />
+                        <div className="flex-1 max-w-[450px]">
+                          <textarea
+                            rows={2}
+                            placeholder="Fill-in website information"
+                            value={isEditMode ? editWebsiteInfo : websiteInfo}
+                            onChange={(e) => setEditWebsiteInfo(e.target.value)}
+                            disabled={!isEditMode}
+                            className={`w-full text-[14px] border rounded-[6px] p-2 outline-none resize-none ${isEditMode
+                              ? 'border-[#D1D5DB] bg-white'
+                              : 'border-[#E5E7EB] bg-[#F9FAFB] text-[#6B7280] cursor-not-allowed'
+                              }`}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Error message row with same alignment */}
+                      <div className="flex w-full items-start justify-between gap-4">
+                        <div className="flex-shrink-0" style={{ width: 'fit-content' }}>
+                          {/* Empty space to match label width */}
+                        </div>
+
+                        <div className="flex-1 mb-2 max-w-[450px] flex items-center justify-between">
+                          <p className="text-[16px] leading-tight font-normal text-[#DE3B40] flex-1 mr-1">
+                            Please ensure your provided information is accurate, relevant to the website's information.
+                          </p>
+
+                          <div className="flex gap-2 flex-shrink-0">
+                            {isEditMode ? (
+                              <>
+                                <button
+                                  onClick={handleCancel}
+                                  className="text-[14px] font-medium text-[#6B7280] border border-[#D1D5DB] px-3 py-1 rounded-[6px] hover:bg-[#F3F4F6] transition-colors"
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  onClick={handleInfoSave}
+                                  className="text-[14px] font-medium text-white bg-[#3B82F6] border border-[#3B82F6] px-3 py-1 rounded-[6px] hover:bg-[#2563EB] transition-colors"
+                                >
+                                  Save
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                onClick={handleEdit}
+                                className="text-[14px] font-medium text-[#3B82F6] border border-[#3B82F6] px-3 py-1 rounded-[6px] hover:bg-[#3B82F6] hover:text-white transition-colors"
+                              >
+                                Edit
+                              </button>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -696,7 +812,7 @@ export const MyIDsTable: React.FC = () => {
                           type="number"
                           defaultValue={0.0}
                           value={totalEarning}
-                          onChange={(e) => setTotalEarning(e.target.value)}
+                          onChange={(e) => setTotalEarning(Number(e.target.value))}
                           className="w-24 rounded-md border border-gray-300 px-2 py-1 text-sm outline-none"
                         />
                       </div>
@@ -790,16 +906,16 @@ export const MyIDsTable: React.FC = () => {
                       {/* Filter Tags Section */}
                       <div className="p-4 w-full bg-white border border-gray-200 rounded-[6px] mt-[10px]">
                         <div className="flex flex-wrap gap-2 mb-4">
-                          {selectedFilters.map((filter) => (
+                          {selectedFilters?.map((tag, index) => (
                             <div
-                              key={filter.id}
+                              key={index}
                               className="inline-flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
                             >
-                              <span>{filter.label}</span>
+                              <span>{tag}</span>
                               <button
-                                onClick={() => removeFilter(filter.id)}
+                                onClick={() => removeFilter(tag)}
                                 className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
-                                aria-label={`Remove ${filter.label} filter`}
+                                aria-label={`Remove ${tag} filter`}
                               >
                                 <X size={14} />
                               </button>
@@ -825,7 +941,7 @@ export const MyIDsTable: React.FC = () => {
                                   key={index}
                                   onClick={() => addFilter(category)}
                                   className="text-left text-sm text-gray-700 hover:bg-white hover:shadow-sm px-2 py-1 rounded transition-colors"
-                                  disabled={selectedFilters.some(filter => filter.label === category)}
+                                  disabled={selectedFilters?.includes(category)}
                                 >
                                   {category}
                                 </button>

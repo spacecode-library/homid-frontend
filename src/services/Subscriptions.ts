@@ -48,5 +48,10 @@ export const subscriptionService = {
   extractDataBasedOnIUrl: async (obj: any) => {
     const resposne = await api.post('/homid/extract', obj);
     return resposne.data;
+  },
+
+  postChat: async (obj: any) => {
+    const response = await api.post('/homid/chat', obj);
+    return response.data;
   }
 }
