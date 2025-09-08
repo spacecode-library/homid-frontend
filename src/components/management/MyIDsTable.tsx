@@ -57,7 +57,7 @@ interface TableRow {
   targetUrl: string;
   productName: string;
   totalRedirects: string;
-  status: "Active" | "Inactive";
+  status: "pending" | "approved" | "rejected" | "auto_approved";
   numericId: string;
   websiteUrl: string,
   redirectCreditsUsed: number;
@@ -122,12 +122,14 @@ export const MyIDsTable: React.FC = () => {
 
 
   const [searchTerm, setSearchTerm] = useState<string>("");
-  console.log("searchTerm", searchTerm)
   const [tableData, setTableData] = useState<TableRow[]>([]);
   const [productName, setProductName] = useState("");
   const [imageUrl, setImageUrl] = useState("");
 
   const [showAddTags, setShowAddTags] = useState(false);
+
+  const [isReadUrl, setIsReadUrl] = useState<boolean>(false);
+  const [isEditedSave, setIsEditedSave] = useState<boolean>(false);
 
   const resetForm = () => {
     setWebsiteUrl("");
@@ -259,7 +261,7 @@ export const MyIDsTable: React.FC = () => {
       setTableData(res?.data?.homIds)
     }
     getListHomeIds();
-  }, [])
+  }, [loading])
 
   const availableCategories = [
     'Shopping', 'Consulting', 'Professional Services', 'Information',
@@ -288,14 +290,11 @@ export const MyIDsTable: React.FC = () => {
     setGlobalExpandedRow(globalExpandedRow === index ? null : index)
   }
 
-  const handleStatusToggle = (index: number) => {
-    setTableData(prevData =>
-      prevData.map((row, i) =>
-        i === index
-          ? { ...row, status: row.status === "Active" ? "Inactive" : "Active" }
-          : row
-      )
-    );
+  const getUiStatus = (status: "pending" | "approved" | "rejected" | "auto_approved"): "Active" | "Inactive" => {
+    if (status === "approved" || status === "auto_approved") {
+      return "Active";
+    }
+    return "Inactive";
   };
 
   const getStatusColor = (status: "Active" | "Inactive"): string => {
@@ -308,10 +307,6 @@ export const MyIDsTable: React.FC = () => {
 
   const filteredData = tableData?.filter(
     (item) =>
-      // item.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      // item.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      // item.targetUrl.toLowerCase().includes(searchTerm.toLowerCase())
-
       item?.numericId?.includes(searchTerm)
   );
 
@@ -340,6 +335,7 @@ export const MyIDsTable: React.FC = () => {
   };
 
   const handleExtractDataFromUrl = async () => {
+    setIsReadUrl(true);
     try {
       const obj = {
         "url": websiteUrl
@@ -350,6 +346,8 @@ export const MyIDsTable: React.FC = () => {
         setProductName(res?.data?.productName);
         setImageUrl(res?.data?.productImage);
         setEditWebsiteInfo("");
+        toast.success(res?.message);
+        setIsReadUrl(false);
       }
     } catch (err) {
       console.error(err);
@@ -366,17 +364,19 @@ export const MyIDsTable: React.FC = () => {
     // Reset edit state and exit edit mode
     setEditWebsiteInfo("");
     setIsEditMode(false);
+    setIsEditMode(false);
   };
 
   const handleInfoSave = async () => {
-    // Save the edited content to the main state
-    // setWebsiteInfo(editWebsiteInfo);
+    setIsEditedSave(true)
     const obj = {
       "message": websiteInfo + " " + editWebsiteInfo
     }
     const res = await subscriptionService.postChat(obj);
     if (res?.success) {
       setAIWebsiteInfo(res?.data?.response);
+      setIsEditedSave(false);
+      toast.success(res?.message);
     }
 
     if (isContentEdited()) {
@@ -553,20 +553,24 @@ export const MyIDsTable: React.FC = () => {
 
               {/* Status - Interactive Switch */}
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleStatusToggle(index)}
+                <div
                   className={`w-12 h-6 ${getStatusToggleColor(
-                    row.status
-                  )} rounded-full relative transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 ${row.status === "Active" ? "focus:ring-green-500" : "focus:ring-red-500"
-                    }`}
+                    getUiStatus(row.status)
+                  )} rounded-full relative transition-colors duration-200 ease-in-out`}
                 >
                   <div
-                    className={`w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 transition-transform duration-200 ease-in-out ${row.status === "Active" ? "transform translate-x-6" : "transform translate-x-0.5"
+                    className={`w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 transition-transform duration-200 ease-in-out ${getUiStatus(row.status) === "Active"
+                      ? "transform translate-x-6"
+                      : "transform translate-x-0.5"
                       }`}
                   ></div>
-                </button>
-                <span className={`text-sm font-medium ${getStatusColor(row.status)}`}>
-                  {row.status}
+                </div>
+                <span
+                  className={`text-sm font-medium ${getStatusColor(
+                    getUiStatus(row.status)
+                  )}`}
+                >
+                  {getUiStatus(row.status)}
                 </span>
               </div>
 
@@ -618,8 +622,13 @@ export const MyIDsTable: React.FC = () => {
                               : "text-gray-400 border-gray-300 cursor-not-allowed bg-gray-100"
                             }`}
                         >
-                          Read URL
-                          <ExternalLink className="w-4 h-4" />
+                          {isReadUrl ?
+                            <div className="w-5 h-5 border-2 border-[#3B82F6FF] border-t-transparent rounded-full animate-spin"></div>
+                            : <>
+                              Read URL
+                              <ExternalLink className="w-4 h-4" />
+                            </>}
+
                         </button>
                       </div>
                     </div>
@@ -670,7 +679,7 @@ export const MyIDsTable: React.FC = () => {
                                   onClick={handleInfoSave}
                                   className="text-[14px] font-medium text-white bg-[#3B82F6] border border-[#3B82F6] px-3 py-1 rounded-[6px] hover:bg-[#2563EB] transition-colors"
                                 >
-                                  Save
+                                  {isEditedSave ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : "Save"}
                                 </button>
                               </>
                             ) : (

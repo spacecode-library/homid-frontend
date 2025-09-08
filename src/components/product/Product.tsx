@@ -7,6 +7,7 @@ import AsteriskIcon from "../../assets/asterisk.png";
 import KMartImg from "../../assets/kmart.png";
 import BurgerKingImg from "../../assets/burgerKing.png";
 import NavigateLogo from "../../assets/navigate.png";
+import { subscriptionService } from '../../services/Subscriptions';
 
 interface SearchResult {
   imageUrl: string;
@@ -27,9 +28,10 @@ interface ProductItem {
 
 interface ProductProps {
   searchResult: SearchResult;
+  numericId: string;
 }
 
-export const Product: React.FC<ProductProps> = ({ searchResult }) => {
+export const Product: React.FC<ProductProps> = ({ searchResult, numericId }) => {
   const products = [
     {
       name: "Summer Outdoor Patio w/ Sunshade Sail Canopy",
@@ -50,6 +52,17 @@ export const Product: React.FC<ProductProps> = ({ searchResult }) => {
       brand: "Burger King"
     }
   ];
+
+  const handleConnect = async () => {
+    const digits = numericId.replace(/\D/g, '');
+    const obj = {
+      homId: digits
+    }
+    const res = await subscriptionService.postHomIdRedirect(obj);
+    if (res?.success) {
+      window.open(searchResult.websiteUrl, "_blank");
+    }
+  }
 
   return (
     <div className="max-w-md mx-auto space-y-2 bg-white">
@@ -112,9 +125,11 @@ export const Product: React.FC<ProductProps> = ({ searchResult }) => {
                 : ''
               }
             </p>
-            <a href={searchResult?.websiteUrl} target='_blank'>
-              <button className='mt-[14px] text-white text-[20px] bg-[#3AB9F4] rounded-[20px] px-10'>Connect</button>
-            </a>
+            {/* <a href={searchResult?.websiteUrl} target='_blank'> */}
+            <button
+              onClick={handleConnect}
+              className='mt-[14px] text-white text-[20px] bg-[#3AB9F4] rounded-[20px] px-10'>Connect</button>
+            {/* </a> */}
           </div>
         </div>
 

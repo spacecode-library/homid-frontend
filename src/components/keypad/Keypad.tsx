@@ -276,7 +276,7 @@ export const Keypad: React.FC<KeypadProps> = ({ onSubmit }) => {
       {
         searchResult !== null &&
         <div className='z-20 absolute top-[30%] left-0 right-0 px-4'>
-          <Product searchResult={searchResult} />
+          <Product searchResult={searchResult} numericId={value} />
         </div>
       }
     </div>
