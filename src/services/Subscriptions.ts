@@ -73,5 +73,15 @@ export const subscriptionService = {
   getHistory: async () => {
     const response = await api.get('/homid/history');
     return response.data;
+  },
+
+  postFavouriteFolder: async (obj: any) => {
+    const response = await api.post('/favourite', obj);
+    return response.data;
+  },
+
+  getFavouriteFolder: async () => {
+    const response = await api.get('/favourite');
+    return response.data;
   }
 }

@@ -673,7 +673,7 @@ export const MyIDsTable: React.FC = () => {
                             Please ensure your provided information is accurate, relevant to the website's information.
                           </p>
 
-                          <div className="flex gap-2 flex-shrink-0">
+                          <div className="flex gap-x-2 flex-shrink-0">
                             {isEditMode ? (
                               <>
                                 <button
@@ -690,12 +690,21 @@ export const MyIDsTable: React.FC = () => {
                                 </button>
                               </>
                             ) : (
-                              <button
-                                onClick={handleEdit}
-                                className="text-[14px] font-medium text-[#3B82F6] border border-[#3B82F6] px-3 py-1 rounded-[6px] hover:bg-[#3B82F6] hover:text-white transition-colors"
-                              >
-                                Edit
-                              </button>
+                              <div className="flex gap-x-2">
+                                <button
+                                  onClick={handleEdit}
+                                  className="text-[14px] font-medium text-[#3B82F6] border border-[#3B82F6] px-3 py-1 rounded-[6px] hover:bg-[#3B82F6] hover:text-white transition-colors"
+                                >
+                                  Edit
+                                </button>
+
+                                <button
+                                  onClick={handleInfoSave}
+                                  className="text-[14px] font-medium text-white bg-[#3B82F6] border border-[#3B82F6] px-3 py-1 rounded-[6px] hover:bg-[#2563EB] transition-colors"
+                                >
+                                  {isEditedSave ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : "Save"}
+                                </button>
+                              </div>
                             )}
                           </div>
                         </div>
