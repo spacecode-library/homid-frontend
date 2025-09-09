@@ -63,5 +63,15 @@ export const subscriptionService = {
   postHomIdRedirect: async (obj: any) => {
     const response = await api.post('homid/redirect', obj);
     return response.data;
+  },
+
+  postHistory: async (obj: any) => {
+    const response = await api.post('/homid/history', obj);
+    return response.data;
+  },
+
+  getHistory: async () => {
+    const response = await api.get('/homid/history');
+    return response.data;
   }
 }

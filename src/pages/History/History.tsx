@@ -1,55 +1,87 @@
+import { useEffect, useState } from "react";
 import NavigateIcon from "../../assets/navigate.png";
 import StarIcon from "../../assets/star.png";
 import { Header } from "../../components/common/Header"
+import { subscriptionService } from "../../services/Subscriptions";
+
+interface Mapping {
+  imageUrl: string;
+  productName: string;
+  websiteUrl: string;
+  formattedHomId: string;
+}
+
+interface SearchItem {
+  time: string;
+  mapping: Mapping;
+}
+
+interface HistorySection {
+  date: string;
+  searches: SearchItem[];
+}
 
 export const History = () => {
-  const historyData = [
-    {
-      date: "2025 - June, 1st, Wednesday",
-      items: [
-        {
-          img: "https://cdn-icons-png.flaticon.com/512/732/732200.png",
-          name: "Mosquito Zapper - Zap Bugs ...",
-          url: "https://www.walmart.com",
-          time: "00:00 am",
-          id: "987-1234",
-        },
-        {
-          img: "https://cdn-icons-png.flaticon.com/512/888/888879.png",
-          name: "Mosquito Zapper - Zap Bugs ...",
-          url: "https://www.walmart.com",
-          time: "00:00 am",
-          id: "767-1234",
-        },
-        {
-          img: "https://cdn-icons-png.flaticon.com/512/5968/5968292.png",
-          name: "Mosquito Zapper - Zap Bugs ...",
-          url: "https://www.walmart.com",
-          time: "00:00 am",
-          id: "561-1234",
-        },
-      ],
-    },
-    {
-      date: "2025 - May, 31st, Wednesday",
-      items: [
-        {
-          img: "https://cdn-icons-png.flaticon.com/512/888/888859.png",
-          name: "Mosquito Zapper - Zap Bugs ...",
-          url: "https://www.walmart.com",
-          time: "00:00 am",
-          id: "987-1234",
-        },
-        {
-          img: "https://cdn-icons-png.flaticon.com/512/888/888846.png",
-          name: "Mosquito Zapper - Zap Bugs ...",
-          url: "https://www.walmart.com",
-          time: "00:00 am",
-          id: "767-1234",
-        },
-      ],
-    },
-  ];
+  const [historyData, setHistoryData] = useState<HistorySection[]>([]);
+
+  useEffect(() => {
+    const homeIdHistory = async () => {
+      const res = await subscriptionService.getHistory();
+      setHistoryData(res?.data?.history || []);
+    }
+    homeIdHistory();
+  }, [])
+
+  const handleNavigate = async (url: any, numericId: any) => {
+    const digits = numericId.replace(/\D/g, '');
+    const obj = {
+      homId: digits
+    }
+    const res = await subscriptionService.postHomIdRedirect(obj);
+    if (res?.success) {
+      window.open(url, "_blank");
+    }
+  }
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+
+    const year = date.getFullYear();
+
+    // Month name
+    const month = date.toLocaleString("en-US", { month: "long" });
+
+    // Day with suffix (1st, 2nd, 3rd, 4th, etc.)
+    const day = date.getDate();
+    const suffix =
+      day % 10 === 1 && day !== 11
+        ? "st"
+        : day % 10 === 2 && day !== 12
+          ? "nd"
+          : day % 10 === 3 && day !== 13
+            ? "rd"
+            : "th";
+
+    // Weekday name
+    const weekday = date.toLocaleString("en-US", { weekday: "long" });
+
+    return `${year} - ${month}, ${day}${suffix}, ${weekday}`;
+  };
+
+  const formatTime = (timeString: string) => {
+    if (!timeString) return "";
+
+    const [hoursStr, minutes] = timeString.split(":");
+    let hours = parseInt(hoursStr, 10);
+    const ampm = hours >= 12 ? "PM" : "AM";
+
+    hours = hours % 12;
+    hours = hours ? hours : 12; // convert 0 to 12
+
+    return `${hours.toString().padStart(2, "0")}:${minutes} ${ampm}`;
+  };
+
+
   return (
     <div className="mt-[26px]">
       <Header />
@@ -58,29 +90,45 @@ export const History = () => {
           <div key={i} className="flex flex-col space-y-3">
             {/* Date */}
             <p className="text-[16px] text-[#1A73E8FF] font-normal">
-              {section.date}
+              {formatDate(section?.date)}
             </p>
 
             {/* Items */}
-            {section.items.map((item, idx) => (
+            {section?.searches?.map((item, idx) => (
               <div
                 key={idx}
                 className="flex items-center space-x-4 border-b border-[#E0E0E0] pb-3 px-[18px]"
               >
-                <img src={item.img} className="w-[32px] h-[32px]" />
+                <img src={item?.mapping?.imageUrl} className="w-[32px] h-[32px]" />
 
                 <div className="flex flex-col flex-1">
                   <p className="text-[16px] font-medium text-[#000000FF] truncate">
-                    {item.name}
+                    {item?.mapping?.productName
+                      ? (item?.mapping?.productName.length > 26
+                        ? `${item?.mapping?.productName.substring(0, 26)}...`
+                        : item?.mapping?.productName
+                      )
+                      : ''
+                    }
                   </p>
-                  <p className="text-[14px] text-[#6B7280FF]">{item.url}</p>
+                  <p className="text-[14px] text-[#6B7280FF]">
+                    {item?.mapping?.websiteUrl
+                      ? (item?.mapping?.websiteUrl.length > 26
+                        ? `${item?.mapping?.websiteUrl.substring(0, 26)}...`
+                        : item?.mapping?.websiteUrl
+                      )
+                      : ''
+                    }
+                  </p>
                   <div className="flex justify-between">
-                    <p className="text-[12px] text-[#000000FF]">{item.time}</p>
+                    <p className="text-[12px] text-[#000000FF]"> {formatTime(item.time)}</p>
                     <div className="flex items-center space-x-2">
                       <p className="text-[14px] font-bold text-[#00AEFFFF]">
-                        .<span className="text-[#1F54B0FF]">ID</span> {item.id}
+                        .<span className="text-[#1F54B0FF]">ID</span> {item?.mapping?.formattedHomId}
                       </p>
-                      <img src={NavigateIcon} className="w-[14px] h-[14px] cursor-pointer" />
+                      <button onClick={() => handleNavigate(item?.mapping?.websiteUrl, item?.mapping?.formattedHomId)}>
+                        <img src={NavigateIcon} className="w-[14px] h-[14px] cursor-pointer" />
+                      </button>
                       <img src={StarIcon} className="w-[14px] h-[14px] cursor-pointer" />
                     </div>
                   </div>

@@ -61,6 +61,10 @@ export const Product: React.FC<ProductProps> = ({ searchResult, numericId }) => 
     const res = await subscriptionService.postHomIdRedirect(obj);
     if (res?.success) {
       window.open(searchResult.websiteUrl, "_blank");
+      const obj = {
+        "homId": digits
+      }
+      const storeHistory = await subscriptionService.postHistory(obj)
     }
   }
 

@@ -504,7 +504,7 @@ export const MyIDsTable: React.FC = () => {
         {filteredData.map((row, index) => (
           <React.Fragment key={row.id}>
             {/* Main Row */}
-            <div className="grid grid-cols-[.7fr_1.5fr_1.5fr_1fr_1fr_.7fr_.6fr] gap-4 p-4 border-b hover:bg-gray-50 items-center">
+            <div className="leading-tight grid grid-cols-[.7fr_1.5fr_1.5fr_1fr_1fr_.7fr_.6fr] gap-x-4 p-4 border-b hover:bg-gray-50 items-center">
               {/* ID */}
               <div className="text-[16px] font-medium text-[#2563EBFF]">{row?.numericId?.slice(0, 4)}-{row?.numericId?.slice(4)}</div>
               {/* Target URL */}
@@ -591,6 +591,13 @@ export const MyIDsTable: React.FC = () => {
               <div onClick={() => toggleGlobal(index)} className="cursor-pointer">
                 <img src={gobalIcon} className="w-6 h-6" />
               </div>
+              {
+                row?.status == "pending" && <div className="col-span-7">
+                  <p className="text-sm text-red-500 font-medium leading-tight">
+                    This Id is in moderation
+                  </p>
+                </div>
+              }
             </div>
 
             {/* Accordion Content */}
