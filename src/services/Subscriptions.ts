@@ -83,5 +83,20 @@ export const subscriptionService = {
   getFavouriteFolder: async () => {
     const response = await api.get('/favourite');
     return response.data;
+  },
+
+  postAddTofavouriteCard: async (id: string, obj: any) => {
+    const response = await api.post(`/favourite/${id}/products`, obj);
+    return response.data;
+  },
+
+  getFavouritesById: async (id: string) => {
+    const response = await api.get(`/favourite/${id}`);
+    return response.data;
+  },
+
+  deleteFavouritesItem: async (folderId: string, itemId: string) => {
+    const response = await api.delete(`/favourite/folders/${folderId}/items/${itemId}`);
+    return response.data;
   }
 }
