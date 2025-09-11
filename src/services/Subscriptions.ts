@@ -98,5 +98,10 @@ export const subscriptionService = {
   deleteFavouritesItem: async (folderId: string, itemId: string) => {
     const response = await api.delete(`/favourite/folders/${folderId}/items/${itemId}`);
     return response.data;
+  },
+
+  deleteFavouritesFolder: async (id: string) => {
+    const response = await api.delete(`/favourite/folders/${id}`);
+    return response.data;
   }
 }

@@ -21,7 +21,7 @@ interface SearchResult {
   // Add other properties that your API returns
 }
 
-export const Keypad: React.FC<KeypadProps> = ({ onSubmit }) => {
+export const Keypad: React.FC<KeypadProps> = () => {
   const [value, setValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
@@ -80,6 +80,10 @@ export const Keypad: React.FC<KeypadProps> = ({ onSubmit }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCloseProduct = () => {
+    setSearchResult(null);
   };
 
   useEffect(() => {
@@ -276,7 +280,7 @@ export const Keypad: React.FC<KeypadProps> = ({ onSubmit }) => {
       {
         searchResult !== null &&
         <div className='z-20 absolute top-[30%] left-0 right-0 px-4'>
-          <Product searchResult={searchResult} numericId={value} />
+          <Product searchResult={searchResult} numericId={value} onClose={handleCloseProduct} />
         </div>
       }
     </div>

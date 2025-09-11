@@ -25,8 +25,8 @@ function App() {
     location.pathname === "/buyId/cart" ||
     location.pathname === "/id-management" ||
     location.pathname === "/buy-credit" ||
-    location.pathname === "/upgrade-plans" ||
-    location.pathname.startsWith("/favourites/");
+    location.pathname === "/upgrade-plans" 
+    // location.pathname.startsWith("/favourites/");
 
   return (
     <>

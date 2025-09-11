@@ -3,7 +3,7 @@ import KMartImg from "../../assets/kmart.png";
 import BurgerKingImg from "../../assets/burgerKing.png";
 import addIcon from "../../assets/add.png";
 import { Header } from "../../components/common/Header"
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { subscriptionService } from "../../services/Subscriptions";
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -27,6 +27,11 @@ export const Favourites: React.FC = () => {
   const [newFolderName, setNewFolderName] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState<boolean>(false);
+  const [folderToDelete, setFolderToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+
+  const navigate = useNavigate();
 
   // Remove newFolderName from dependency array - only run once on mount
   useEffect(() => {
@@ -81,10 +86,10 @@ export const Favourites: React.FC = () => {
 
       try {
         setIsSaving(true);
-        
+
         // Call API to save folder
         await subscriptionService.postFavouriteFolder(obj);
-        
+
         // Refresh the list after successful save
         const res = await subscriptionService.getFavouriteFolder();
         setFavouritesList(res?.data);
@@ -92,7 +97,7 @@ export const Favourites: React.FC = () => {
         setNewFolderName("");
         setShowInput(false);
         toast.success("Folder created successfully!");
-        
+
       } catch (error) {
         console.error("Error creating folder:", error);
         toast.error("Failed to create folder");
@@ -109,6 +114,45 @@ export const Favourites: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setNewFolderName(e.target.value);
+  };
+
+  // Show confirmation dialog
+  const handleDeleteClick = (e: React.MouseEvent, id: string, name: string) => {
+    e.preventDefault(); // Prevent navigation
+    e.stopPropagation(); // Stop event bubbling
+    setFolderToDelete({ id, name });
+    setShowDeleteConfirmation(true);
+  };
+
+  // Cancel delete confirmation
+  const handleCancelDelete = () => {
+    setShowDeleteConfirmation(false);
+    setFolderToDelete(null);
+  };
+
+  // Confirm and execute delete
+  const handleConfirmDelete = async () => {
+    if (!folderToDelete) return;
+
+    try {
+      setIsDeleting(true);
+      const res = await subscriptionService.deleteFavouritesFolder(folderToDelete.id);
+
+      if (res?.success) {
+        // Update local state to remove the deleted folder
+        setFavouritesList(prev => prev.filter(item => item.id !== folderToDelete.id));
+        toast.success(res?.message || "Folder deleted successfully!");
+      } else {
+        toast.error(res?.message || "Failed to delete folder");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete folder");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirmation(false);
+      setFolderToDelete(null);
+    }
   };
 
   // Loader Component
@@ -134,7 +178,7 @@ export const Favourites: React.FC = () => {
 
               return (
                 <Link key={favouritesItem.id} to={favouritesItem.id}>
-                  <div className="flex flex-col">
+                  <div className="relative flex flex-col">
                     <div className="rounded-[20px] border-2 border-[#00E5FFFF] p-4 flex justify-center items-center h-[110px]">
                       <div className={getLayoutClasses(itemCount)}>
                         {displayItems.map((product: Product, index: number) => (
@@ -150,6 +194,15 @@ export const Favourites: React.FC = () => {
                     <p className="text-[14px] font-normal text-[#1A73E8FF] text-center">
                       {favouritesItem.name}
                     </p>
+
+                    <button
+                      onClick={(e) => handleDeleteClick(e, favouritesItem.id, favouritesItem.name)}
+                      className="absolute right-0 -top-4 text-gray-500 hover:text-gray-700 text-xl font-bold"
+                      type="button"
+                      aria-label="Delete folder"
+                    >
+                      ×
+                    </button>
                   </div>
                 </Link>
               );
@@ -227,32 +280,58 @@ export const Favourites: React.FC = () => {
           </div>
         )}
 
-        {/* Toast Notification */}
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: '#fff',
-              color: '#333',
-              border: '1px solid #ddd',
-              borderRadius: '8px',
-              fontSize: '14px',
-            },
-            success: {
-              iconTheme: {
-                primary: '#22c55e',
-                secondary: '#fff',
-              },
-            },
-            error: {
-              iconTheme: {
-                primary: '#ef4444',
-                secondary: '#fff',
-              },
-            },
-          }}
-        />
+        {/* Delete Confirmation Modal */}
+        {showDeleteConfirmation && folderToDelete && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white w-full max-w-md mx-4 rounded-lg shadow-lg p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-[#1A73E8FF]">Delete Folder</h3>
+                <button
+                  onClick={handleCancelDelete}
+                  className="text-gray-500 hover:text-gray-700 text-xl font-bold"
+                  type="button"
+                  aria-label="Close"
+                  disabled={isDeleting}
+                >
+                  ×
+                </button>
+              </div>
+
+              <p className="text-gray-700 mb-6">
+                Are you sure you want to delete the folder "{folderToDelete.name}"? This action cannot be undone.
+              </p>
+
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={handleCancelDelete}
+                  className="px-4 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
+                  type="button"
+                  disabled={isDeleting}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={handleConfirmDelete}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center"
+                  type="button"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Deleting...
+                    </>
+                  ) : (
+                    'Yes, Delete'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+
       </div>
     </>
   )

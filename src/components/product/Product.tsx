@@ -47,9 +47,10 @@ interface FavouriteFolder {
 interface ProductProps {
   searchResult: SearchResult;
   numericId: string;
+  onClose: () => void;
 }
 
-export const Product: React.FC<ProductProps> = ({ searchResult, numericId }) => {
+export const Product: React.FC<ProductProps> = ({ searchResult, numericId, onClose }) => {
   const [showPopup, setShowPopup] = useState<boolean>(false);
   const [allFav, setAllFav] = useState<FavouriteFolder[]>([]);
   const [isLoadingFavourites, setIsLoadingFavourites] = useState<boolean>(false);
@@ -185,7 +186,7 @@ export const Product: React.FC<ProductProps> = ({ searchResult, numericId }) => 
           <div>
             <img src={InfoIcon} className='w-6 h-6' />
           </div>
-          <div>
+          <div onClick={onClose}>
             <img src={CloseIcon} className='w-6 h-6' />
           </div>
         </div>

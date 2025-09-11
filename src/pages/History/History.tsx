@@ -82,11 +82,18 @@ export const History = () => {
   };
 
 
+  const Loader = () => (
+    <div className="flex justify-center items-center py-20">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1A73E8FF]"></div>
+    </div>
+  );
+
+
   return (
     <div className="mt-[26px]">
       <Header />
       <div className="px-7 mt-[14px] flex flex-col space-y-6">
-        {historyData.map((section, i) => (
+        {historyData.length > 0 ? (historyData.map((section, i) => (
           <div key={i} className="flex flex-col space-y-3">
             {/* Date */}
             <p className="text-[16px] text-[#1A73E8FF] font-normal">
@@ -136,7 +143,9 @@ export const History = () => {
               </div>
             ))}
           </div>
-        ))}
+        ))) : (
+          <Loader />
+        )}
       </div>
     </div>
   )
