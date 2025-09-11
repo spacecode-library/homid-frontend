@@ -131,6 +131,8 @@ export const MyIDsTable: React.FC = () => {
   const [isReadUrl, setIsReadUrl] = useState<boolean>(false);
   const [isEditedSave, setIsEditedSave] = useState<boolean>(false);
 
+  const [localStatusStates, setLocalStatusStates] = useState<Record<string, "pending" | "approved" | "rejected" | "auto_approved">>({});
+
   const resetForm = () => {
     setWebsiteUrl("");
     setWebsiteInfo("");
@@ -290,8 +292,12 @@ export const MyIDsTable: React.FC = () => {
     setGlobalExpandedRow(globalExpandedRow === index ? null : index)
   }
 
-  const getUiStatus = (status: "pending" | "approved" | "rejected" | "auto_approved"): "Active" | "Inactive" => {
-    if (status === "approved" || status === "auto_approved") {
+  const getUiStatus = (status: "pending" | "approved" | "rejected" | "auto_approved", rowId?: string): "Active" | "Inactive" => {
+    // Check if there's a local override for this row
+    const localStatus = rowId ? localStatusStates[rowId] : undefined;
+    const actualStatus = localStatus || status;
+
+    if (actualStatus === "approved" || actualStatus === "auto_approved") {
       return "Active";
     }
     return "Inactive";
@@ -462,6 +468,39 @@ export const MyIDsTable: React.FC = () => {
     }
   }
 
+  const handleToggleStatus = async (id: string, currentStatus: "pending" | "approved" | "rejected" | "auto_approved") => {
+    try {
+      // Determine new status based on current UI state
+      const currentUiStatus = getUiStatus(currentStatus);
+      const newStatus = currentUiStatus === "Active" ? "pending" : "approved";
+
+      // Optimistically update local state for immediate UI feedback
+      setLocalStatusStates(prev => ({
+        ...prev,
+        [id]: newStatus
+      }));
+
+      const res = await subscriptionService.updateStatus(id);
+
+      // Update the main table data to reflect the change
+      setTableData(prevData =>
+        prevData.map(row =>
+          row.id === id ? { ...row, status: newStatus } : row
+        )
+      );
+
+    } catch (error) {
+      console.error("Error toggling status:", error);
+
+      // Revert local state on error
+      setLocalStatusStates(prev => {
+        const newState = { ...prev };
+        delete newState[id];
+        return newState;
+      });
+    }
+  };
+
   return (
     <div className="mt-[52px]">
       {/* Header */}
@@ -553,24 +592,28 @@ export const MyIDsTable: React.FC = () => {
 
               {/* Status - Interactive Switch */}
               <div className="flex items-center gap-2">
-                <div
+                <button
+                  onClick={() => handleToggleStatus(row.id, row.status)}
                   className={`w-12 h-6 ${getStatusToggleColor(
-                    getUiStatus(row.status)
-                  )} rounded-full relative transition-colors duration-200 ease-in-out`}
+                    getUiStatus(row.status, row.id)
+                  )} rounded-full relative transition-colors duration-200 ease-in-out cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 hover:shadow-md`}
+                  role="switch"
+                  aria-checked={getUiStatus(row.status, row.id) === "Active"}
+                  aria-label={`Toggle status to ${getUiStatus(row.status, row.id) === "Active" ? "Inactive" : "Active"}`}
                 >
                   <div
-                    className={`w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 transition-transform duration-200 ease-in-out ${getUiStatus(row.status) === "Active"
+                    className={`w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 transition-transform duration-200 ease-in-out ${getUiStatus(row.status, row.id) === "Active"
                       ? "transform translate-x-6"
                       : "transform translate-x-0.5"
                       }`}
                   ></div>
-                </div>
+                </button>
                 <span
                   className={`text-sm font-medium ${getStatusColor(
-                    getUiStatus(row.status)
+                    getUiStatus(row.status, row.id)
                   )}`}
                 >
-                  {getUiStatus(row.status)}
+                  {getUiStatus(row.status, row.id)}
                 </span>
               </div>
 

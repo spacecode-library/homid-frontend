@@ -60,6 +60,10 @@ export const subscriptionService = {
     return response.data;
   },
 
+  updateStatus: async (id: string) => {
+    const response = await api.put(`/homid/status/${id}`)
+  },
+
   postHomIdRedirect: async (obj: any) => {
     const response = await api.post('homid/redirect', obj);
     return response.data;
@@ -103,5 +107,5 @@ export const subscriptionService = {
   deleteFavouritesFolder: async (id: string) => {
     const response = await api.delete(`/favourite/folders/${id}`);
     return response.data;
-  }
+  },
 }
