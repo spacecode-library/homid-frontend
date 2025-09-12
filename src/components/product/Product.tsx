@@ -106,7 +106,7 @@ export const Product: React.FC<ProductProps> = ({ searchResult, numericId, onClo
       if (res?.success) {
         setShowPopup(false);
         toast.success(res?.message);
-        navigate("/favourites");
+        // navigate("/favourites");
       } else {
         toast.error(res?.message);
       }

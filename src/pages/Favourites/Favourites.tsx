@@ -195,14 +195,24 @@ export const Favourites: React.FC = () => {
                       {favouritesItem.name}
                     </p>
 
+                    {/* <button
+                      onClick={(e) => handleDeleteClick(e, favouritesItem.id, favouritesItem.name)}
+                      className="absolute -right-[6px] -top-4 text-gray-500 hover:text-gray-700 text-xl font-bold"
+                      type="button"
+                      aria-label="Delete folder"
+                    >
+                      ×
+                    </button> */}
+
                     <button
                       onClick={(e) => handleDeleteClick(e, favouritesItem.id, favouritesItem.name)}
-                      className="absolute right-0 -top-4 text-gray-500 hover:text-gray-700 text-xl font-bold"
+                      className="absolute -right-2 -top-2 flex items-center justify-center w-7 h-7 rounded-full bg-gray-200 text-gray-600 hover:bg-red-500 hover:text-white shadow-md transition-all duration-200"
                       type="button"
                       aria-label="Delete folder"
                     >
                       ×
                     </button>
+
                   </div>
                 </Link>
               );

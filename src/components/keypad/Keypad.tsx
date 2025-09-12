@@ -5,6 +5,8 @@ import { ErrorAlert } from '../ErrorAlert';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Product } from '../product/Product';
 import { subscriptionService } from '../../services/Subscriptions';
+import { InActiveId } from '../InActiveId';
+import { NotFoundId } from '../NotFoundId';
 
 interface KeypadProps {
   onSubmit?: (searchResult: any) => void;
@@ -27,7 +29,8 @@ export const Keypad: React.FC<KeypadProps> = () => {
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const [isPressed, setIsPressed] = useState<string | null>(null);
   const [error, setError] = useState<{ title?: string; message: string; type?: 'error' | 'warning' | 'info' } | null>(null);
-
+  const [status, setStatus] = useState<string>("");
+  const [notFound, setNotFound] = useState<boolean>(false);
 
   const handleKeyPress = (key: string) => {
     if (value.replace(/\D/g, '').length < 8) {
@@ -72,6 +75,9 @@ export const Keypad: React.FC<KeypadProps> = () => {
       const res = await subscriptionService.postHomIdInfo(obj)
       if (res.success) {
         setSearchResult(res?.data)
+      } else {
+        setStatus(res?.data?.status);
+        setNotFound(res?.data?.notfound);
       }
 
     } catch (error: any) {
@@ -84,6 +90,8 @@ export const Keypad: React.FC<KeypadProps> = () => {
 
   const handleCloseProduct = () => {
     setSearchResult(null);
+    setStatus("");
+    setNotFound(false);
   };
 
   useEffect(() => {
@@ -277,6 +285,23 @@ export const Keypad: React.FC<KeypadProps> = () => {
         </a>
         <p className="text-[12px] text-[#666666] leading-none">© 2025 Hom.ID, All Rights Reserved</p>
       </motion.div>
+
+      {
+        (status === "pending" || status === "inactive" || status === null) && (
+          <div className='z-20 absolute top-[30%] left-0 right-0 px-4'>
+            <InActiveId onClose={handleCloseProduct} />
+          </div>
+        )
+      }
+
+      {
+        notFound &&
+        <div className='z-20 absolute top-[30%] left-0 right-0 px-4'>
+          <NotFoundId onClose={handleCloseProduct} />
+        </div>
+      }
+
+
       {
         searchResult !== null &&
         <div className='z-20 absolute top-[30%] left-0 right-0 px-4'>
