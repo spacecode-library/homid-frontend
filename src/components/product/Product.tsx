@@ -147,26 +147,26 @@ export const Product: React.FC<ProductProps> = ({ searchResult, numericId, onClo
   const getLayoutClasses = (itemCount: number): string => {
     switch (itemCount) {
       case 1:
-        return "w-full h-full flex justify-center items-center";
+        return "w-full h-full flex justify-start items-center";
       case 2:
         return "w-full h-full grid grid-cols-2 gap-1";
       case 3:
-        return "flex flex-wrap justify-center items-center gap-2";
+        return "w-full h-full grid grid-cols-2 gap-1"; // 2 items in first row, 1 in second
       default: // 4 or more
-        return "grid grid-cols-2 gap-2 place-items-center";
+        return "w-full h-full grid grid-cols-2 gap-1"; // Always 2 items per row
     }
   };
 
   const getImageSize = (itemCount: number): string => {
     switch (itemCount) {
       case 1:
-        return "w-full h-full object-cover rounded-[12px]";
+        return "w-[32px] h-[32px] rounded-[100%] object-cover";
       case 2:
-        return "w-full h-full object-cover rounded-[8px]";
+        return "w-[32px] h-[32px] rounded-[100%] object-cover";
       case 3:
-        return "w-[30px] h-[30px]";
+        return "w-[32px] h-[32px] rounded-[100%] object-cover";
       default: // 4 or more
-        return "w-[30px] h-[30px]";
+        return "w-[32px] h-[32px] rounded-[100%] object-cover";
     }
   };
 

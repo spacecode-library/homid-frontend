@@ -108,4 +108,18 @@ export const subscriptionService = {
     const response = await api.delete(`/favourite/folders/${id}`);
     return response.data;
   },
+
+  getUsersInfo: async () => {
+    const response = await api.get('/users/info');
+    return response.data;
+  },
+
+  postProfileImage: async (formData: FormData) => {
+    const response = await api.post('/users/profile/upload-image', formData, {
+      headers: {
+        "Content-Type": "multipart/form-data", 
+      },
+    });
+    return response.data;
+  }
 }

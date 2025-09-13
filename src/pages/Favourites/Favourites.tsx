@@ -52,26 +52,26 @@ export const Favourites: React.FC = () => {
   const getLayoutClasses = (itemCount: number): string => {
     switch (itemCount) {
       case 1:
-        return "w-full h-full flex justify-center items-center";
+        return "w-full h-full flex justify-start items-center";
       case 2:
         return "w-full h-full grid grid-cols-2 gap-1";
       case 3:
-        return "flex flex-wrap justify-center items-center gap-2";
+        return "w-full h-full grid grid-cols-2 gap-1"; // 2 items in first row, 1 in second
       default: // 4 or more
-        return "grid grid-cols-2 gap-2 place-items-center";
+        return "w-full h-full grid grid-cols-2 gap-1"; // Always 2 items per row
     }
   };
 
   const getImageSize = (itemCount: number): string => {
     switch (itemCount) {
       case 1:
-        return "w-full h-full object-cover rounded-[12px]";
+        return "w-[32px] h-[32px] rounded-[100%] object-cover";
       case 2:
-        return "w-full h-full object-cover rounded-[8px]";
+        return "w-[32px] h-[32px] rounded-[100%] object-cover";
       case 3:
-        return "w-[30px] h-[30px]";
+        return "w-[32px] h-[32px] rounded-[100%] object-cover";
       default: // 4 or more
-        return "w-[30px] h-[30px]";
+        return "w-[32px] h-[32px] rounded-[100%] object-cover";
     }
   };
 
@@ -195,15 +195,6 @@ export const Favourites: React.FC = () => {
                       {favouritesItem.name}
                     </p>
 
-                    {/* <button
-                      onClick={(e) => handleDeleteClick(e, favouritesItem.id, favouritesItem.name)}
-                      className="absolute -right-[6px] -top-4 text-gray-500 hover:text-gray-700 text-xl font-bold"
-                      type="button"
-                      aria-label="Delete folder"
-                    >
-                      ×
-                    </button> */}
-
                     <button
                       onClick={(e) => handleDeleteClick(e, favouritesItem.id, favouritesItem.name)}
                       className="absolute -right-2 -top-2 flex items-center justify-center w-7 h-7 rounded-full bg-gray-200 text-gray-600 hover:bg-red-500 hover:text-white shadow-md transition-all duration-200"
@@ -213,13 +204,20 @@ export const Favourites: React.FC = () => {
                       ×
                     </button>
 
+                    <div
+                      className="absolute -right-2 bottom-3 flex items-center justify-center w-6 h-6 rounded-full bg-red-500 text-white text-xs font-semibold shadow-md hover:scale-110 transition-transform duration-200"
+                    >
+                      <span>{itemCount}</span>
+                    </div>
+
+
                   </div>
                 </Link>
               );
             })}
 
             {/* Add button as a grid item card */}
-            <div className="flex items-center -mt-[16px] ml-[40px]">
+            <div className="flex items-center ml-[40px]">
               <button
                 onClick={handleAddClick}
                 className="bg-[#1A73E8FF] rounded-full flex justify-center items-center p-4"
