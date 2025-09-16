@@ -117,9 +117,14 @@ export const subscriptionService = {
   postProfileImage: async (formData: FormData) => {
     const response = await api.post('/users/profile/upload-image', formData, {
       headers: {
-        "Content-Type": "multipart/form-data", 
+        "Content-Type": "multipart/form-data",
       },
     });
+    return response.data;
+  },
+
+  getTopIds: async () => {
+    const response = await api.get('/homid/top-ids');
     return response.data;
   }
 }

@@ -16,6 +16,7 @@ import tiktokIcon from "../../assets/tiktok.png";
 import bellIcon from "../../assets/bell.svg";
 import fileTextIcon from "../../assets/file-text.svg";
 import barChartIcon from "../../assets/chart.svg";
+import { LiveTopPerforming } from "./LiveTopPerforming";
 
 
 type Status = "Live" | "Demo";
@@ -135,9 +136,8 @@ export const TopPerforming = () => {
 
       {
         row.status === "Live" ? (
-          <div className="bg-white rounded-[8px] shadow-sm border border-[#E5E7EBFF] p-4 mt-5">
-            <p className="text-center">No Active Id's</p>
-          </div>) : (
+          <LiveTopPerforming />
+        ) : (
           <div className="grid grid-cols-3 gap-6 mt-5">
             {topPerformingData.map((card, index) => (
               <div key={card.id} className="bg-white rounded-[8px] shadow-sm border border-[#E5E7EBFF] p-4">
