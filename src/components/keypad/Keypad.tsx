@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { searchService } from '../../services/search';
 import { idsService } from '../../services/ids';
 import { ErrorAlert } from '../ErrorAlert';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Fireworks } from 'fireworks-js';
 import { Product } from '../product/Product';
 import { subscriptionService } from '../../services/Subscriptions';
 import { InActiveId } from '../InActiveId';
@@ -31,12 +32,37 @@ export const Keypad: React.FC<KeypadProps> = () => {
   const [error, setError] = useState<{ title?: string; message: string; type?: 'error' | 'warning' | 'info' } | null>(null);
   const [status, setStatus] = useState<string>("");
   const [notFound, setNotFound] = useState<boolean>(false);
+  const fireworksRef = useRef<HTMLDivElement>(null);
+  const fireworksInstance = useRef<Fireworks | null>(null);
 
   const handleKeyPress = (key: string) => {
     if (value.replace(/\D/g, '').length < 8) {
       setValue(prev => prev + key);
       setIsPressed(key);
       setTimeout(() => setIsPressed(null), 150);
+
+      // Trigger fireworks for digit keys
+      if (fireworksRef.current && !fireworksInstance.current) {
+        fireworksInstance.current = new Fireworks(fireworksRef.current, {
+          rocketsPoint: { min: 50, max: 50 },
+          hue: { min: 0, max: 360 },
+          delay: { min: 15, max: 30 },
+          acceleration: 1.05,
+          friction: 0.95,
+          gravity: 1.5,
+          particles: 50,
+          explosion: 5
+        });
+      }
+
+      if (fireworksInstance.current) {
+        fireworksInstance.current.start();
+        setTimeout(() => {
+          if (fireworksInstance.current) {
+            fireworksInstance.current.stop();
+          }
+        }, 1200);
+      }
 
       // Vibrate on mobile if supported
       if ('vibrate' in navigator) {
@@ -134,6 +160,21 @@ export const Keypad: React.FC<KeypadProps> = () => {
 
   return (
     <div className='px-10'>
+
+      <div
+        ref={fireworksRef}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          zIndex: 1000
+        }}
+      />
+
+
       {/* ID Display */}
 
       {/* <motion.div
