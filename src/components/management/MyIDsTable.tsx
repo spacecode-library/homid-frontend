@@ -86,6 +86,10 @@ export const MyIDsTable: React.FC = () => {
   const [isAdultWebsite, setIsAdultWebsite] = useState<null | boolean>(null);
   const [isPromotingOwnServices, setIsPromotingOwnServices] = useState<null | boolean>(null);
   const [isOwnerOrAdmin, setIsOwnerOrAdmin] = useState<null | boolean>(null);
+  // States for Row #1
+  const [value1, setValue1] = useState<string>("");
+  const [selectedCountry1, setSelectedCountry1] = useState<string>("");
+  const [isOpen1, setIsOpen1] = useState<boolean>(false);
   // States for Row #2
   const [value2, setValue2] = useState<string>("");
   const [selectedCountry2, setSelectedCountry2] = useState<string>("");
@@ -139,6 +143,10 @@ export const MyIDsTable: React.FC = () => {
     setIsAdultWebsite(null);
     setIsPromotingOwnServices(null);
     setIsOwnerOrAdmin(null);
+
+    setValue1("");
+    setSelectedCountry1("");
+    setIsOpen1(false);
 
     setValue2("");
     setSelectedCountry2("");
@@ -196,6 +204,9 @@ export const MyIDsTable: React.FC = () => {
           setIsAdultWebsite(data?.adultGambling);
           setIsPromotingOwnServices(data?.promotion);
           setIsOwnerOrAdmin(data?.ownerOrAdministrator);
+
+          setValue1(data?.targetRegion1);
+          setSelectedCountry1((data?.targetRegion1));
 
           setValue2(data?.targetRegion2);
           setSelectedCountry2((data?.targetRegion2));
@@ -423,7 +434,7 @@ export const MyIDsTable: React.FC = () => {
         "adultGambling": isAdultWebsite,
         "promotion": isPromotingOwnServices,
         "ownerOrAdministrator": isOwnerOrAdmin,
-        "targetRegion1": "US",
+        "targetRegion1": value1,
         "targetRegion2": value2,
         "targetRegion3": value3,
         "startDate": startDate,
@@ -835,18 +846,15 @@ export const MyIDsTable: React.FC = () => {
 
                       <div className="flex items-center space-x-4 w-full">
                         {/* Row #1 */}
-                        <label className="flex items-center space-x-2 w-full">
-                          <input type="checkbox" className="w-4 h-4" />
-                          <span className="text-[16px] text-[ #374151FF]">#1:</span>
-                          <div className="relative flex-1">
-                            <input
-                              type="text"
-                              placeholder="Search"
-                              className="w-full text-sm px-2 py-1 pr-8 border border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                            <Search className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                          </div>
-                        </label>
+                        <CountrySelectorRow
+                          label="#1:"
+                          value={value1}
+                          selectedCountry={selectedCountry1}
+                          isOpen={isOpen1}
+                          onValueChange={setValue1}
+                          onSelectedCountryChange={setSelectedCountry1}
+                          onOpenChange={setIsOpen1}
+                        />
 
                         {/* Row #2 */}
                         <CountrySelectorRow
