@@ -126,5 +126,10 @@ export const subscriptionService = {
   getTopIds: async () => {
     const response = await api.get('/homid/top-ids');
     return response.data;
+  },
+
+  getAnalyticsId: async (id: string) => {
+    const response = await api.get(`/homid/traffic/${id}`);
+    return response.data;
   }
 }

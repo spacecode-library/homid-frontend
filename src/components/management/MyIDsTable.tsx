@@ -6,6 +6,7 @@ import {
   ExternalLink,
   X,
   Plus,
+  Eye,
 } from "lucide-react";
 
 import {
@@ -33,6 +34,7 @@ import { CountrySelectorRow } from "../CountrySelectorRow";
 import { CountryMultiSelector } from "../CountryMultiSelector";
 import { SocialMediaSelector } from "../SocialMediaSelector";
 import toast from "react-hot-toast";
+import { ViewAnalytics } from "./ViewAnalytics";
 
 // Types
 interface AccordionData {
@@ -135,6 +137,8 @@ export const MyIDsTable: React.FC = () => {
 
   const [localStatusStates, setLocalStatusStates] = useState<Record<string, "pending" | "approved" | "rejected" | "auto_approved">>({});
 
+  const [showViewAnalytics, setShowViewAnalytics] = useState<boolean>(false);
+  const [analyticsId, setAnalyticsId] = useState<string>("");
   const resetForm = () => {
     setWebsiteUrl("");
     setWebsiteInfo("");
@@ -511,6 +515,11 @@ export const MyIDsTable: React.FC = () => {
     }
   };
 
+  const handleClosePopup = () => {
+    setShowViewAnalytics(false);
+    setAnalyticsId("");
+  }
+
   return (
     <div className="mt-[52px]">
       {/* Header */}
@@ -533,7 +542,7 @@ export const MyIDsTable: React.FC = () => {
       {/* Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {/* Table Header */}
-        <div className="grid grid-cols-[.7fr_1.5fr_1.5fr_1fr_1fr_.7fr_.6fr] gap-4 p-4 bg-white border-b font-semibold text-[#374151FF] text-[16px]">
+        <div className="grid grid-cols-[.7fr_1.5fr_1.5fr_1fr_.7fr_.7fr_.6fr_.5fr] gap-4 p-4 bg-white border-b font-semibold text-[#374151FF] text-[16px]">
           <div className="flex items-center gap-2">
             ID <ChevronDown className="w-4 h-4" />
           </div>
@@ -542,6 +551,7 @@ export const MyIDsTable: React.FC = () => {
           <div className="flex items-center gap-2">
             Total Redirects <ChevronDown className="w-4 h-4" />
           </div>
+          <div>Analytics</div>
           <div className="flex items-center gap-2">
             Status <ChevronDown className="w-4 h-4" />
           </div>
@@ -553,7 +563,7 @@ export const MyIDsTable: React.FC = () => {
         {filteredData.map((row, index) => (
           <React.Fragment key={row.id}>
             {/* Main Row */}
-            <div className="leading-tight grid grid-cols-[.7fr_1.5fr_1.5fr_1fr_1fr_.7fr_.6fr] gap-x-4 p-4 border-b hover:bg-gray-50 items-center">
+            <div className="leading-tight grid grid-cols-[.7fr_1.5fr_1.5fr_1fr_.7fr_.7fr_.6fr_.5fr] gap-x-4 p-4 border-b hover:bg-gray-50 items-center">
               {/* ID */}
               <div className="text-[16px] font-medium text-[#2563EBFF]">{row?.numericId?.slice(0, 4)}-{row?.numericId?.slice(4)}</div>
               {/* Target URL */}
@@ -599,6 +609,13 @@ export const MyIDsTable: React.FC = () => {
               </div>
               {/* Total Redirects */}
               <div className="text-[16px] font-normal text-[#242524FF]">{row?.redirectCreditsUsed}</div>
+
+              {/* Analytics */}
+              <div className="relative text-[16px] font-normal text-[#242524FF]">
+                <button onClick={() => { setShowViewAnalytics(true); setAnalyticsId(row?.id) }}>
+                  <Eye />
+                </button>
+              </div>
 
               {/* Status - Interactive Switch */}
               <div className="flex items-center gap-2">
@@ -1116,6 +1133,10 @@ export const MyIDsTable: React.FC = () => {
           </React.Fragment>
         ))}
       </div>
-    </div >
+
+      {
+        showViewAnalytics && <ViewAnalytics open={showViewAnalytics} close={handleClosePopup} id={analyticsId} />
+      }
+    </div>
   );
 };

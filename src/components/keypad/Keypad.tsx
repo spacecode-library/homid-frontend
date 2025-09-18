@@ -3,7 +3,6 @@ import { searchService } from '../../services/search';
 import { idsService } from '../../services/ids';
 import { ErrorAlert } from '../ErrorAlert';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Fireworks } from 'fireworks-js';
 import { Product } from '../product/Product';
 import { subscriptionService } from '../../services/Subscriptions';
 import { InActiveId } from '../InActiveId';
@@ -32,37 +31,12 @@ export const Keypad: React.FC<KeypadProps> = () => {
   const [error, setError] = useState<{ title?: string; message: string; type?: 'error' | 'warning' | 'info' } | null>(null);
   const [status, setStatus] = useState<string>("");
   const [notFound, setNotFound] = useState<boolean>(false);
-  const fireworksRef = useRef<HTMLDivElement>(null);
-  const fireworksInstance = useRef<Fireworks | null>(null);
 
   const handleKeyPress = (key: string) => {
     if (value.replace(/\D/g, '').length < 8) {
       setValue(prev => prev + key);
       setIsPressed(key);
       setTimeout(() => setIsPressed(null), 150);
-
-      // Trigger fireworks for digit keys
-      if (fireworksRef.current && !fireworksInstance.current) {
-        fireworksInstance.current = new Fireworks(fireworksRef.current, {
-          rocketsPoint: { min: 50, max: 50 },
-          hue: { min: 0, max: 360 },
-          delay: { min: 15, max: 30 },
-          acceleration: 1.05,
-          friction: 0.95,
-          gravity: 1.5,
-          particles: 50,
-          explosion: 5
-        });
-      }
-
-      if (fireworksInstance.current) {
-        fireworksInstance.current.start();
-        setTimeout(() => {
-          if (fireworksInstance.current) {
-            fireworksInstance.current.stop();
-          }
-        }, 1200);
-      }
 
       // Vibrate on mobile if supported
       if ('vibrate' in navigator) {
@@ -160,79 +134,7 @@ export const Keypad: React.FC<KeypadProps> = () => {
 
   return (
     <div className='px-10'>
-
-      <div
-        ref={fireworksRef}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          pointerEvents: 'none',
-          zIndex: 1000
-        }}
-      />
-
-
       {/* ID Display */}
-
-      {/* <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-        className="mb-8"
-      >
-        <div className="flex justify-center items-center gap-x-[11px]">
-          <div className="flex justify-center items-center text-[#1F54B0] text-[40px] font-semibold"><span className='text-[#379AE6]'>.</span>ID</div>
-          <div className="flex justify-center items-center text-[40px] font-semibold">
-            {(() => {
-              const digits = value.replace(/\D/g, '');
-
-              if (digits.length === 0) {
-                return <span className="text-gray-400">0000-0000</span>;
-              }
-
-              let display = '';
-
-              // First 4 digits
-              for (let i = 0; i < 4; i++) {
-                display += i < digits.length ? digits[i] : '0';
-              }
-
-              display += '-';
-
-              // Last 4 digits
-              for (let i = 4; i < 8; i++) {
-                display += i < digits.length ? digits[i] : '0';
-              }
-
-              return (
-                <>
-                  {display.split('').map((char, index) => {
-                    let digitPosition = index > 4 ? index - 1 : index;
-
-                    if (char === '-') {
-                      return <span key={index} className="text-[#379AE6]">-</span>;
-                    }
-
-                    const isFilled = digitPosition < digits.length;
-                    return (
-                      <span
-                        key={index}
-                        className={isFilled ? "text-[#379AE6]" : "text-gray-400"}
-                      >
-                        {char}
-                      </span>
-                    );
-                  })}
-                </>
-              );
-            })()}
-          </div>
-        </div>
-      </motion.div> */}
-
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -298,64 +200,6 @@ export const Keypad: React.FC<KeypadProps> = () => {
       </motion.div>
 
       {/* Keypad Grid */}
-
-      {/* <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4, delay: 0.2 }}
-        className="mb-[53px]"
-      >
-        <div className="grid grid-cols-3 gap-x-[15px] gap-y-[16px] w-full">
-          {keys.map((row, rowIndex) => (
-            row.map((key, colIndex) => (
-              <motion.button
-                key={`${rowIndex}-${colIndex}`}
-                whileHover={!loading ? { scale: 1.02 } : {}}
-                whileTap={!loading ? { scale: 0.98 } : {}}
-                onClick={() => {
-                  if (key.number === 'clear') {
-                    handleClear();
-                  } else if (key.number === 'enter') {
-                    handleSearch();
-                  } else if (key.number && key.number !== 'clear' && key.number !== 'enter') {
-                    handleKeyPress(key.number);
-                  }
-                }}
-                className={`
-                  relative h-[90px] rounded-[8px] font-medium transition-all duration-150 border border-[#1F54B0]
-                  ${isPressed === key.number ? 'transform scale-95 shadow-inner' : 'shadow-sm hover:shadow-md'}
-                  ${loading ? 'opacity-50 cursor-not-allowed' : ''}
-                  flex flex-col items-center justify-center
-                `}
-                disabled={loading}
-                aria-label={
-                  key.number === 'clear' ? 'Clear' :
-                    key.number === 'enter' ? 'Enter' :
-                      key.number
-                }
-              >
-                {key.number === 'clear' ? (
-                  <span className="text-[24px] font-bold leading-none text-[#1F54B0]">Clear</span>
-                ) : key.number === 'enter' ? (
-                  loading ? (
-                    <div className="w-4 h-4 border border-[#1F54B0] border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <span className="text-[24px] font-bold leading-none text-[#1F54B0]">Enter</span>
-                  )
-                ) : (
-                  <div className="flex flex-col items-center">
-                    <span className="text-[48px] font-bold leading-none text-[#1F54B0]">{key.number}</span>
-                    {key.letters && (
-                      <span className="text-[14px] text-[#1F54B0] mt-1">{key.letters}</span>
-                    )}
-                  </div>
-                )}
-              </motion.button>
-            ))
-          ))}
-        </div>
-      </motion.div> */}
-
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -398,16 +242,16 @@ export const Keypad: React.FC<KeypadProps> = () => {
                   }
                 }}
                 className={`
-            relative h-[90px] rounded-[8px] font-medium transition-all duration-200 border border-[#1F54B0]
-            ${isPressed === key.number ?
-                    'transform scale-90 shadow-inner bg-[rgba(31,84,176,0.1)] border-[#1F54B0]' :
+                  relative h-[90px] rounded-[8px] font-medium transition-all duration-200 border border-[#1F54B0] overflow-hidden
+                  ${isPressed === key.number ?
+                    'transform scale-90 shadow-inner border-[#1F54B0]' :
                     'shadow-sm hover:shadow-lg bg-white'
                   }
-            ${loading ? 'opacity-50 cursor-not-allowed' : ''}
-            flex flex-col items-center justify-center
-            active:shadow-inner active:bg-[rgba(31,84,176,0.15)]
-            hover:bg-[rgba(31,84,176,0.03)]
-          `}
+                  ${loading ? 'opacity-50 cursor-not-allowed' : ''}
+                  flex flex-col items-center justify-center
+                  active:shadow-inner
+                  hover:bg-[rgba(31,84,176,0.03)]
+                `}
                 disabled={loading}
                 aria-label={
                   key.number === 'clear' ? 'Clear' :
@@ -415,6 +259,72 @@ export const Keypad: React.FC<KeypadProps> = () => {
                       key.number
                 }
               >
+                {/* Background Animation Layer */}
+                <motion.div
+                  className="absolute inset-0 rounded-[8px]"
+                  animate={isPressed === key.number ? {
+                    background: [
+                      "linear-gradient(135deg, rgba(31, 84, 176, 0.2) 0%, rgba(55, 154, 230, 0.2) 100%)",
+                      "linear-gradient(135deg, rgba(31, 84, 176, 0.5) 0%, rgba(55, 154, 230, 0.5) 100%)",
+                      "linear-gradient(135deg, rgba(31, 84, 176, 0.4) 0%, rgba(55, 154, 230, 0.4) 100%)",
+                      "linear-gradient(135deg, rgba(31, 84, 176, 0.15) 0%, rgba(55, 154, 230, 0.15) 100%)"
+                    ],
+                    transition: { duration: 0.15, times: [0, 0.3, 0.7, 1] }
+                  } : {
+                    background: "rgba(255, 255, 255, 0)",
+                    transition: { duration: 0.2 }
+                  }}
+                />
+
+                {/* Ripple Effect */}
+                <motion.div
+                  className="absolute inset-0 rounded-[8px] pointer-events-none"
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={isPressed === key.number ? {
+                    scale: [0, 1.2, 1.5],
+                    opacity: [0, 0.4, 0],
+                    transition: { duration: 0.3, ease: "easeOut" }
+                  } : {
+                    scale: 0,
+                    opacity: 0
+                  }}
+                  style={{
+                    background: "radial-gradient(circle, rgba(31, 84, 176, 0.6) 0%, rgba(55, 154, 230, 0.4) 40%, rgba(31, 84, 176, 0) 70%)"
+                  }}
+                />
+
+                {/* Pulse Effect */}
+                <motion.div
+                  className="absolute inset-0 rounded-[8px] border-2 border-[#379AE6] pointer-events-none"
+                  initial={{ scale: 1, opacity: 0 }}
+                  animate={isPressed === key.number ? {
+                    color: "#fff",
+                    textShadow: "0 0 15px rgba(255, 255, 255, 0.8)",
+                    transition: { duration: 0.1 }
+                  } : {
+                    color: "rgb(31, 84, 176)",
+                    textShadow: "none",
+                    transition: { duration: 0.2 }
+                  }}
+                />
+
+                {/* Shimmer Effect */}
+                <motion.div
+                  className="absolute inset-0 rounded-[8px] pointer-events-none"
+                  initial={{ x: "-100%" }}
+                  animate={isPressed === key.number ? {
+                    x: ["100%", "-100%"],
+                    transition: { duration: 0.4, ease: "easeInOut" }
+                  } : {
+                    x: "-100%"
+                  }}
+                  style={{
+                    background: "linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%)",
+                    width: "200%"
+                  }}
+                />
+
+                {/* Content Layer - Always on top */}
                 <motion.div
                   animate={isPressed === key.number ? {
                     scale: 0.9,
@@ -423,16 +333,18 @@ export const Keypad: React.FC<KeypadProps> = () => {
                     scale: 1,
                     transition: { duration: 0.2, type: "spring", stiffness: 300 }
                   }}
-                  className="flex flex-col items-center"
+                  className="flex flex-col items-center relative z-10"
                 >
                   {key.number === 'clear' ? (
                     <motion.span
                       className="text-[24px] font-bold leading-none text-[#1F54B0]"
                       animate={isPressed === key.number ? {
-                        color: "rgba(31, 84, 176, 0.8)",
+                        color: "#fff",
+                        textShadow: "0 0 15px rgba(255, 255, 255, 0.8)",
                         transition: { duration: 0.1 }
                       } : {
                         color: "rgb(31, 84, 176)",
+                        textShadow: "none",
                         transition: { duration: 0.2 }
                       }}
                     >
@@ -449,11 +361,15 @@ export const Keypad: React.FC<KeypadProps> = () => {
                       <motion.span
                         className="text-[24px] font-bold leading-none text-[#1F54B0]"
                         animate={isPressed === key.number ? {
-                          color: "rgba(31, 84, 176, 0.8)",
-                          transition: { duration: 0.1 }
+                          scale: 0.95,
+                          color: "#fff",
+                          textShadow: "0 0 20px rgba(255, 255, 255, 0.9)",
+                          transition: { duration: 0.1, type: "spring", stiffness: 500 }
                         } : {
+                          scale: 1,
                           color: "rgb(31, 84, 176)",
-                          transition: { duration: 0.2 }
+                          textShadow: "none",
+                          transition: { duration: 0.2, type: "spring", stiffness: 300 }
                         }}
                       >
                         Enter
@@ -465,12 +381,14 @@ export const Keypad: React.FC<KeypadProps> = () => {
                         className="text-[48px] font-bold leading-none text-[#1F54B0]"
                         animate={isPressed === key.number ? {
                           scale: 0.95,
-                          color: "rgba(31, 84, 176, 0.8)",
-                          transition: { duration: 0.1, type: "spring", stiffness: 500 }
+                          color: "#fff",
+                          textShadow: "0 0 8px rgba(255, 255, 255, 0.7)",
+                          transition: { duration: 0.1 }
                         } : {
                           scale: 1,
                           color: "rgb(31, 84, 176)",
-                          transition: { duration: 0.2, type: "spring", stiffness: 300 }
+                          textShadow: "none",
+                          transition: { duration: 0.2 }
                         }}
                       >
                         {key.number}
@@ -480,11 +398,13 @@ export const Keypad: React.FC<KeypadProps> = () => {
                           className="text-[14px] text-[#1F54B0] mt-1"
                           animate={isPressed === key.number ? {
                             scale: 0.95,
-                            color: "rgba(31, 84, 176, 0.7)",
+                            color: "#fff",
+                            textShadow: "0 0 8px rgba(255, 255, 255, 0.7)",
                             transition: { duration: 0.1 }
                           } : {
                             scale: 1,
                             color: "rgb(31, 84, 176)",
+                            textShadow: "none",
                             transition: { duration: 0.2 }
                           }}
                         >
@@ -494,23 +414,6 @@ export const Keypad: React.FC<KeypadProps> = () => {
                     </div>
                   )}
                 </motion.div>
-
-                {/* Ripple effect on press */}
-                <motion.div
-                  className="absolute inset-0 rounded-[8px] pointer-events-none"
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={isPressed === key.number ? {
-                    scale: 1,
-                    opacity: [0, 0.3, 0],
-                    transition: { duration: 0.3, ease: "easeOut" }
-                  } : {
-                    scale: 0,
-                    opacity: 0
-                  }}
-                  style={{
-                    background: "radial-gradient(circle, rgba(31, 84, 176, 0.2) 0%, rgba(31, 84, 176, 0) 70%)"
-                  }}
-                />
               </motion.button>
             ))
           ))}
@@ -547,7 +450,6 @@ export const Keypad: React.FC<KeypadProps> = () => {
           <NotFoundId onClose={handleCloseProduct} />
         </div>
       }
-
 
       {
         searchResult !== null &&

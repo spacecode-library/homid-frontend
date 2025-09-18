@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from "react";
+import ReactCountryFlag from "react-country-flag";
 import brand1Icon from "../../assets/brand1.png";
 import brand2Icon from "../../assets/brand2.png";
 import brand3Icon from "../../assets/brand3.png";
@@ -37,6 +38,18 @@ interface topLiveIdsProps {
   startdate: string;
   enddate: string;
   status: "pending" | "active" | "completed" | string;
+  countryCode: string;
+  count: number;
+  percentage: number;
+
+  traffic: {
+    totalTraffic: number;
+    countryBreakdown: {
+      countryCode: string;
+      count: number;
+      percentage: number;
+    }[];
+  };
 }
 
 
@@ -44,12 +57,6 @@ interface topLiveIdsProps {
 export const LiveTopPerforming: React.FC = () => {
   const [topPerformingData, setTopPerformingData] = useState<topLiveIdsProps[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const countries = [
-    { flag: flag1Icon, percent: "40%", },
-    { flag: flag2Icon, percent: "35%", },
-    { flag: flag3Icon, percent: "25%", }
-  ]
 
   useEffect(() => {
     const getTopPerformingLiveIds = async () => {
@@ -131,14 +138,26 @@ export const LiveTopPerforming: React.FC = () => {
                   <div className="mt-3 flex justify-between items-center">
                     <p className="text-[14px] text-[#4B5563FF] font-normal text-nowrap">Top Performing Countries:</p>
                     <div className="flex items-center gap-x-1">
-                      {countries?.map((country, idx) => (
-                        <div key={idx} className="flex items-center gap-x-1">
-                          <div className='flex items-center'>
-                            <img src={country.flag} className='w-[30px] h-[30px]' />
+                      {card?.traffic.countryBreakdown.length > 0 &&
+                        card?.traffic.countryBreakdown.map((country, idx) => (
+                          <div key={idx} className="flex items-center gap-x-1">
+                            <div className="flex items-center">
+                              <ReactCountryFlag
+                                countryCode={country.countryCode}
+                                svg
+                                style={{
+                                  width: "30px",
+                                  height: "30px",
+                                  borderRadius: "4px",
+                                }}
+                                title={country.countryCode}
+                              />
+                            </div>
+                            <span className="text-[14px] text-[#374151FF] font-normal">
+                              {country.percentage}%
+                            </span>
                           </div>
-                          <span className="text-[14px] text-[#374151FF] font-normal">{country.percent}</span>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   </div>
 
