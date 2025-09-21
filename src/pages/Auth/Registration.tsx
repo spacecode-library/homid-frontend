@@ -97,11 +97,16 @@ export const Registration: React.FC = () => {
       const response = await authService.register(formData);
 
       if (response.success) {
-        console.log('Registration successful:', response);
-        // Handle successful registration
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+
         setTimeout(() => {
-          navigate("/");
-        }, 500)
+          // You might want to add role-based navigation here too
+          if (response?.data?.user?.isAdmin) {
+            navigate("/admin");
+          } else {
+            navigate("/");
+          }
+        }, 500);
 
         setFirstName('');
         setLastName('');

@@ -10,6 +10,7 @@ import { IdManagement } from "./pages/IdManagement/IdManagement";
 import { RedirectCredit } from "./pages/buyCredit/RedirectCredit";
 import { UpgradePlans } from "./pages/upgradePlans/UpgradePlans";
 import PrivateRoute from "./components/PrivateRoute"; // ⬅️ import
+import PublicUserRoute from "./components/PublicUserRoute";
 import { Favourites } from "./pages/Favourites/Favourites";
 import { FavouritesDetails } from "./pages/Favourites/FavouritesDetails";
 import { History } from "./pages/History/History";
@@ -34,15 +35,22 @@ function App() {
     <>
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={<HomePage />} />
+        <Route
+          path="/"
+          element={
+            <PublicUserRoute>
+              <HomePage />
+            </PublicUserRoute>
+          }
+        />
         <Route path="/login" element={<Login />} />
         <Route path="/registration" element={<Registration />} />
 
-        {/* Private Routes */}
+        {/* User-only Routes (regular users, not admins) */}
         <Route
           path="/my-account"
           element={
-            <PrivateRoute>
+            <PrivateRoute userOnly>
               <MyAccount />
             </PrivateRoute>
           }
@@ -50,7 +58,7 @@ function App() {
         <Route
           path="/buyId"
           element={
-            <PrivateRoute>
+            <PrivateRoute userOnly>
               <SelectPlans />
             </PrivateRoute>
           }
@@ -58,7 +66,7 @@ function App() {
         <Route
           path="/id-management"
           element={
-            <PrivateRoute>
+            <PrivateRoute userOnly>
               <IdManagement />
             </PrivateRoute>
           }
@@ -66,7 +74,7 @@ function App() {
         <Route
           path="/buy-credit"
           element={
-            <PrivateRoute>
+            <PrivateRoute userOnly>
               <RedirectCredit />
             </PrivateRoute>
           }
@@ -74,7 +82,7 @@ function App() {
         <Route
           path="/upgrade-plans"
           element={
-            <PrivateRoute>
+            <PrivateRoute userOnly>
               <UpgradePlans />
             </PrivateRoute>
           }
@@ -82,7 +90,7 @@ function App() {
         <Route
           path="/favourites"
           element={
-            <PrivateRoute>
+            <PrivateRoute userOnly>
               <Favourites />
             </PrivateRoute>
           }
@@ -90,7 +98,7 @@ function App() {
         <Route
           path="/favourites/:id"
           element={
-            <PrivateRoute>
+            <PrivateRoute userOnly>
               <FavouritesDetails />
             </PrivateRoute>
           }
@@ -98,21 +106,23 @@ function App() {
         <Route
           path="/history"
           element={
-            <PrivateRoute>
+            <PrivateRoute userOnly>
               <History />
             </PrivateRoute>
           }
         />
 
+        {/* Admin-only Route */}
         <Route
           path="/admin"
           element={
-            <PrivateRoute>
+            <PrivateRoute adminOnly>
               <Admin />
             </PrivateRoute>
           }
         />
       </Routes>
+
 
       <Toaster
         position="top-right"  // 👈 default position

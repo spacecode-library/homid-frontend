@@ -35,6 +35,7 @@ import { CountryMultiSelector } from "../CountryMultiSelector";
 import { SocialMediaSelector } from "../SocialMediaSelector";
 import toast from "react-hot-toast";
 import { ViewAnalytics } from "./ViewAnalytics";
+import { DotsLoader } from "../../DotsLoader";
 
 // Types
 interface AccordionData {
@@ -77,6 +78,7 @@ interface SocialMediaItem {
 
 export const MyIDsTable: React.FC = () => {
   const [loading, setLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
   const [globalExpandedRow, setGlobalExpandedRow] = useState<number | null>(null);
   const [currentId, setCurrentId] = useState<string>("");
@@ -266,8 +268,10 @@ export const MyIDsTable: React.FC = () => {
 
   useEffect(() => {
     const getListHomeIds = async () => {
+      setDataLoading(true);
       const res = await subscriptionService.homeIdsList();
       setTableData(res?.data?.homIds)
+      setDataLoading(false);
     }
     getListHomeIds();
   }, [loading])
@@ -560,580 +564,591 @@ export const MyIDsTable: React.FC = () => {
           <div>Global</div>
         </div>
 
-        {/* Table Body */}
-        {filteredData.map((row, index) => (
-          <React.Fragment key={row.id}>
-            {/* Main Row */}
-            <div className="leading-tight grid grid-cols-[.7fr_1.5fr_1.5fr_1fr_.7fr_.7fr_.6fr_.5fr] gap-x-4 p-4 border-b hover:bg-gray-50 items-center">
-              {/* ID */}
-              <div className="text-[16px] font-medium text-[#2563EBFF]">{row?.numericId?.slice(0, 4)}-{row?.numericId?.slice(4)}</div>
-              {/* Target URL */}
-              <div className="flex items-center gap-2">
-                <span
-                  className="text-[16px] font-normal text-[#242524FF]"
-                  title={row.websiteUrl || ''} // Shows full URL on hover
-                >
-                  {row.websiteUrl
-                    ? (row.websiteUrl.length > 20
-                      ? `${row.websiteUrl.substring(0, 20)}...`
-                      : row.websiteUrl
-                    )
-                    : '-'
-                  }
-                </span>
+        {
+          dataLoading ? (<div className="bg-white rounded-[8px] shadow-sm border border-[#E5E7EBFF] p-4 mt-5">
+            <DotsLoader />
+            <p className="text-center text-[#6B7280FF] text-[14px] font-normal">Loading IDs...</p>
+          </div>) :
+            filteredData.length > 0 ? filteredData.map((row, index) => (
+              <React.Fragment key={row.id}>
+                {/* Main Row */}
+                <div className="leading-tight grid grid-cols-[.7fr_1.5fr_1.5fr_1fr_.7fr_.7fr_.6fr_.5fr] gap-x-4 p-4 border-b hover:bg-gray-50 items-center">
+                  {/* ID */}
+                  <div className="text-[16px] font-medium text-[#2563EBFF]">{row?.numericId?.slice(0, 4)}-{row?.numericId?.slice(4)}</div>
+                  {/* Target URL */}
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="text-[16px] font-normal text-[#242524FF]"
+                      title={row.websiteUrl || ''} // Shows full URL on hover
+                    >
+                      {row.websiteUrl
+                        ? (row.websiteUrl.length > 20
+                          ? `${row.websiteUrl.substring(0, 20)}...`
+                          : row.websiteUrl
+                        )
+                        : '-'
+                      }
+                    </span>
 
-                {row.websiteUrl && (
-                  <a
-                    href={row.websiteUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-blue-500 transition-colors cursor-pointer"
-                    title="Open in new tab"
-                  >
-                    <ExternalLink className="w-4 h-4 text-gray-400 hover:text-blue-500" />
-                  </a>
-                )}
-              </div>
-
-              {/* Product Name */}
-              <div
-                className="text-[16px] font-normal text-[#242524FF]"
-                title={row.productName || ''} // Shows full product name on hover
-              >
-                {row.productName
-                  ? (row.productName.length > 20
-                    ? `${row.productName.substring(0, 20)}...`
-                    : row.productName
-                  )
-                  : '-'
-                }
-              </div>
-              {/* Total Redirects */}
-              <div className="text-[16px] font-normal text-[#242524FF]">{row?.redirectCreditsUsed}</div>
-
-              {/* Analytics */}
-              <button onClick={() => { setShowViewAnalytics(true); setAnalyticsId(row?.id) }}>
-                <img src={barChartIcon} className="w-5 h-5" />
-              </button>
-
-              {/* Status - Interactive Switch */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleToggleStatus(row.id, row.status)}
-                  className={`w-12 h-6 ${getStatusToggleColor(
-                    getUiStatus(row.status, row.id)
-                  )} rounded-full relative transition-colors duration-200 ease-in-out cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 hover:shadow-md`}
-                  role="switch"
-                  aria-checked={getUiStatus(row.status, row.id) === "Active"}
-                  aria-label={`Toggle status to ${getUiStatus(row.status, row.id) === "Active" ? "Inactive" : "Active"}`}
-                >
-                  <div
-                    className={`w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 transition-transform duration-200 ease-in-out ${getUiStatus(row.status, row.id) === "Active"
-                      ? "transform translate-x-6"
-                      : "transform translate-x-0.5"
-                      }`}
-                  ></div>
-                </button>
-                <span
-                  className={`text-sm font-medium ${getStatusColor(
-                    getUiStatus(row.status, row.id)
-                  )}`}
-                >
-                  {getUiStatus(row.status, row.id)}
-                </span>
-              </div>
-
-              {/* Manage Button */}
-              <div>
-                <button
-                  onClick={() => { toggleAccordion(index); setCurrentId(row?.numericId) }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2"
-                >
-                  Manage
-                  <ChevronDown
-                    className={`w-4 h-4 transform transition-transform ${expandedRow === index ? "rotate-180" : ""
-                      }`}
-                  />
-                </button>
-              </div>
-
-              <div onClick={() => toggleGlobal(index)} className="cursor-pointer">
-                <img src={gobalIcon} className="w-6 h-6" />
-              </div>
-              {
-                row?.status == "pending" && <div className="col-span-7">
-                  <p className="text-sm text-red-500 font-medium leading-tight">
-                    This Id is in moderation
-                  </p>
-                </div>
-              }
-            </div>
-
-            {/* Accordion Content */}
-            {expandedRow === index && (
-              <div className="border-b bg-[#DEE1E600] p-6">
-                <div className="grid grid-cols-2 gap-20">
-                  {/* Left Column */}
-                  <div className="space-y-4">
-                    <div className="flex w-full items-center justify-between">
-                      <p className="text-[16px] font-normal text-[#374151FF] mr-4">
-                        Website URL:
-                      </p>
-
-                      <div className="flex items-center gap-3 w-full max-w-[450px]">
-                        <input
-                          type="text"
-                          placeholder="Add Website and click 'Read URL' →"
-                          value={websiteUrl}
-                          onChange={handleChange}
-                          className="text-[14px] flex-1 border border-[#D1D5DBFF] rounded-[6px] p-2 outline-none"
-                        />
-
-                        <button
-                          disabled={!websiteUrl?.trim()}
-                          onClick={handleExtractDataFromUrl}
-                          className={`flex items-center text-[14px] gap-x-2 font-medium whitespace-nowrap border rounded-[6px] px-4 py-2
-      ${websiteUrl?.trim()
-                              ? "text-[#3B82F6FF] border-[#3B82F6FF] cursor-pointer"
-                              : "text-gray-400 border-gray-300 cursor-not-allowed bg-gray-100"
-                            }`}
-                        >
-                          {isReadUrl ?
-                            <div className="w-5 h-5 border-2 border-[#3B82F6FF] border-t-transparent rounded-full animate-spin"></div>
-                            : <>
-                              Read URL
-                              <ExternalLink className="w-4 h-4" />
-                            </>}
-
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="">
-                      {/* Main row with label and textarea */}
-                      <div className="flex w-full items-start justify-between gap-4">
-                        <p className="text-[16px] font-normal text-[#374151] flex-shrink-0">
-                          Website Info:
-                        </p>
-
-                        <div className="flex-1 max-w-[450px]">
-                          <textarea
-                            rows={2}
-                            placeholder="Fill-in website information"
-                            value={isEditMode ? editWebsiteInfo : (editWebsiteInfo || websiteInfo)}
-                            onChange={(e) => setEditWebsiteInfo(e.target.value)}
-                            disabled={!isEditMode}
-                            className={`w-full text-[14px] border rounded-[6px] p-2 outline-none resize-none ${isEditMode
-                              ? 'border-[#D1D5DB] bg-white'
-                              : 'border-[#E5E7EB] bg-[#F9FAFB] text-[#6B7280] cursor-not-allowed'
-                              }`}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Error message row with same alignment */}
-                      <div className="flex w-full items-start justify-between gap-4">
-                        <div className="flex-shrink-0" style={{ width: 'fit-content' }}>
-                          {/* Empty space to match label width */}
-                        </div>
-
-                        <div className="flex-1 mb-2 max-w-[450px] flex items-center justify-between">
-                          <p className="text-[16px] leading-tight font-normal text-[#DE3B40] flex-1 mr-1">
-                            Please ensure your provided information is accurate, relevant to the website's information.
-                          </p>
-
-                          <div className="flex gap-x-2 flex-shrink-0">
-                            {isEditMode ? (
-                              <>
-                                <button
-                                  onClick={handleCancel}
-                                  className="text-[14px] font-medium text-[#6B7280] border border-[#D1D5DB] px-3 py-1 rounded-[6px] hover:bg-[#F3F4F6] transition-colors"
-                                >
-                                  Cancel
-                                </button>
-                                <button
-                                  onClick={handleInfoSave}
-                                  className="text-[14px] font-medium text-white bg-[#3B82F6] border border-[#3B82F6] px-3 py-1 rounded-[6px] hover:bg-[#2563EB] transition-colors"
-                                >
-                                  {isEditedSave ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : "Save"}
-                                </button>
-                              </>
-                            ) : (
-                              <div className="flex gap-x-2">
-                                <button
-                                  onClick={handleEdit}
-                                  className="text-[14px] font-medium text-[#3B82F6] border border-[#3B82F6] px-3 py-1 rounded-[6px] hover:bg-[#3B82F6] hover:text-white transition-colors"
-                                >
-                                  Edit
-                                </button>
-
-                                <button
-                                  onClick={handleInfoSave}
-                                  className="text-[14px] font-medium text-white bg-[#3B82F6] border border-[#3B82F6] px-3 py-1 rounded-[6px] hover:bg-[#2563EB] transition-colors"
-                                >
-                                  {isEditedSave ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : "Save"}
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between leading-tight">
-                      <p className="text-[16px] text-[#374151FF] font-normal">Is this an adult or gambling website?</p>
-                      <div className="space-x-4">
-                        <label className="inline-flex items-center space-x-1">
-                          <input
-                            type="checkbox"
-                            className="w-4 h-4"
-                            checked={isAdultWebsite === true}
-                            onChange={() => setIsAdultWebsite(true)}
-                          />
-                          <span className="text-[16px] text-[#374151FF] font-normal">Yes</span>
-                        </label>
-                        <label className="inline-flex items-center space-x-1">
-                          <input
-                            type="checkbox"
-                            className="w-4 h-4"
-                            checked={isAdultWebsite === false}
-                            onChange={() => setIsAdultWebsite(false)}
-                          />
-                          <span className="text-[16px] text-[#374151FF] font-normal">No</span>
-                        </label>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between leading-tight">
-                      <p className="text-[16px] text-[#374151FF] font-normal">
-                        Is the website promoting your own Services, Products or Contents?
-                      </p>
-                      <div className="space-x-4 text-nowrap">
-                        <label className="inline-flex items-center space-x-1">
-                          <input
-                            type="checkbox"
-                            className="w-4 h-4"
-                            checked={isPromotingOwnServices === true}
-                            onChange={() => setIsPromotingOwnServices(true)}
-                          />
-                          <span className="text-[16px] text-[#374151FF] font-normal">Yes</span>
-                        </label>
-                        <label className="inline-flex items-center space-x-1">
-                          <input
-                            type="checkbox"
-                            className="w-4 h-4"
-                            checked={isPromotingOwnServices === false}
-                            onChange={() => setIsPromotingOwnServices(false)}
-                          />
-                          <span className="text-[16px] text-[#374151FF] font-normal">No</span>
-                        </label>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between leading-tight">
-                      <p className="text-[16px] text-[#374151FF] font-normal">Are you the owner or an administrator?</p>
-                      <div className="space-x-4">
-                        <label className="inline-flex items-center space-x-1">
-                          <input
-                            type="checkbox"
-                            className="w-4 h-4"
-                            checked={isOwnerOrAdmin === true}
-                            onChange={() => setIsOwnerOrAdmin(true)}
-                          />
-                          <span className="text-[16px] text-[#374151FF] font-normal">Yes</span>
-                        </label>
-                        <label className="inline-flex items-center space-x-1">
-                          <input
-                            type="checkbox"
-                            className="w-4 h-4"
-                            checked={isOwnerOrAdmin === false}
-                            onChange={() => setIsOwnerOrAdmin(false)}
-                          />
-                          <span className="text-[16px] text-[#374151FF] font-normal">No</span>
-                        </label>
-                      </div>
-                    </div>
-
-                    <div>
-                      <p className="text-[16px] font-normal text-[#374151FF] mb-2">
-                        Targeted Regions (City, State/Province, Country)
-                      </p>
-
-                      <div className="flex items-center space-x-4 w-full">
-                        {/* Row #1 */}
-                        <label className="flex items-center space-x-2 w-full">
-                          <input type="checkbox" className="w-4 h-4" />
-                          <span className="text-[16px] text-[ #374151FF]">#1:</span>
-                          <div className="relative flex-1">
-                            <input
-                              type="text"
-                              value={value1 ? CountryCodeReverse[value1] : ""}
-                              placeholder="Search"
-                              disabled={true}
-                              className="w-full text-sm px-2 py-1 pr-8 border border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                            <Search className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                          </div>
-                        </label>
-
-                        {/* Row #2 */}
-                        <CountrySelectorRow
-                          label="#2:"
-                          value={value2}
-                          selectedCountry={selectedCountry2}
-                          isOpen={isOpen2}
-                          onValueChange={setValue2}
-                          onSelectedCountryChange={setSelectedCountry2}
-                          onOpenChange={setIsOpen2}
-                          isDisabled={false}
-                        />
-
-                        {/* Row #3 */}
-                        <CountrySelectorRow
-                          label="#3:"
-                          value={value3}
-                          selectedCountry={selectedCountry3}
-                          isOpen={isOpen3}
-                          onValueChange={setValue3}
-                          onSelectedCountryChange={setSelectedCountry3}
-                          onOpenChange={setIsOpen3}
-                          isDisabled={false}
-                        />
-                      </div>
-                    </div>
-
-                    <CountryMultiSelector
-                      selected={selected}
-                      onSelectionChange={setSelected}
-                      maxSelections={20}
-                      isDisabled={false}
-                    />
-
-                    <div className="flex items-center gap-3">
-                      <label className="w-28 text-[16px] text-[#374151FF] font-normal">Start Date</label>
-                      <DatePicker
-                        selected={startDate}
-                        onChange={(date: Date | null) => setStartDate(date)}
-                        dateFormat="dd/MMM/yyyy"
-                        className="border rounded-md px-2 py-1 text-gray-700 w-[140px]"
-                      />
-                      <button className="border px-3 py-1 rounded-md text-[14px] text-[#374151FF] font-normal hover:bg-gray-100">
-                        Set Reminder
-                      </button>
-                    </div>
-
-                    {/* Stop Date */}
-                    <div className="flex items-center gap-3">
-                      <label className="w-28 text-[16px] text-[#374151FF] font-normal">Stop Date</label>
-                      <DatePicker
-                        selected={stopDate}
-                        onChange={(date: Date | null) => setStopDate(date)}
-                        dateFormat="dd/MMM/yyyy"
-                        className="border rounded-md px-2 py-1 text-gray-700 w-[140px]"
-                      />
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <label className="w-[116px] text-[16px] text-[#374151FF] font-normal">
-                        Posted Social Medias
-                      </label>
-                      <SocialMediaSelector
-                        value={socialMediaData}
-                        onChange={setSocialMediaData}
-                      />
-                    </div>
-
-                    {/* Total Earnings */}
-                    <div className="flex items-center gap-3">
-                      <label className="w-28 text-[16px] text-[#374151FF] font-normal">Total Earnings</label>
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-600">$</span>
-                        <input
-                          type="number"
-                          defaultValue={0.0}
-                          value={totalEarning}
-                          onChange={(e) => setTotalEarning(Number(e.target.value))}
-                          className="w-24 rounded-md border border-gray-300 px-2 py-1 text-sm outline-none"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Left: Label + Textarea */}
-                    <div className="flex items-start gap-2">
-                      <Pencil className="w-5 h-5 text-[#374151FF] mt-1" />
-                      <label className="w-[90px] text-[16px] text-[#374151FF] font-normal mt-1">Memo here</label>
-                      <textarea
-                        placeholder="Write your memo..."
-                        value={memo}
-                        onChange={(e) => setMemo(e.target.value)}
-                        className="flex-1 min-h-[80px] resize-y rounded-md border border-gray-300 p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
+                    {row.websiteUrl && (
+                      <a
+                        href={row.websiteUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-blue-500 transition-colors cursor-pointer"
+                        title="Open in new tab"
+                      >
+                        <ExternalLink className="w-4 h-4 text-gray-400 hover:text-blue-500" />
+                      </a>
+                    )}
                   </div>
 
-                  {/* Right Column */}
-                  <div className="space-y-4 px-10">
-                    <div className="flex items-center justify-between leading-tight max-w-[350px]">
-                      <p className="text-[16px] text-[#374151FF] font-normal">Affiliate URL?</p>
-                      <div className="space-x-4">
-                        <label className="inline-flex items-center space-x-1">
-                          <input
-                            type="checkbox"
-                            className="w-4 h-4"
-                            checked={affiliateUrl === true}
-                            onChange={() => setAffiliateUrl(true)}
-                          />
-                          <span className="text-[16px] text-[#374151FF] font-normal">Yes</span>
-                        </label>
-                        <label className="inline-flex items-center space-x-1">
-                          <input
-                            type="checkbox"
-                            className="w-4 h-4"
-                            checked={affiliateUrl === false}
-                            onChange={() => setAffiliateUrl(false)}
-                          />
-                          <span className="text-[16px] text-[#374151FF] font-normal">No</span>
-                        </label>
-                      </div>
-                    </div>
+                  {/* Product Name */}
+                  <div
+                    className="text-[16px] font-normal text-[#242524FF]"
+                    title={row.productName || ''} // Shows full product name on hover
+                  >
+                    {row.productName
+                      ? (row.productName.length > 20
+                        ? `${row.productName.substring(0, 20)}...`
+                        : row.productName
+                      )
+                      : '-'
+                    }
+                  </div>
+                  {/* Total Redirects */}
+                  <div className="text-[16px] font-normal text-[#242524FF]">{row?.redirectCreditsUsed}</div>
 
-                    <div className="flex items-center justify-between leading-tight max-w-[350px]">
-                      <p className="text-[16px] text-[#374151FF] font-normal">Paid Promotion</p>
-                      <div className="space-x-4">
-                        <label className="inline-flex items-center space-x-1">
-                          <input
-                            type="checkbox"
-                            className="w-4 h-4"
-                            checked={isPaidPromotion === true}
-                            onChange={() => setIsPaidPromotion(true)}
-                          />
-                          <span className="text-[16px] text-[#374151FF] font-normal">Yes</span>
-                        </label>
-                        <label className="inline-flex items-center space-x-1">
-                          <input
-                            type="checkbox"
-                            className="w-4 h-4"
-                            checked={isPaidPromotion === false}
-                            onChange={() => setIsPaidPromotion(false)}
-                          />
-                          <span className="text-[16px] text-[#374151FF] font-normal">No</span>
-                        </label>
-                      </div>
-                    </div>
+                  {/* Analytics */}
+                  <button onClick={() => { setShowViewAnalytics(true); setAnalyticsId(row?.id) }}>
+                    <img src={barChartIcon} className="w-5 h-5" />
+                  </button>
 
-                    <div>
-                      <p className="text-[16px] text-[#374151FF] font-normal">Advertiser/Brand Owner Info(If Paid Promotion):</p>
-                      <input
-                        type="text"
-                        placeholder="Website URL:"
-                        value={brandOwnerUrl}
-                        onChange={(e) => setBrandOwnerUrl(e.target.value)}
-                        className="mt-2 text-[14px] flex-1 border border-[#D1D5DBFF] rounded-[6px] p-2 outline-none w-full"
+                  {/* Status - Interactive Switch */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleToggleStatus(row.id, row.status)}
+                      className={`w-12 h-6 ${getStatusToggleColor(
+                        getUiStatus(row.status, row.id)
+                      )} rounded-full relative transition-colors duration-200 ease-in-out cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 hover:shadow-md`}
+                      role="switch"
+                      aria-checked={getUiStatus(row.status, row.id) === "Active"}
+                      aria-label={`Toggle status to ${getUiStatus(row.status, row.id) === "Active" ? "Inactive" : "Active"}`}
+                    >
+                      <div
+                        className={`w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 transition-transform duration-200 ease-in-out ${getUiStatus(row.status, row.id) === "Active"
+                          ? "transform translate-x-6"
+                          : "transform translate-x-0.5"
+                          }`}
+                      ></div>
+                    </button>
+                    <span
+                      className={`text-sm font-medium ${getStatusColor(
+                        getUiStatus(row.status, row.id)
+                      )}`}
+                    >
+                      {getUiStatus(row.status, row.id)}
+                    </span>
+                  </div>
+
+                  {/* Manage Button */}
+                  <div>
+                    <button
+                      onClick={() => { toggleAccordion(index); setCurrentId(row?.numericId) }}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2"
+                    >
+                      Manage
+                      <ChevronDown
+                        className={`w-4 h-4 transform transition-transform ${expandedRow === index ? "rotate-180" : ""
+                          }`}
                       />
-                      <textarea
-                        rows={3}
-                        placeholder="Promotion Type: Information about your relationship with the ReDirected To URL Website."
-                        value={brandPromotion}
-                        onChange={(e) => setBrandPromotion(e.target.value)}
-                        className="mt-2 text-[14px] flex-1 border border-[#D1D5DBFF] rounded-[6px] p-2 outline-none w-full"
-                      />
-                    </div>
+                    </button>
+                  </div>
 
-                    <div className="">
-                      <h3 className="text-[16px] font-normal text-[#374151FF]">
-                        What does this website offer?
-                      </h3>
-                      {/* Filter Tags Section */}
-                      <div className="p-4 w-full bg-white border border-gray-200 rounded-[6px] mt-[10px]">
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {selectedFilters?.map((tag, index) => (
-                            <div
-                              key={index}
-                              className="inline-flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
+                  <div onClick={() => toggleGlobal(index)} className="cursor-pointer">
+                    <img src={gobalIcon} className="w-6 h-6" />
+                  </div>
+                  {
+                    row?.status == "pending" && <div className="col-span-7">
+                      <p className="text-sm text-red-500 font-medium leading-tight">
+                        This Id is in moderation
+                      </p>
+                    </div>
+                  }
+                </div>
+
+                {/* Accordion Content */}
+                {expandedRow === index && (
+                  <div className="border-b bg-[#DEE1E600] p-6">
+                    <div className="grid grid-cols-2 gap-20">
+                      {/* Left Column */}
+                      <div className="space-y-4">
+                        <div className="flex w-full items-center justify-between">
+                          <p className="text-[16px] font-normal text-[#374151FF] mr-4">
+                            Website URL:
+                          </p>
+
+                          <div className="flex items-center gap-3 w-full max-w-[450px]">
+                            <input
+                              type="text"
+                              placeholder="Add Website and click 'Read URL' →"
+                              value={websiteUrl}
+                              onChange={handleChange}
+                              className="text-[14px] flex-1 border border-[#D1D5DBFF] rounded-[6px] p-2 outline-none"
+                            />
+
+                            <button
+                              disabled={!websiteUrl?.trim()}
+                              onClick={handleExtractDataFromUrl}
+                              className={`flex items-center text-[14px] gap-x-2 font-medium whitespace-nowrap border rounded-[6px] px-4 py-2
+      ${websiteUrl?.trim()
+                                  ? "text-[#3B82F6FF] border-[#3B82F6FF] cursor-pointer"
+                                  : "text-gray-400 border-gray-300 cursor-not-allowed bg-gray-100"
+                                }`}
                             >
-                              <span>{tag}</span>
-                              <button
-                                onClick={() => removeFilter(tag)}
-                                className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
-                                aria-label={`Remove ${tag} filter`}
-                              >
-                                <X size={14} />
-                              </button>
-                            </div>
-                          ))}
+                              {isReadUrl ?
+                                <div className="w-5 h-5 border-2 border-[#3B82F6FF] border-t-transparent rounded-full animate-spin"></div>
+                                : <>
+                                  Read URL
+                                  <ExternalLink className="w-4 h-4" />
+                                </>}
 
-                          {/* Add Tags Button */}
-                          <button
-                            onClick={() => setShowAddTags(!showAddTags)}
-                            className="inline-flex items-center gap-1 bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors"
-                          >
-                            <Plus size={14} />
-                            <span>Add Tags</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="">
+                          {/* Main row with label and textarea */}
+                          <div className="flex w-full items-start justify-between gap-4">
+                            <p className="text-[16px] font-normal text-[#374151] flex-shrink-0">
+                              Website Info:
+                            </p>
+
+                            <div className="flex-1 max-w-[450px]">
+                              <textarea
+                                rows={2}
+                                placeholder="Fill-in website information"
+                                value={isEditMode ? editWebsiteInfo : (editWebsiteInfo || websiteInfo)}
+                                onChange={(e) => setEditWebsiteInfo(e.target.value)}
+                                disabled={!isEditMode}
+                                className={`w-full text-[14px] border rounded-[6px] p-2 outline-none resize-none ${isEditMode
+                                  ? 'border-[#D1D5DB] bg-white'
+                                  : 'border-[#E5E7EB] bg-[#F9FAFB] text-[#6B7280] cursor-not-allowed'
+                                  }`}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Error message row with same alignment */}
+                          <div className="flex w-full items-start justify-between gap-4">
+                            <div className="flex-shrink-0" style={{ width: 'fit-content' }}>
+                              {/* Empty space to match label width */}
+                            </div>
+
+                            <div className="flex-1 mb-2 max-w-[450px] flex items-center justify-between">
+                              <p className="text-[16px] leading-tight font-normal text-[#DE3B40] flex-1 mr-1">
+                                Please ensure your provided information is accurate, relevant to the website's information.
+                              </p>
+
+                              <div className="flex gap-x-2 flex-shrink-0">
+                                {isEditMode ? (
+                                  <>
+                                    <button
+                                      onClick={handleCancel}
+                                      className="text-[14px] font-medium text-[#6B7280] border border-[#D1D5DB] px-3 py-1 rounded-[6px] hover:bg-[#F3F4F6] transition-colors"
+                                    >
+                                      Cancel
+                                    </button>
+                                    <button
+                                      onClick={handleInfoSave}
+                                      className="text-[14px] font-medium text-white bg-[#3B82F6] border border-[#3B82F6] px-3 py-1 rounded-[6px] hover:bg-[#2563EB] transition-colors"
+                                    >
+                                      {isEditedSave ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : "Save"}
+                                    </button>
+                                  </>
+                                ) : (
+                                  <div className="flex gap-x-2">
+                                    <button
+                                      onClick={handleEdit}
+                                      className="text-[14px] font-medium text-[#3B82F6] border border-[#3B82F6] px-3 py-1 rounded-[6px] hover:bg-[#3B82F6] hover:text-white transition-colors"
+                                    >
+                                      Edit
+                                    </button>
+
+                                    <button
+                                      onClick={handleInfoSave}
+                                      className="text-[14px] font-medium text-white bg-[#3B82F6] border border-[#3B82F6] px-3 py-1 rounded-[6px] hover:bg-[#2563EB] transition-colors"
+                                    >
+                                      {isEditedSave ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : "Save"}
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between leading-tight">
+                          <p className="text-[16px] text-[#374151FF] font-normal">Is this an adult or gambling website?</p>
+                          <div className="space-x-4">
+                            <label className="inline-flex items-center space-x-1">
+                              <input
+                                type="checkbox"
+                                className="w-4 h-4"
+                                checked={isAdultWebsite === true}
+                                onChange={() => setIsAdultWebsite(true)}
+                              />
+                              <span className="text-[16px] text-[#374151FF] font-normal">Yes</span>
+                            </label>
+                            <label className="inline-flex items-center space-x-1">
+                              <input
+                                type="checkbox"
+                                className="w-4 h-4"
+                                checked={isAdultWebsite === false}
+                                onChange={() => setIsAdultWebsite(false)}
+                              />
+                              <span className="text-[16px] text-[#374151FF] font-normal">No</span>
+                            </label>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between leading-tight">
+                          <p className="text-[16px] text-[#374151FF] font-normal">
+                            Is the website promoting your own Services, Products or Contents?
+                          </p>
+                          <div className="space-x-4 text-nowrap">
+                            <label className="inline-flex items-center space-x-1">
+                              <input
+                                type="checkbox"
+                                className="w-4 h-4"
+                                checked={isPromotingOwnServices === true}
+                                onChange={() => setIsPromotingOwnServices(true)}
+                              />
+                              <span className="text-[16px] text-[#374151FF] font-normal">Yes</span>
+                            </label>
+                            <label className="inline-flex items-center space-x-1">
+                              <input
+                                type="checkbox"
+                                className="w-4 h-4"
+                                checked={isPromotingOwnServices === false}
+                                onChange={() => setIsPromotingOwnServices(false)}
+                              />
+                              <span className="text-[16px] text-[#374151FF] font-normal">No</span>
+                            </label>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between leading-tight">
+                          <p className="text-[16px] text-[#374151FF] font-normal">Are you the owner or an administrator?</p>
+                          <div className="space-x-4">
+                            <label className="inline-flex items-center space-x-1">
+                              <input
+                                type="checkbox"
+                                className="w-4 h-4"
+                                checked={isOwnerOrAdmin === true}
+                                onChange={() => setIsOwnerOrAdmin(true)}
+                              />
+                              <span className="text-[16px] text-[#374151FF] font-normal">Yes</span>
+                            </label>
+                            <label className="inline-flex items-center space-x-1">
+                              <input
+                                type="checkbox"
+                                className="w-4 h-4"
+                                checked={isOwnerOrAdmin === false}
+                                onChange={() => setIsOwnerOrAdmin(false)}
+                              />
+                              <span className="text-[16px] text-[#374151FF] font-normal">No</span>
+                            </label>
+                          </div>
+                        </div>
+
+                        <div>
+                          <p className="text-[16px] font-normal text-[#374151FF] mb-2">
+                            Targeted Regions (City, State/Province, Country)
+                          </p>
+
+                          <div className="flex items-center space-x-4 w-full">
+                            {/* Row #1 */}
+                            <label className="flex items-center space-x-2 w-full">
+                              <input type="checkbox" className="w-4 h-4" />
+                              <span className="text-[16px] text-[ #374151FF]">#1:</span>
+                              <div className="relative flex-1">
+                                <input
+                                  type="text"
+                                  value={value1 ? CountryCodeReverse[value1] : ""}
+                                  placeholder="Search"
+                                  disabled={true}
+                                  className="w-full text-sm px-2 py-1 pr-8 border border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                                <Search className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                              </div>
+                            </label>
+
+                            {/* Row #2 */}
+                            <CountrySelectorRow
+                              label="#2:"
+                              value={value2}
+                              selectedCountry={selectedCountry2}
+                              isOpen={isOpen2}
+                              onValueChange={setValue2}
+                              onSelectedCountryChange={setSelectedCountry2}
+                              onOpenChange={setIsOpen2}
+                              isDisabled={false}
+                            />
+
+                            {/* Row #3 */}
+                            <CountrySelectorRow
+                              label="#3:"
+                              value={value3}
+                              selectedCountry={selectedCountry3}
+                              isOpen={isOpen3}
+                              onValueChange={setValue3}
+                              onSelectedCountryChange={setSelectedCountry3}
+                              onOpenChange={setIsOpen3}
+                              isDisabled={false}
+                            />
+                          </div>
+                        </div>
+
+                        <CountryMultiSelector
+                          selected={selected}
+                          onSelectionChange={setSelected}
+                          maxSelections={20}
+                          isDisabled={false}
+                        />
+
+                        <div className="flex items-center gap-3">
+                          <label className="w-28 text-[16px] text-[#374151FF] font-normal">Start Date</label>
+                          <DatePicker
+                            selected={startDate}
+                            onChange={(date: Date | null) => setStartDate(date)}
+                            dateFormat="dd/MMM/yyyy"
+                            className="border rounded-md px-2 py-1 text-gray-700 w-[140px]"
+                          />
+                          <button className="border px-3 py-1 rounded-md text-[14px] text-[#374151FF] font-normal hover:bg-gray-100">
+                            Set Reminder
                           </button>
                         </div>
 
-                        {/* Add Tags Dropdown */}
-                        {showAddTags && (
-                          <div className="mb-4 p-3 bg-gray-50 rounded-lg border">
-                            <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
-                              {availableCategories.map((category, index) => (
-                                <button
+                        {/* Stop Date */}
+                        <div className="flex items-center gap-3">
+                          <label className="w-28 text-[16px] text-[#374151FF] font-normal">Stop Date</label>
+                          <DatePicker
+                            selected={stopDate}
+                            onChange={(date: Date | null) => setStopDate(date)}
+                            dateFormat="dd/MMM/yyyy"
+                            className="border rounded-md px-2 py-1 text-gray-700 w-[140px]"
+                          />
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <label className="w-[116px] text-[16px] text-[#374151FF] font-normal">
+                            Posted Social Medias
+                          </label>
+                          <SocialMediaSelector
+                            value={socialMediaData}
+                            onChange={setSocialMediaData}
+                          />
+                        </div>
+
+                        {/* Total Earnings */}
+                        <div className="flex items-center gap-3">
+                          <label className="w-28 text-[16px] text-[#374151FF] font-normal">Total Earnings</label>
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-600">$</span>
+                            <input
+                              type="number"
+                              defaultValue={0.0}
+                              value={totalEarning}
+                              onChange={(e) => setTotalEarning(Number(e.target.value))}
+                              className="w-24 rounded-md border border-gray-300 px-2 py-1 text-sm outline-none"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Left: Label + Textarea */}
+                        <div className="flex items-start gap-2">
+                          <Pencil className="w-5 h-5 text-[#374151FF] mt-1" />
+                          <label className="w-[90px] text-[16px] text-[#374151FF] font-normal mt-1">Memo here</label>
+                          <textarea
+                            placeholder="Write your memo..."
+                            value={memo}
+                            onChange={(e) => setMemo(e.target.value)}
+                            className="flex-1 min-h-[80px] resize-y rounded-md border border-gray-300 p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Right Column */}
+                      <div className="space-y-4 px-10">
+                        <div className="flex items-center justify-between leading-tight max-w-[350px]">
+                          <p className="text-[16px] text-[#374151FF] font-normal">Affiliate URL?</p>
+                          <div className="space-x-4">
+                            <label className="inline-flex items-center space-x-1">
+                              <input
+                                type="checkbox"
+                                className="w-4 h-4"
+                                checked={affiliateUrl === true}
+                                onChange={() => setAffiliateUrl(true)}
+                              />
+                              <span className="text-[16px] text-[#374151FF] font-normal">Yes</span>
+                            </label>
+                            <label className="inline-flex items-center space-x-1">
+                              <input
+                                type="checkbox"
+                                className="w-4 h-4"
+                                checked={affiliateUrl === false}
+                                onChange={() => setAffiliateUrl(false)}
+                              />
+                              <span className="text-[16px] text-[#374151FF] font-normal">No</span>
+                            </label>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between leading-tight max-w-[350px]">
+                          <p className="text-[16px] text-[#374151FF] font-normal">Paid Promotion</p>
+                          <div className="space-x-4">
+                            <label className="inline-flex items-center space-x-1">
+                              <input
+                                type="checkbox"
+                                className="w-4 h-4"
+                                checked={isPaidPromotion === true}
+                                onChange={() => setIsPaidPromotion(true)}
+                              />
+                              <span className="text-[16px] text-[#374151FF] font-normal">Yes</span>
+                            </label>
+                            <label className="inline-flex items-center space-x-1">
+                              <input
+                                type="checkbox"
+                                className="w-4 h-4"
+                                checked={isPaidPromotion === false}
+                                onChange={() => setIsPaidPromotion(false)}
+                              />
+                              <span className="text-[16px] text-[#374151FF] font-normal">No</span>
+                            </label>
+                          </div>
+                        </div>
+
+                        <div>
+                          <p className="text-[16px] text-[#374151FF] font-normal">Advertiser/Brand Owner Info(If Paid Promotion):</p>
+                          <input
+                            type="text"
+                            placeholder="Website URL:"
+                            value={brandOwnerUrl}
+                            onChange={(e) => setBrandOwnerUrl(e.target.value)}
+                            className="mt-2 text-[14px] flex-1 border border-[#D1D5DBFF] rounded-[6px] p-2 outline-none w-full"
+                          />
+                          <textarea
+                            rows={3}
+                            placeholder="Promotion Type: Information about your relationship with the ReDirected To URL Website."
+                            value={brandPromotion}
+                            onChange={(e) => setBrandPromotion(e.target.value)}
+                            className="mt-2 text-[14px] flex-1 border border-[#D1D5DBFF] rounded-[6px] p-2 outline-none w-full"
+                          />
+                        </div>
+
+                        <div className="">
+                          <h3 className="text-[16px] font-normal text-[#374151FF]">
+                            What does this website offer?
+                          </h3>
+                          {/* Filter Tags Section */}
+                          <div className="p-4 w-full bg-white border border-gray-200 rounded-[6px] mt-[10px]">
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {selectedFilters?.map((tag, index) => (
+                                <div
                                   key={index}
-                                  onClick={() => addFilter(category)}
-                                  className="text-left text-sm text-gray-700 hover:bg-white hover:shadow-sm px-2 py-1 rounded transition-colors"
-                                  disabled={selectedFilters?.includes(category)}
+                                  className="inline-flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
                                 >
-                                  {category}
-                                </button>
+                                  <span>{tag}</span>
+                                  <button
+                                    onClick={() => removeFilter(tag)}
+                                    className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+                                    aria-label={`Remove ${tag} filter`}
+                                  >
+                                    <X size={14} />
+                                  </button>
+                                </div>
                               ))}
+
+                              {/* Add Tags Button */}
+                              <button
+                                onClick={() => setShowAddTags(!showAddTags)}
+                                className="inline-flex items-center gap-1 bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors"
+                              >
+                                <Plus size={14} />
+                                <span>Add Tags</span>
+                              </button>
+                            </div>
+
+                            {/* Add Tags Dropdown */}
+                            {showAddTags && (
+                              <div className="mb-4 p-3 bg-gray-50 rounded-lg border">
+                                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                                  {availableCategories.map((category, index) => (
+                                    <button
+                                      key={index}
+                                      onClick={() => addFilter(category)}
+                                      className="text-left text-sm text-gray-700 hover:bg-white hover:shadow-sm px-2 py-1 rounded transition-colors"
+                                      disabled={selectedFilters?.includes(category)}
+                                    >
+                                      {category}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Category Selection Text */}
+                            <div className="text-sm text-gray-600 leading-relaxed">
+                              <span className="font-medium text-gray-700">Select All Applies</span> - Shopping, Consulting, Professional Services, Information, Entertainment, Social Networking, Music, Education, Medical Care, Kids, Adult, Game Business, Hobbies, News, Banking, Legal, Business Services, Home Services, Local Services, Religion, Politics, Government, Professional Services, Real Estate, Online Casino(Gamble), Lotto.
                             </div>
                           </div>
-                        )}
-
-                        {/* Category Selection Text */}
-                        <div className="text-sm text-gray-600 leading-relaxed">
-                          <span className="font-medium text-gray-700">Select All Applies</span> - Shopping, Consulting, Professional Services, Information, Entertainment, Social Networking, Music, Education, Medical Care, Kids, Adult, Game Business, Hobbies, News, Banking, Legal, Business Services, Home Services, Local Services, Religion, Politics, Government, Professional Services, Real Estate, Online Casino(Gamble), Lotto.
                         </div>
+
+                        <TargetedAudience selections={selections} setSelections={setSelections} />
                       </div>
                     </div>
 
-                    <TargetedAudience selections={selections} setSelections={setSelections} />
-                  </div>
-                </div>
-
-                <div className="flex justify-end px-6 gap-x-4">
-                  <div className="flex items-center gap-x-2">
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4"
-                      checked={termsAccepted}
-                      onChange={(e) => setTermsAccepted(e.target.checked)}
-                    />
-                    <p className="text-[14px] font-normal text-[#374151FF]">I agree to Terms & Conditions</p>
-                  </div>
-                  <button className={`rounded-[6px] bg-[#2563EBFF] text-white font-semibold px-6 py-2 ${!termsAccepted || loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
-                    onClick={handleSave}
-                    disabled={!termsAccepted || loading}
-                  >
-                    {loading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Saving...
+                    <div className="flex justify-end px-6 gap-x-4">
+                      <div className="flex items-center gap-x-2">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4"
+                          checked={termsAccepted}
+                          onChange={(e) => setTermsAccepted(e.target.checked)}
+                        />
+                        <p className="text-[14px] font-normal text-[#374151FF]">I agree to Terms & Conditions</p>
                       </div>
-                    ) : (
-                      'Save'
-                    )}
-                  </button>
-                </div>
-              </div>
-            )}
+                      <button className={`rounded-[6px] bg-[#2563EBFF] text-white font-semibold px-6 py-2 ${!termsAccepted || loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
+                        onClick={handleSave}
+                        disabled={!termsAccepted || loading}
+                      >
+                        {loading ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Saving...
+                          </div>
+                        ) : (
+                          'Save'
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
 
-            {/* Global Id Content*/}
-            {globalExpandedRow === index && (
-              <Global />
-            )}
-          </React.Fragment>
-        ))}
+                {/* Global Id Content*/}
+                {globalExpandedRow === index && (
+                  <Global />
+                )}
+              </React.Fragment>
+            )) : (
+              <div className="bg-white rounded-[8px] shadow-sm border border-[#E5E7EBFF] p-4 mt-5">
+                <p className="text-center">No Id's</p>
+              </div>
+            )
+        }
+
+
       </div>
 
       {

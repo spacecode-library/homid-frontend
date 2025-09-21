@@ -39,6 +39,8 @@ export const Login: React.FC = () => {
       const response = await authService.login(loginData);
 
       if (response.success) {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+
         setEmail('');
         setPassword('');
 
