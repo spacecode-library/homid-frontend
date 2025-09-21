@@ -27,14 +27,14 @@ import social6 from "../../assets/social6.png";
 import barChartIcon from "../../assets/chart.svg";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { TargetedAudience } from "./TargetedAudience";
-import { Global } from "./Global";
+import { TargetedAudience } from "../../components/management/TargetedAudience";
+import { Global } from "../../components/management/Global";
 import { subscriptionService } from "../../services/Subscriptions";
-import { CountrySelectorRow } from "../CountrySelectorRow";
-import { CountryMultiSelector } from "../CountryMultiSelector";
-import { SocialMediaSelector } from "../SocialMediaSelector";
+import { CountrySelectorRow } from "../../components/CountrySelectorRow";
+import { CountryMultiSelector } from "../../components/CountryMultiSelector";
+import { SocialMediaSelector } from "../../components/SocialMediaSelector";
 import toast from "react-hot-toast";
-import { ViewAnalytics } from "./ViewAnalytics";
+import { ViewAnalytics } from "../../components/management/ViewAnalytics";
 
 // Types
 interface AccordionData {
@@ -75,16 +75,15 @@ interface SocialMediaItem {
   customValue?: string;
 }
 
-export const MyIDsTable: React.FC = () => {
+export const AllIDsTable: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
   const [globalExpandedRow, setGlobalExpandedRow] = useState<number | null>(null);
   const [currentId, setCurrentId] = useState<string>("");
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [websiteInfo, setWebsiteInfo] = useState("");
-  const [isEditMode, setIsEditMode] = useState(false);
   const [editWebsiteInfo, setEditWebsiteInfo] = useState("");
-  const [aiWebSiteInfo, setAIWebsiteInfo] = useState("");
+  const [aiWebSiteInfo, setAIWebsiteInfo] = useState<string | any>("");
   const [isAdultWebsite, setIsAdultWebsite] = useState<null | boolean>(null);
   const [isPromotingOwnServices, setIsPromotingOwnServices] = useState<null | boolean>(null);
   const [isOwnerOrAdmin, setIsOwnerOrAdmin] = useState<null | boolean>(null);
@@ -131,9 +130,6 @@ export const MyIDsTable: React.FC = () => {
   const [imageUrl, setImageUrl] = useState("");
 
   const [showAddTags, setShowAddTags] = useState(false);
-
-  const [isReadUrl, setIsReadUrl] = useState<boolean>(false);
-  const [isEditedSave, setIsEditedSave] = useState<boolean>(false);
 
   const [localStatusStates, setLocalStatusStates] = useState<Record<string, "pending" | "approved" | "rejected" | "auto_approved">>({});
 
@@ -194,12 +190,17 @@ export const MyIDsTable: React.FC = () => {
     resetForm();
     const getIdsPrefilledDetails = async () => {
       try {
-        const res = await subscriptionService.getHomeIdsDetails(currentId);
+        const res = await subscriptionService.adminGetHomeIdsDetails(currentId);
         if (res.success) {
           const data = res.data;
           setWebsiteUrl(data?.websiteUrl);
-          setWebsiteInfo(data?.websiteInfo);
-          setEditWebsiteInfo(data?.editInfo || "");
+          setWebsiteInfo(data.websiteInfo);
+          setEditWebsiteInfo(data?.editInfo);
+          if (data.aiInfo) {
+            const parsed = JSON.parse(data.aiInfo);
+            setAIWebsiteInfo(parsed);
+          }
+
           setIsAdultWebsite(data?.adultGambling);
           setIsPromotingOwnServices(data?.promotion);
           setIsOwnerOrAdmin(data?.ownerOrAdministrator);
@@ -266,7 +267,7 @@ export const MyIDsTable: React.FC = () => {
 
   useEffect(() => {
     const getListHomeIds = async () => {
-      const res = await subscriptionService.homeIdsList();
+      const res = await subscriptionService.adminHomeIdsList();
       setTableData(res?.data?.homIds)
     }
     getListHomeIds();
@@ -355,115 +356,16 @@ export const MyIDsTable: React.FC = () => {
     setWebsiteUrl(cleanUrl(inputVal));
   };
 
-  const handleExtractDataFromUrl = async () => {
-    setIsReadUrl(true);
-    try {
-      const obj = {
-        "url": websiteUrl
-      }
-      const res = await subscriptionService.extractDataBasedOnIUrl(obj);
-      if (res?.success) {
-        setWebsiteInfo(res?.data?.productDescription);
-        setProductName(res?.data?.productName);
-        setImageUrl(res?.data?.productImage);
-        setEditWebsiteInfo("");
-        toast.success(res?.message);
-        setIsReadUrl(false);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  const handleEdit = () => {
-    // Initialize edit state with current displayed value
-    setEditWebsiteInfo(editWebsiteInfo || websiteInfo);
-    setIsEditMode(true);
-  };
-
-  const handleCancel = () => {
-    // Reset edit state and exit edit mode
-    setEditWebsiteInfo("");
-    setIsEditMode(false);
-    setIsEditMode(false);
-  };
-
-  const handleInfoSave = async () => {
-    setIsEditedSave(true)
-    const obj = {
-      "message": websiteInfo + " " + editWebsiteInfo
-    }
-    const res = await subscriptionService.postChat(obj);
-    if (res?.success) {
-      setAIWebsiteInfo(res?.data?.response);
-      setIsEditedSave(false);
-      toast.success(res?.message);
-    }
-
-    // if (isContentEdited()) {
-    //   setWebsiteInfo(editWebsiteInfo);
-    // }
-    setIsEditMode(false);
-  };
-
-  const isContentEdited = () => {
-    return editWebsiteInfo !== "" && editWebsiteInfo !== websiteInfo;
-  };
-
-  const handleSave = async () => {
+  const handleActivate = async (id: string) => {
     setLoading(true);
-    const toastId = toast.loading("Saving details...");
+    const toastId = toast.loading("Activating ID...");
     try {
-      const socialMediaSelection = socialMediaData.reduce((acc, item) => {
-        if (item.id === "other") {
-          // For 'other', store the custom value and link
-          acc[item.id] = item.checked ? (item.customValue || "") : "";
-          acc[`${item.id}Link`] = item.checked ? (item.socialLink || "") : "";
-        } else {
-          // For regular social media platforms
-          acc[item.id] = item.checked;
-          acc[`${item.id}Link`] = item.checked ? (item.socialLink || "") : "";
-        }
-        return acc;
-      }, {} as Record<string, string | boolean>);
-
-      const selectedCodes = selected.map((country) => CountryCode[country]);
-
-      const obj = {
-        "homIdId": currentId,
-        "websiteUrl": websiteUrl,
-        "websiteInfo": websiteInfo,
-        "editInfo": editWebsiteInfo,
-        "aiInfo": aiWebSiteInfo,
-        "adultGambling": isAdultWebsite,
-        "promotion": isPromotingOwnServices,
-        "ownerOrAdministrator": isOwnerOrAdmin,
-        "targetRegion1": value1,
-        "targetRegion2": value2,
-        "targetRegion3": value3,
-        "startDate": startDate,
-        "endDate": stopDate,
-        ...socialMediaSelection,
-        "earning": totalEarning,
-        "memo": memo,
-        "affiliate": affiliateUrl,
-        "paidPromotion": isPaidPromotion,
-        "paidPromotionLink": brandOwnerUrl,
-        "paidPromotionInfo": brandPromotion,
-        "tag": selectedFilters,
-        "ageGroup": selections.ageGroup,
-        "gender": selections.gender,
-        "income": selections.incomeLevel,
-        "termCondition": termsAccepted,
-        "blockedCountry": selectedCodes,
-        "productName": productName,
-        "imageUrl": imageUrl
-
-      }
-      const res = await subscriptionService.homeIdsDetailsPost(obj);
+      const res = await subscriptionService.adminStatusApprove(id);
       toast.dismiss(toastId);
       if (res?.success) {
         setLoading(false);
+        setCurrentId("");
+        setExpandedRow(null);
         toast.success(res?.message, {
           position: "top-right",
         })
@@ -619,6 +521,7 @@ export const MyIDsTable: React.FC = () => {
               {/* Status - Interactive Switch */}
               <div className="flex items-center gap-2">
                 <button
+                  disabled
                   onClick={() => handleToggleStatus(row.id, row.status)}
                   className={`w-12 h-6 ${getStatusToggleColor(
                     getUiStatus(row.status, row.id)
@@ -686,26 +589,9 @@ export const MyIDsTable: React.FC = () => {
                           placeholder="Add Website and click 'Read URL' →"
                           value={websiteUrl}
                           onChange={handleChange}
+                          disabled
                           className="text-[14px] flex-1 border border-[#D1D5DBFF] rounded-[6px] p-2 outline-none"
                         />
-
-                        <button
-                          disabled={!websiteUrl?.trim()}
-                          onClick={handleExtractDataFromUrl}
-                          className={`flex items-center text-[14px] gap-x-2 font-medium whitespace-nowrap border rounded-[6px] px-4 py-2
-      ${websiteUrl?.trim()
-                              ? "text-[#3B82F6FF] border-[#3B82F6FF] cursor-pointer"
-                              : "text-gray-400 border-gray-300 cursor-not-allowed bg-gray-100"
-                            }`}
-                        >
-                          {isReadUrl ?
-                            <div className="w-5 h-5 border-2 border-[#3B82F6FF] border-t-transparent rounded-full animate-spin"></div>
-                            : <>
-                              Read URL
-                              <ExternalLink className="w-4 h-4" />
-                            </>}
-
-                        </button>
                       </div>
                     </div>
 
@@ -720,62 +606,47 @@ export const MyIDsTable: React.FC = () => {
                           <textarea
                             rows={2}
                             placeholder="Fill-in website information"
-                            value={isEditMode ? editWebsiteInfo : (editWebsiteInfo || websiteInfo)}
+                            value={websiteInfo}
                             onChange={(e) => setEditWebsiteInfo(e.target.value)}
-                            disabled={!isEditMode}
-                            className={`w-full text-[14px] border rounded-[6px] p-2 outline-none resize-none ${isEditMode
-                              ? 'border-[#D1D5DB] bg-white'
-                              : 'border-[#E5E7EB] bg-[#F9FAFB] text-[#6B7280] cursor-not-allowed'
-                              }`}
+                            disabled
+                            className={`w-full text-[14px] border rounded-[6px] p-2 outline-none resize-none border-[#E5E7EB] bg-[#F9FAFB] text-[#6B7280] cursor-not-allowed'`}
                           />
                         </div>
                       </div>
 
-                      {/* Error message row with same alignment */}
                       <div className="flex w-full items-start justify-between gap-4">
-                        <div className="flex-shrink-0" style={{ width: 'fit-content' }}>
-                          {/* Empty space to match label width */}
+                        <p className="text-[16px] font-normal text-[#374151] flex-shrink-0">
+                          Edit Info:
+                        </p>
+
+                        <div className="flex-1 max-w-[450px]">
+                          <textarea
+                            rows={2}
+                            placeholder="Fill-in website information"
+                            value={editWebsiteInfo}
+                            onChange={(e) => setEditWebsiteInfo(e.target.value)}
+                            disabled
+                            className={`w-full text-[14px] border rounded-[6px] p-2 outline-none resize-none border-[#E5E7EB] bg-[#F9FAFB] text-[#6B7280] cursor-not-allowed'`}
+                          />
                         </div>
+                      </div>
 
-                        <div className="flex-1 mb-2 max-w-[450px] flex items-center justify-between">
-                          <p className="text-[16px] leading-tight font-normal text-[#DE3B40] flex-1 mr-1">
-                            Please ensure your provided information is accurate, relevant to the website's information.
-                          </p>
+                      <div className="flex w-full items-start justify-between gap-4">
+                        <p className="text-[16px] font-normal text-[#374151] flex-shrink-0">
+                          AI Info:
+                        </p>
 
-                          <div className="flex gap-x-2 flex-shrink-0">
-                            {isEditMode ? (
-                              <>
-                                <button
-                                  onClick={handleCancel}
-                                  className="text-[14px] font-medium text-[#6B7280] border border-[#D1D5DB] px-3 py-1 rounded-[6px] hover:bg-[#F3F4F6] transition-colors"
-                                >
-                                  Cancel
-                                </button>
-                                <button
-                                  onClick={handleInfoSave}
-                                  className="text-[14px] font-medium text-white bg-[#3B82F6] border border-[#3B82F6] px-3 py-1 rounded-[6px] hover:bg-[#2563EB] transition-colors"
-                                >
-                                  {isEditedSave ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : "Save"}
-                                </button>
-                              </>
-                            ) : (
-                              <div className="flex gap-x-2">
-                                <button
-                                  onClick={handleEdit}
-                                  className="text-[14px] font-medium text-[#3B82F6] border border-[#3B82F6] px-3 py-1 rounded-[6px] hover:bg-[#3B82F6] hover:text-white transition-colors"
-                                >
-                                  Edit
-                                </button>
-
-                                <button
-                                  onClick={handleInfoSave}
-                                  className="text-[14px] font-medium text-white bg-[#3B82F6] border border-[#3B82F6] px-3 py-1 rounded-[6px] hover:bg-[#2563EB] transition-colors"
-                                >
-                                  {isEditedSave ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : "Save"}
-                                </button>
-                              </div>
-                            )}
-                          </div>
+                        <div className="flex-1 max-w-[450px]">
+                          <textarea
+                            rows={2}
+                            placeholder="Fill-in website information"
+                            value={
+                              aiWebSiteInfo?.data?.completions?.["openai/gpt-4o-mini"]?.completion?.choices?.[0]?.message?.content || ""
+                            }
+                            onChange={(e) => setEditWebsiteInfo(e.target.value)}
+                            disabled
+                            className={`w-full text-[14px] border rounded-[6px] p-2 outline-none resize-none border-[#E5E7EB] bg-[#F9FAFB] text-[#6B7280] cursor-not-allowed'`}
+                          />
                         </div>
                       </div>
                     </div>
@@ -785,6 +656,7 @@ export const MyIDsTable: React.FC = () => {
                       <div className="space-x-4">
                         <label className="inline-flex items-center space-x-1">
                           <input
+                            disabled
                             type="checkbox"
                             className="w-4 h-4"
                             checked={isAdultWebsite === true}
@@ -794,6 +666,7 @@ export const MyIDsTable: React.FC = () => {
                         </label>
                         <label className="inline-flex items-center space-x-1">
                           <input
+                            disabled
                             type="checkbox"
                             className="w-4 h-4"
                             checked={isAdultWebsite === false}
@@ -811,6 +684,7 @@ export const MyIDsTable: React.FC = () => {
                       <div className="space-x-4 text-nowrap">
                         <label className="inline-flex items-center space-x-1">
                           <input
+                            disabled
                             type="checkbox"
                             className="w-4 h-4"
                             checked={isPromotingOwnServices === true}
@@ -820,6 +694,7 @@ export const MyIDsTable: React.FC = () => {
                         </label>
                         <label className="inline-flex items-center space-x-1">
                           <input
+                            disabled
                             type="checkbox"
                             className="w-4 h-4"
                             checked={isPromotingOwnServices === false}
@@ -835,6 +710,7 @@ export const MyIDsTable: React.FC = () => {
                       <div className="space-x-4">
                         <label className="inline-flex items-center space-x-1">
                           <input
+                            disabled
                             type="checkbox"
                             className="w-4 h-4"
                             checked={isOwnerOrAdmin === true}
@@ -844,6 +720,7 @@ export const MyIDsTable: React.FC = () => {
                         </label>
                         <label className="inline-flex items-center space-x-1">
                           <input
+                            disabled
                             type="checkbox"
                             className="w-4 h-4"
                             checked={isOwnerOrAdmin === false}
@@ -862,7 +739,7 @@ export const MyIDsTable: React.FC = () => {
                       <div className="flex items-center space-x-4 w-full">
                         {/* Row #1 */}
                         <label className="flex items-center space-x-2 w-full">
-                          <input type="checkbox" className="w-4 h-4" />
+                          <input type="checkbox" className="w-4 h-4" disabled />
                           <span className="text-[16px] text-[ #374151FF]">#1:</span>
                           <div className="relative flex-1">
                             <input
@@ -885,7 +762,7 @@ export const MyIDsTable: React.FC = () => {
                           onValueChange={setValue2}
                           onSelectedCountryChange={setSelectedCountry2}
                           onOpenChange={setIsOpen2}
-                          isDisabled={false}
+                          isDisabled={true}
                         />
 
                         {/* Row #3 */}
@@ -897,7 +774,7 @@ export const MyIDsTable: React.FC = () => {
                           onValueChange={setValue3}
                           onSelectedCountryChange={setSelectedCountry3}
                           onOpenChange={setIsOpen3}
-                          isDisabled={false}
+                          isDisabled={true}
                         />
                       </div>
                     </div>
@@ -906,7 +783,7 @@ export const MyIDsTable: React.FC = () => {
                       selected={selected}
                       onSelectionChange={setSelected}
                       maxSelections={20}
-                      isDisabled={false}
+                      isDisabled={true}
                     />
 
                     <div className="flex items-center gap-3">
@@ -954,6 +831,7 @@ export const MyIDsTable: React.FC = () => {
                           value={totalEarning}
                           onChange={(e) => setTotalEarning(Number(e.target.value))}
                           className="w-24 rounded-md border border-gray-300 px-2 py-1 text-sm outline-none"
+                          disabled
                         />
                       </div>
                     </div>
@@ -967,6 +845,7 @@ export const MyIDsTable: React.FC = () => {
                         value={memo}
                         onChange={(e) => setMemo(e.target.value)}
                         className="flex-1 min-h-[80px] resize-y rounded-md border border-gray-300 p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                        disabled
                       />
                     </div>
                   </div>
@@ -982,6 +861,7 @@ export const MyIDsTable: React.FC = () => {
                             className="w-4 h-4"
                             checked={affiliateUrl === true}
                             onChange={() => setAffiliateUrl(true)}
+                            disabled
                           />
                           <span className="text-[16px] text-[#374151FF] font-normal">Yes</span>
                         </label>
@@ -991,6 +871,7 @@ export const MyIDsTable: React.FC = () => {
                             className="w-4 h-4"
                             checked={affiliateUrl === false}
                             onChange={() => setAffiliateUrl(false)}
+                            disabled
                           />
                           <span className="text-[16px] text-[#374151FF] font-normal">No</span>
                         </label>
@@ -1006,6 +887,7 @@ export const MyIDsTable: React.FC = () => {
                             className="w-4 h-4"
                             checked={isPaidPromotion === true}
                             onChange={() => setIsPaidPromotion(true)}
+                            disabled
                           />
                           <span className="text-[16px] text-[#374151FF] font-normal">Yes</span>
                         </label>
@@ -1015,6 +897,7 @@ export const MyIDsTable: React.FC = () => {
                             className="w-4 h-4"
                             checked={isPaidPromotion === false}
                             onChange={() => setIsPaidPromotion(false)}
+                            disabled
                           />
                           <span className="text-[16px] text-[#374151FF] font-normal">No</span>
                         </label>
@@ -1029,6 +912,7 @@ export const MyIDsTable: React.FC = () => {
                         value={brandOwnerUrl}
                         onChange={(e) => setBrandOwnerUrl(e.target.value)}
                         className="mt-2 text-[14px] flex-1 border border-[#D1D5DBFF] rounded-[6px] p-2 outline-none w-full"
+                        disabled
                       />
                       <textarea
                         rows={3}
@@ -1036,6 +920,7 @@ export const MyIDsTable: React.FC = () => {
                         value={brandPromotion}
                         onChange={(e) => setBrandPromotion(e.target.value)}
                         className="mt-2 text-[14px] flex-1 border border-[#D1D5DBFF] rounded-[6px] p-2 outline-none w-full"
+                        disabled
                       />
                     </div>
 
@@ -1056,6 +941,7 @@ export const MyIDsTable: React.FC = () => {
                                 onClick={() => removeFilter(tag)}
                                 className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
                                 aria-label={`Remove ${tag} filter`}
+                                disabled
                               >
                                 <X size={14} />
                               </button>
@@ -1066,6 +952,7 @@ export const MyIDsTable: React.FC = () => {
                           <button
                             onClick={() => setShowAddTags(!showAddTags)}
                             className="inline-flex items-center gap-1 bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors"
+                            disabled
                           >
                             <Plus size={14} />
                             <span>Add Tags</span>
@@ -1112,16 +999,16 @@ export const MyIDsTable: React.FC = () => {
                     <p className="text-[14px] font-normal text-[#374151FF]">I agree to Terms & Conditions</p>
                   </div>
                   <button className={`rounded-[6px] bg-[#2563EBFF] text-white font-semibold px-6 py-2 ${!termsAccepted || loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
-                    onClick={handleSave}
+                    onClick={() => handleActivate(row?.id)}
                     disabled={!termsAccepted || loading}
                   >
                     {loading ? (
                       <div className="flex items-center gap-2">
                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Saving...
+                        Approving...
                       </div>
                     ) : (
-                      'Save'
+                      'Approve'
                     )}
                   </button>
                 </div>

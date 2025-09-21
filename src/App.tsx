@@ -13,6 +13,7 @@ import PrivateRoute from "./components/PrivateRoute"; // ⬅️ import
 import { Favourites } from "./pages/Favourites/Favourites";
 import { FavouritesDetails } from "./pages/Favourites/FavouritesDetails";
 import { History } from "./pages/History/History";
+import { Admin } from "./pages/Admin/Admin";
 
 function App() {
   const location = useLocation();
@@ -25,8 +26,9 @@ function App() {
     location.pathname === "/buyId/cart" ||
     location.pathname === "/id-management" ||
     location.pathname === "/buy-credit" ||
-    location.pathname === "/upgrade-plans" 
-    // location.pathname.startsWith("/favourites/");
+    location.pathname === "/upgrade-plans" ||
+    location.pathname === "/admin"
+  // location.pathname.startsWith("/favourites/");
 
   return (
     <>
@@ -98,6 +100,15 @@ function App() {
           element={
             <PrivateRoute>
               <History />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute>
+              <Admin />
             </PrivateRoute>
           }
         />

@@ -109,7 +109,7 @@ export const ViewAnalytics: React.FC<ViewAnalyticsProp> = ({ open, close, id }) 
             </button>
 
             {/* Content */}
-            <h2 className="text-xl font-semibold text-[#1F54B0] mb-6">
+            <h2 className="text-xl font-semibold text-[#1F54B0] mb-2">
               Country Analytics Breakdown
             </h2>
 
@@ -121,9 +121,9 @@ export const ViewAnalytics: React.FC<ViewAnalyticsProp> = ({ open, close, id }) 
                 </div>
               </div>
             ) : analyticsData.length > 0 ? (
-              <div className="space-y-6">
+              <div className="space-y-2">
                 {/* Donut Chart */}
-                <div className="h-[350px]">
+                <div className="h-[300px] overflow-y-auto">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie

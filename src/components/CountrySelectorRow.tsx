@@ -10,6 +10,7 @@ interface CountrySelectorRowProps {
   onValueChange: (value: string) => void;
   onSelectedCountryChange: (country: string) => void;
   onOpenChange: (isOpen: boolean) => void;
+  isDisabled: boolean;
 }
 
 export const CountrySelectorRow = ({
@@ -19,7 +20,8 @@ export const CountrySelectorRow = ({
   isOpen,
   onValueChange,
   onSelectedCountryChange,
-  onOpenChange
+  onOpenChange,
+  isDisabled = false
 }: CountrySelectorRowProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -63,10 +65,11 @@ export const CountrySelectorRow = ({
 
   return (
     <label className="flex items-center space-x-2 w-full">
-      <input type="checkbox" className="w-4 h-4" />
+      <input type="checkbox" className="w-4 h-4" disabled={isDisabled} />
       <span className="text-[16px] text-[#374151FF]">{label}</span>
       <div className="relative flex-1" ref={dropdownRef}>
         <input
+          disabled={isDisabled}
           ref={inputRef}
           type="text"
           value={value}

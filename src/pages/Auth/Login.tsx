@@ -43,7 +43,11 @@ export const Login: React.FC = () => {
         setPassword('');
 
         setTimeout(() => {
-          navigate("/");
+          if (response?.data?.user?.isAdmin) {
+            navigate("/admin");
+          } else {
+            navigate("/");
+          }
         }, 500);
 
       } else {

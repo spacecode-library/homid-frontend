@@ -131,5 +131,20 @@ export const subscriptionService = {
   getAnalyticsId: async (id: string) => {
     const response = await api.get(`/homid/traffic/${id}`);
     return response.data;
+  },
+
+  adminHomeIdsList: async () => {
+    const response = await api.get('/homid/admin/list');
+    return response.data;
+  },
+
+  adminGetHomeIdsDetails: async (homIdId: string) => {
+    const response = await api.get(`/homid/admin/${homIdId}`);
+    return response.data;
+  },
+
+  adminStatusApprove: async (id: string) => {
+    const response = await api.put(`/homid/admin/approve/status/${id}`);
+    return response.data;
   }
 }

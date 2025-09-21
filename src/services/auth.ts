@@ -19,6 +19,7 @@ export interface LoginData {
 }
 
 export interface User {
+  isAdmin: any;
   id: string;
   email: string;
   firstName: string;
