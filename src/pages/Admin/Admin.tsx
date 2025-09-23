@@ -7,6 +7,7 @@ import {
   BarChart3
 } from 'lucide-react';
 import { AllIDsTable } from './AllIDsTable';
+import { Link } from 'react-router-dom';
 
 const AdminHeader: React.FC = () => {
   return (
@@ -25,6 +26,12 @@ const AdminHeader: React.FC = () => {
         <div className="flex items-center space-x-6">
           {/* Quick Stats */}
           <div className="hidden md:flex items-center space-x-6">
+            <div className='text-center'>
+              <Link to="/admin-analytics">
+                <button className='bg-blue-400 text-white py-2 rounded-[8px] px-4'>Analytics</button>
+              </Link>
+            </div>
+
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-900">15.4K</div>
               <div className="text-xs text-gray-500 flex items-center">

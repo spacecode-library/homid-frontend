@@ -146,5 +146,10 @@ export const subscriptionService = {
   adminStatusApprove: async (id: string) => {
     const response = await api.put(`/homid/admin/approve/status/${id}`);
     return response.data;
+  },
+
+  updateProfile: async (obj: any) => {
+    const response = await api.put('/users/profile', obj);
+    return response.data;
   }
 }

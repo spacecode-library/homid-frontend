@@ -58,7 +58,7 @@ export const MyAccount: React.FC = () => {
   };
 
   const accountMenues = [
-    { icon: MyAccountIcon, menuName: "Edit profile", link: "" },
+    { icon: MyAccountIcon, menuName: "Edit profile", link: "/edit-profile" },
     { icon: FavouritesIcon, menuName: "Favourites", link: "/favourites" },
     { icon: HistoryIcon, menuName: "History", link: "/history" },
     { icon: ShoppingBagIcon, menuName: "Buy an .ID", link: "/buyId" },

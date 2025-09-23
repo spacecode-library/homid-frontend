@@ -15,6 +15,8 @@ import { Favourites } from "./pages/Favourites/Favourites";
 import { FavouritesDetails } from "./pages/Favourites/FavouritesDetails";
 import { History } from "./pages/History/History";
 import { Admin } from "./pages/Admin/Admin";
+import { EditProfile } from "./pages/Profile/EditProfile";
+import { AdminAnalytics } from "./pages/Admin/AdminAnalytics";
 
 function App() {
   const location = useLocation();
@@ -28,7 +30,9 @@ function App() {
     location.pathname === "/id-management" ||
     location.pathname === "/buy-credit" ||
     location.pathname === "/upgrade-plans" ||
-    location.pathname === "/admin"
+    location.pathname === "/admin" ||
+    location.pathname === "/edit-profile" ||
+     location.pathname === "/admin-analytics"
   // location.pathname.startsWith("/favourites/");
 
   return (
@@ -112,12 +116,30 @@ function App() {
           }
         />
 
+        <Route
+          path="/edit-profile"
+          element={
+            <PrivateRoute userOnly>
+              <EditProfile />
+            </PrivateRoute>
+          }
+        />
+
         {/* Admin-only Route */}
         <Route
           path="/admin"
           element={
             <PrivateRoute adminOnly>
               <Admin />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/admin-analytics"
+          element={
+            <PrivateRoute adminOnly>
+              <AdminAnalytics />
             </PrivateRoute>
           }
         />
