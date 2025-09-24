@@ -141,6 +141,7 @@ export const MyIDsTable: React.FC = () => {
 
   const [showViewAnalytics, setShowViewAnalytics] = useState<boolean>(false);
   const [analyticsId, setAnalyticsId] = useState<string>("");
+  const [homIdentifier, setHomIdentifier] = useState<string>("");
   const resetForm = () => {
     setWebsiteUrl("");
     setWebsiteInfo("");
@@ -434,6 +435,7 @@ export const MyIDsTable: React.FC = () => {
       const selectedCodes = selected.map((country) => CountryCode[country]);
 
       const obj = {
+        "homIdentifier": homIdentifier,
         "homIdId": currentId,
         "websiteUrl": websiteUrl,
         "websiteInfo": websiteInfo,
@@ -654,7 +656,7 @@ export const MyIDsTable: React.FC = () => {
                   {/* Manage Button */}
                   <div>
                     <button
-                      onClick={() => { toggleAccordion(index); setCurrentId(row?.numericId) }}
+                      onClick={() => { toggleAccordion(index); setCurrentId(row?.numericId); setHomIdentifier(row?.id) }}
                       className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2"
                     >
                       Manage

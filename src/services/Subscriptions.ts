@@ -148,8 +148,28 @@ export const subscriptionService = {
     return response.data;
   },
 
+  adminStatusReject: async (id: string, obj: any) => {
+    const response = await api.put(`/homid/admin/reject/status/${id}`, obj);
+    return response.data;
+  },
+
   updateProfile: async (obj: any) => {
     const response = await api.put('/users/profile', obj);
+    return response.data;
+  },
+
+  getAnalyticsRankingIDs: async (page: number, limit: number) => {
+    const response = await api.get(`/analytics/rankings?page=${page}&limit=${limit}`);
+    return response.data;
+  },
+
+  getCountryTrafficData: async (limit: number = 15, days: number = 7) => {
+    const response = await api.get(`/analytics/country-traffic?limit=${limit}&days=${days}`);
+    return response.data;
+  },
+
+  getIdStaticsData: async () => {
+    const response = await api.get('/analytics/id-statistics');
     return response.data;
   }
 }

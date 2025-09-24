@@ -17,6 +17,8 @@ import { History } from "./pages/History/History";
 import { Admin } from "./pages/Admin/Admin";
 import { EditProfile } from "./pages/Profile/EditProfile";
 import { AdminAnalytics } from "./pages/Admin/AdminAnalytics";
+import { Traffic } from "./pages/Admin/Traffic";
+import { CountryTraffic } from "./pages/Admin/CountryTraffic";
 
 function App() {
   const location = useLocation();
@@ -31,9 +33,9 @@ function App() {
     location.pathname === "/buy-credit" ||
     location.pathname === "/upgrade-plans" ||
     location.pathname === "/admin" ||
-    location.pathname === "/edit-profile" ||
-     location.pathname === "/admin-analytics"
-  // location.pathname.startsWith("/favourites/");
+    location.pathname === "/admin-analytics" ||
+    location.pathname === "/traffic" ||
+    location.pathname === "/country-traffic"
 
   return (
     <>
@@ -140,6 +142,24 @@ function App() {
           element={
             <PrivateRoute adminOnly>
               <AdminAnalytics />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/traffic"
+          element={
+            <PrivateRoute adminOnly>
+              <Traffic />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/country-traffic"
+          element={
+            <PrivateRoute adminOnly>
+              <CountryTraffic />
             </PrivateRoute>
           }
         />

@@ -137,6 +137,7 @@ export const AllIDsTable: React.FC = () => {
 
   const [showViewAnalytics, setShowViewAnalytics] = useState<boolean>(false);
   const [analyticsId, setAnalyticsId] = useState<string>("");
+  const [rejectionReason, setRejectionReason] = useState<string>("");
   const resetForm = () => {
     setWebsiteUrl("");
     setWebsiteInfo("");
@@ -370,6 +371,39 @@ export const AllIDsTable: React.FC = () => {
         setLoading(false);
         setCurrentId("");
         setExpandedRow(null);
+        toast.success(res?.message, {
+          position: "top-right",
+        })
+      } else {
+        setLoading(false);
+        toast.error(res?.message, {
+          position: "top-right"
+        });
+      }
+    } catch (err: any) {
+      setLoading(false);
+      console.error(err);
+      toast.dismiss(toastId);
+      toast.error(err?.response?.data?.message || "Something went wrong!", {
+        position: "top-right"
+      });
+    }
+  }
+
+  const handleReject = async (id: string) => {
+    setLoading(true);
+    const toastId = toast.loading("Rejecting ID...");
+    try {
+      const obj = {
+        reason: rejectionReason
+      }
+      const res = await subscriptionService.adminStatusReject(id, obj);
+      toast.dismiss(toastId);
+      if (res?.success) {
+        setLoading(false);
+        setCurrentId("");
+        setExpandedRow(null);
+        setRejectionReason("");
         toast.success(res?.message, {
           position: "top-right",
         })
@@ -995,6 +1029,22 @@ export const AllIDsTable: React.FC = () => {
                           </div>
 
                           <TargetedAudience selections={selections} setSelections={setSelections} />
+
+                          <div className="flex w-full items-start justify-between gap-4">
+                            <p className="text-[16px] font-normal text-red-500 flex-shrink-0">
+                              Reason for rejecting:
+                            </p>
+
+                            <div className="flex-1 max-w-[450px]">
+                              <textarea
+                                rows={3}
+                                placeholder="Enter the reason for rejecting Id's"
+                                value={rejectionReason}
+                                onChange={(e) => setRejectionReason(e.target.value)}
+                                className={`w-full text-[14px] border rounded-[6px] p-2 outline-none resize-none border-[#E5E7EB] bg-[#F9FAFB] text-[#6B7280] cursor-not-allowed'`}
+                              />
+                            </div>
+                          </div>
                         </div>
                       </div>
 
@@ -1008,19 +1058,35 @@ export const AllIDsTable: React.FC = () => {
                           />
                           <p className="text-[14px] font-normal text-[#374151FF]">I agree to Terms & Conditions</p>
                         </div>
-                        <button className={`rounded-[6px] bg-[#2563EBFF] text-white font-semibold px-6 py-2 ${!termsAccepted || loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
-                          onClick={() => handleActivate(row?.id)}
-                          disabled={!termsAccepted || loading}
-                        >
-                          {loading ? (
-                            <div className="flex items-center gap-2">
-                              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                              Approving...
-                            </div>
-                          ) : (
-                            'Approve'
-                          )}
-                        </button>
+                        <div className="flex items-center gap-x-3">
+                          <button className={`rounded-[6px] bg-[#2563EBFF] text-white font-semibold px-6 py-2 ${!termsAccepted || loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
+                            onClick={() => handleActivate(row?.id)}
+                            disabled={!termsAccepted || loading}
+                          >
+                            {loading ? (
+                              <div className="flex items-center gap-2">
+                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                Approving...
+                              </div>
+                            ) : (
+                              'Approve'
+                            )}
+                          </button>
+
+                          <button className={`rounded-[6px] bg-red-400 text-white font-semibold px-6 py-2 ${!termsAccepted || loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-500'}`}
+                            onClick={() => handleReject(row?.id)}
+                            disabled={loading}
+                          >
+                            {loading ? (
+                              <div className="flex items-center gap-2">
+                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                Rejecting...
+                              </div>
+                            ) : (
+                              'Reject'
+                            )}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
