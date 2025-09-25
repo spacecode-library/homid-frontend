@@ -19,23 +19,32 @@ import { EditProfile } from "./pages/Profile/EditProfile";
 import { AdminAnalytics } from "./pages/Admin/AdminAnalytics";
 import { Traffic } from "./pages/Admin/Traffic";
 import { CountryTraffic } from "./pages/Admin/CountryTraffic";
+import { ForgotPassword } from "./pages/Auth/ForgotPassword";
+import { ResetPasswordPage } from "./pages/Auth/ResetPasswordPage";
 
 function App() {
   const location = useLocation();
 
-  // Hide footer on certain pages
-  const hideFooter =
-    location.pathname === "/login" ||
-    location.pathname === "/registration" ||
-    location.pathname === "/buyId" ||
-    location.pathname === "/buyId/cart" ||
-    location.pathname === "/id-management" ||
-    location.pathname === "/buy-credit" ||
-    location.pathname === "/upgrade-plans" ||
-    location.pathname === "/admin" ||
-    location.pathname === "/admin-analytics" ||
-    location.pathname === "/traffic" ||
-    location.pathname === "/country-traffic"
+  const hideFooterPaths = [
+    "/login",
+    "/registration",
+    "/forgot-password",
+    "/reset-password",
+    "/buyId",
+    "/buyId/cart",
+    "/id-management",
+    "/buy-credit",
+    "/upgrade-plans",
+    "/admin",
+    "/admin-analytics",
+    "/traffic",
+    "/country-traffic"
+  ];
+
+  // Check if current path should hide footer (also check if path starts with any of these for query params)
+  const hideFooter = hideFooterPaths.some(path =>
+    location.pathname === path || location.pathname.startsWith(path + "?")
+  );
 
   return (
     <>
@@ -51,6 +60,8 @@ function App() {
         />
         <Route path="/login" element={<Login />} />
         <Route path="/registration" element={<Registration />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         {/* User-only Routes (regular users, not admins) */}
         <Route

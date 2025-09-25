@@ -34,7 +34,6 @@ export const Login: React.FC = () => {
         password,
       };
 
-
       // Call the auth service
       const response = await authService.login(loginData);
 
@@ -188,6 +187,16 @@ export const Login: React.FC = () => {
                 'Sign In'
               )}
             </button>
+          </div>
+
+          {/* Updated Forgot Password Link */}
+          <div className="flex justify-center">
+            <Link
+              to="/forgot-password"
+              className="text-[#0A1317] font-medium text-[15px] hover:underline"
+            >
+              Forgot password?
+            </Link>
           </div>
 
           <div className="text-center">
