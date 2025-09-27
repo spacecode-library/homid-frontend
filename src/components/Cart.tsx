@@ -27,25 +27,8 @@ export const Cart: React.FC<CartProps> = ({
   onRemovePhoneNumber,
   selectedPlan,
 }) => {
-  console.log("selectedPlan", selectedPlan)
   const planId = selectedPlan.name.toLowerCase();
   const [loading, setLoading] = useState(false);
-
-  // const handleCheckoutPlan = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const res = await subscriptionService.createSubscription(planId);
-  //     if (res.success) {
-  //       const billingRes = await subscriptionService.createBillingPortalSession();
-  //       if (billingRes.success) {
-  //         window.open(billingRes.data.url, "_blank");
-  //         setLoading(false)
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }
 
   const handleInsertId = async () => {
     // Check if user has selected required number of IDs
@@ -68,8 +51,19 @@ export const Cart: React.FC<CartProps> = ({
       }
       const res = await subscriptionService.insertCartId(obj);
       setLoading(false);
+      const subscription = await buyPlans();
     } catch (err) {
       console.error(err);
+    }
+  }
+
+  const buyPlans = async () => {
+    const obj = {
+      planId: selectedPlan?.name?.toLocaleLowerCase(),
+    }
+    const res = await subscriptionService.createSubscription(obj);
+    if (res.success) {
+      window.location.href = res?.sessionUrl
     }
   }
 
@@ -147,7 +141,6 @@ export const Cart: React.FC<CartProps> = ({
             <div className="text-center pb-2">
               <button
                 disabled={loading}
-                // onClick={handleCheckoutPlan}
                 onClick={handleInsertId}
                 className={`mx-auto flex items-center justify-center gap-x-4 bg-[#4285F4] text-white text-[20px] font-medium py-3 px-10 rounded-[10px] mt-[34px] transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
                   }`}>
